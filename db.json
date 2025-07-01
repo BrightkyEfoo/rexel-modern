@@ -1,0 +1,1002 @@
+{
+  "categories": [
+    {
+      "id": "1",
+      "name": "Fils et câbles",
+      "description": "Câbles d'alimentation, domestiques et réseaux locaux",
+      "imageUrl": "https://ext.same-assets.com/1793188226/3695388679.png",
+      "productCount": 25847,
+      "slug": "fils-et-cables",
+      "parentId": null
+    },
+    {
+      "id": "2",
+      "name": "Distribution et gestion de l'énergie",
+      "description": "Solutions de distribution électrique et protection",
+      "imageUrl": "https://ext.same-assets.com/1793188226/3964897264.png",
+      "productCount": 18965,
+      "slug": "distribution-energie",
+      "parentId": null,
+      "subcategories": [
+        {
+          "id": "2-1",
+          "name": "Disjoncteurs",
+          "slug": "disjoncteurs",
+          "productCount": 1245
+        },
+        {
+          "id": "2-2",
+          "name": "Tableaux électriques",
+          "slug": "tableaux-electriques",
+          "productCount": 856
+        }
+      ],
+      "featuredProducts": ["1", "2"],
+      "filters": {
+        "brands": [
+          {"id": "7", "name": "Legrand", "productCount": 845},
+          {"id": "9", "name": "Schneider Electric", "productCount": 1234}
+        ],
+        "priceRange": {"min": 5.50, "max": 2500.00},
+        "specifications": [
+          {
+            "name": "Courant nominal",
+            "values": ["10A", "16A", "20A", "25A", "32A"]
+          },
+          {
+            "name": "Nombre de pôles",
+            "values": ["1", "2", "3", "4"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "3",
+      "name": "Chauffage électrique climatisation ventilation",
+      "description": "Solutions de chauffage et climatisation",
+      "imageUrl": "https://ext.same-assets.com/1793188226/3909673424.png",
+      "productCount": 12456,
+      "slug": "chauffage-climatisation",
+      "parentId": null
+    },
+    {
+      "id": "4",
+      "name": "Produits industriels",
+      "description": "Équipements et solutions industrielles",
+      "imageUrl": "https://ext.same-assets.com/1793188226/3302471888.png",
+      "productCount": 15789,
+      "slug": "produits-industriels",
+      "parentId": null
+    },
+    {
+      "id": "5",
+      "name": "Éclairage",
+      "description": "Luminaires d'intérieur et d'extérieur",
+      "imageUrl": "https://ext.same-assets.com/1793188226/1197622136.png",
+      "productCount": 22134,
+      "slug": "eclairage",
+      "parentId": null
+    },
+    {
+      "id": "6",
+      "name": "Appareillage et contrôle du bâtiment",
+      "description": "Dispositifs de contrôle et d'automatisation",
+      "imageUrl": "https://ext.same-assets.com/1793188226/2970365201.png",
+      "productCount": 19875,
+      "slug": "appareillage-controle",
+      "parentId": null
+    },
+    {
+      "id": "7",
+      "name": "Conduits et cheminements",
+      "description": "Chemins de câbles et systèmes de protection",
+      "imageUrl": "https://ext.same-assets.com/1793188226/900758893.png",
+      "productCount": 8945,
+      "slug": "conduits-cheminements",
+      "parentId": null
+    },
+    {
+      "id": "8",
+      "name": "Outillage, mesure et fixation",
+      "description": "Outils professionnels et équipements de mesure",
+      "imageUrl": "https://ext.same-assets.com/1793188226/1636599233.png",
+      "productCount": 14562,
+      "slug": "outillage-mesure",
+      "parentId": null
+    },
+    {
+      "id": "9",
+      "name": "Sécurité et communication",
+      "description": "Systèmes de sécurité et communication",
+      "imageUrl": "https://ext.same-assets.com/1793188226/2990947450.png",
+      "productCount": 11234,
+      "slug": "securite-communication",
+      "parentId": null
+    },
+    {
+      "id": "10",
+      "name": "Chauffage hydraulique et plomberie",
+      "description": "Solutions de chauffage hydraulique",
+      "imageUrl": "https://ext.same-assets.com/1793188226/201036172.png",
+      "productCount": 9876,
+      "slug": "chauffage-hydraulique",
+      "parentId": null
+    },
+    {
+      "id": "11",
+      "name": "Réseau informatique",
+      "description": "Équipements réseau et informatiques",
+      "imageUrl": "https://ext.same-assets.com/1793188226/3129870987.png",
+      "productCount": 7845,
+      "slug": "reseau-informatique",
+      "parentId": null
+    },
+    {
+      "id": "12",
+      "name": "Production d'énergie - Photovoltaïque",
+      "description": "Solutions photovoltaïques et énergies renouvelables",
+      "imageUrl": "https://ext.same-assets.com/1793188226/2399997687.png",
+      "productCount": 5678,
+      "slug": "photovoltaique",
+      "parentId": null
+    },
+    {
+      "id": "13",
+      "name": "Électroménager, multimédia et informatique",
+      "description": "Équipements électroménagers et multimédia",
+      "imageUrl": "https://ext.same-assets.com/1793188226/4228344481.png",
+      "productCount": 6789,
+      "slug": "electromenager-multimedia",
+      "parentId": null
+    },
+    {
+      "id": "14",
+      "name": "Sanitaire",
+      "description": "Équipements sanitaires et plomberie",
+      "imageUrl": "https://ext.same-assets.com/1793188226/2201617110.png",
+      "productCount": 4567,
+      "slug": "sanitaire",
+      "parentId": null
+    }
+  ],
+  "brands": [
+    {
+      "id": "1",
+      "name": "ABB",
+      "description": "Leader mondial des technologies de l'électrification",
+      "logoUrl": "https://ext.same-assets.com/1793188226/1104996693.png",
+      "website": "https://www.abb.com",
+      "productCount": 1245
+    },
+    {
+      "id": "2",
+      "name": "Atlantic",
+      "description": "Spécialiste du confort thermique",
+      "logoUrl": "https://ext.same-assets.com/1793188226/643349439.png",
+      "website": "https://www.atlantic.fr",
+      "productCount": 892
+    },
+    {
+      "id": "3",
+      "name": "Bizline",
+      "description": "Solutions d'installation électrique",
+      "logoUrl": "https://ext.same-assets.com/1793188226/1496540744.png",
+      "website": "https://www.bizline.com",
+      "productCount": 756
+    },
+    {
+      "id": "4",
+      "name": "Eaton",
+      "description": "Gestion intelligente de l'énergie",
+      "logoUrl": "https://ext.same-assets.com/1793188226/4122755410.png",
+      "website": "https://www.eaton.com",
+      "productCount": 1156
+    },
+    {
+      "id": "5",
+      "name": "Hager",
+      "description": "Solutions pour l'installation électrique",
+      "logoUrl": "https://ext.same-assets.com/1793188226/1939114413.png",
+      "website": "https://www.hager.com",
+      "productCount": 987
+    },
+    {
+      "id": "6",
+      "name": "Ledvance",
+      "description": "Solutions d'éclairage LED",
+      "logoUrl": "https://ext.same-assets.com/1793188226/627240785.png",
+      "website": "https://www.ledvance.com",
+      "productCount": 654
+    },
+    {
+      "id": "7",
+      "name": "Legrand",
+      "description": "Spécialiste des infrastructures électriques",
+      "logoUrl": "https://ext.same-assets.com/1793188226/970698383.png",
+      "website": "https://www.legrand.com",
+      "productCount": 1567
+    },
+    {
+      "id": "8",
+      "name": "Philips",
+      "description": "Innovation en éclairage",
+      "logoUrl": "https://ext.same-assets.com/1793188226/240249755.png",
+      "website": "https://www.philips.com",
+      "productCount": 789
+    },
+    {
+      "id": "9",
+      "name": "Schneider Electric",
+      "description": "Transformation numérique de l'énergie",
+      "logoUrl": "https://ext.same-assets.com/1793188226/436814416.png",
+      "website": "https://www.schneider-electric.com",
+      "productCount": 1834
+    },
+    {
+      "id": "10",
+      "name": "Siemens",
+      "description": "Technologies d'ingénierie",
+      "logoUrl": "https://ext.same-assets.com/1793188226/3106213825.png",
+      "website": "https://www.siemens.com",
+      "productCount": 1123
+    }
+  ],
+  "products": [
+    {
+      "id": "1",
+      "name": "Disjoncteur modulaire 16A",
+      "description": "Disjoncteur modulaire bipolaire 16A courbe C",
+      "longDescription": "Le disjoncteur modulaire Legrand offre une protection optimale pour vos installations électriques. Conçu pour les applications résidentielles et tertiaires, il garantit une sécurité maximale avec un design compact et une installation facile. Sa courbe C le rend idéal pour la protection des circuits d'éclairage et de prises de courant.",
+      "price": 24.50,
+      "originalPrice": 29.99,
+      "badge": "Promo",
+      "categoryId": "2-1",
+      "categoryName": "Disjoncteurs",
+      "brandId": "7",
+      "brandName": "Legrand",
+      "imageUrl": "https://ext.same-assets.com/1793188226/1234567890.png",
+      "availability": "in_stock",
+      "sku": "LEG-16A-C",
+      "specifications": {
+        "Courant nominal": "16A",
+        "Nombre de pôles": "2",
+        "Courbe": "C",
+        "Tension": "230V"
+      },
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z",
+      "rating": 4.5,
+      "reviewCount": 128,
+      "stock": 150,
+      "weight": 0.2,
+      "dimensions": {
+        "length": 8.5,
+        "width": 3.5,
+        "height": 7.0
+      },
+      "warranty": "2 ans",
+      "certifications": ["CE", "NF"]
+    },
+    {
+      "id": "2",
+      "name": "Tableau électrique 12 modules",
+      "description": "Tableau électrique pré-équipé 12 modules avec porte",
+      "longDescription": "Tableau électrique de qualité professionnelle, pré-équipé avec 12 modules et une porte de protection. Idéal pour les installations résidentielles et tertiaires, il offre une organisation optimale de votre installation électrique.",
+      "price": 89.99,
+      "originalPrice": 109.99,
+      "badge": "Nouveau",
+      "categoryId": "2-2",
+      "categoryName": "Tableaux électriques",
+      "brandId": "9",
+      "brandName": "Schneider Electric",
+      "imageUrl": "https://ext.same-assets.com/1793188226/2345678901.png",
+      "availability": "in_stock",
+      "sku": "SCH-TB12",
+      "specifications": {
+        "Nombre de modules": "12",
+        "Matériau": "Plastique",
+        "Protection": "IP40",
+        "Couleur": "Blanc"
+      },
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z",
+      "rating": 4.8,
+      "reviewCount": 95,
+      "stock": 75,
+      "weight": 2.5,
+      "dimensions": {
+        "length": 30.0,
+        "width": 15.0,
+        "height": 10.0
+      },
+      "warranty": "3 ans",
+      "certifications": ["CE", "NF"]
+    },
+    {
+      "id": "3",
+      "name": "Luminaire LED 36W",
+      "description": "Dalle LED 60x60cm 36W blanc neutre",
+      "price": 89.90,
+      "categoryId": "5",
+      "categoryName": "Éclairage",
+      "brandId": "8",
+      "brandName": "Philips",
+      "imageUrl": "https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=400&h=400&fit=crop",
+      "availability": "in_stock",
+      "sku": "PHI-LED-36W-001",
+      "specifications": {
+        "Puissance": "36W",
+        "Température de couleur": "4000K",
+        "Flux lumineux": "3600lm",
+        "Dimensions": "60x60cm"
+      },
+      "createdAt": "2024-01-15T10:00:00Z",
+      "updatedAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "4",
+      "name": "Prise de courant 2P+T",
+      "description": "Prise de courant 2P+T 16A avec éclips blanc",
+      "price": 12.30,
+      "categoryId": "6",
+      "categoryName": "Appareillage et contrôle du bâtiment",
+      "brandId": "7",
+      "brandName": "Legrand",
+      "imageUrl": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop",
+      "availability": "in_stock",
+      "sku": "LEG-PRS-16A-BL",
+      "specifications": {
+        "Type": "2P+T",
+        "Courant": "16A",
+        "Couleur": "Blanc",
+        "Fixation": "À vis"
+      },
+      "createdAt": "2024-01-15T10:00:00Z",
+      "updatedAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "5",
+      "name": "Contacteur 25A",
+      "description": "Contacteur modulaire 25A 3NO+1NF",
+      "price": 45.20,
+      "categoryId": "4",
+      "categoryName": "Produits industriels",
+      "brandId": "9",
+      "brandName": "Schneider Electric",
+      "imageUrl": "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=400&fit=crop",
+      "availability": "in_stock",
+      "sku": "SCH-CON-25A-001",
+      "specifications": {
+        "Courant nominal": "25A",
+        "Configuration": "3NO+1NF",
+        "Tension bobine": "230V AC",
+        "Catégorie d'emploi": "AC3"
+      },
+      "createdAt": "2024-01-15T10:00:00Z",
+      "updatedAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "6",
+      "name": "Goulotte GTL 13 modules",
+      "description": "Goulotte technique logement 13 modules",
+      "price": 78.40,
+      "categoryId": "7",
+      "categoryName": "Conduits et cheminements",
+      "brandId": "7",
+      "brandName": "Legrand",
+      "imageUrl": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop",
+      "availability": "in_stock",
+      "sku": "LEG-GTL-13MOD",
+      "specifications": {
+        "Capacité": "13 modules",
+        "Hauteur": "2.60m",
+        "Largeur": "250mm",
+        "Matériau": "PVC"
+      },
+      "createdAt": "2024-01-15T10:00:00Z",
+      "updatedAt": "2024-01-15T10:00:00Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "email": "user@example.com",
+      "firstName": "Jean",
+      "lastName": "Dupont",
+      "company": "Électricité Moderne",
+      "role": "customer",
+      "preferences": {
+        "language": "fr",
+        "currency": "EUR",
+        "notifications": true,
+        "newsletter": false
+      },
+      "addresses": [
+        {
+          "id": "addr-1",
+          "type": "billing",
+          "name": "Jean Dupont",
+          "company": "Électricité Moderne",
+          "street": "123 Avenue de la République",
+          "city": "Lyon",
+          "postalCode": "69001",
+          "country": "France",
+          "isDefault": true
+        },
+        {
+          "id": "addr-2",
+          "type": "shipping",
+          "name": "Jean Dupont",
+          "company": "Électricité Moderne",
+          "street": "456 Rue du Commerce",
+          "city": "Lyon",
+          "postalCode": "69002",
+          "country": "France",
+          "isDefault": false
+        }
+      ],
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-06-15T10:00:00Z",
+      "lastLogin": "2024-06-15T10:00:00Z",
+      "isVerified": true
+    }
+  ],
+  "cart": {
+    "id": "1",
+    "userId": "1",
+    "items": [
+      {
+        "id": "cart-item-1",
+        "productId": "1",
+        "product": {
+          "id": "1",
+          "name": "Disjoncteur modulaire 16A",
+          "price": 24.50,
+          "imageUrl": "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=400&fit=crop",
+          "brandName": "Legrand",
+          "sku": "LEG-DIS-16A-001",
+          "availability": "in_stock"
+        },
+        "variantId": "1-1",
+        "variant": {
+          "id": "1-1",
+          "name": "Disjoncteur 16A - Courbe C",
+          "price": 24.50,
+          "attributes": {
+            "Courbe": "C",
+            "Courant": "16A"
+          }
+        },
+        "quantity": 2,
+        "price": 24.50,
+        "totalPrice": 49.00,
+        "addedAt": "2024-06-15T10:00:00Z"
+      },
+      {
+        "id": "cart-item-2",
+        "productId": "3",
+        "product": {
+          "id": "3",
+          "name": "Luminaire LED 36W",
+          "price": 89.90,
+          "imageUrl": "https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=400&h=400&fit=crop",
+          "brandName": "Philips",
+          "sku": "PHI-LED-36W-001",
+          "availability": "in_stock"
+        },
+        "quantity": 1,
+        "price": 89.90,
+        "totalPrice": 89.90,
+        "addedAt": "2024-06-15T11:30:00Z"
+      }
+    ],
+    "totalItems": 3,
+    "subtotal": 138.90,
+    "taxAmount": 27.78,
+    "shippingAmount": 8.50,
+    "totalPrice": 175.18,
+    "updatedAt": "2024-06-15T11:30:00Z",
+    "expiresAt": "2024-06-22T11:30:00Z"
+  },
+  "favorites": [
+    {
+      "id": "fav-1",
+      "userId": "1",
+      "productId": "1",
+      "product": {
+        "id": "1",
+        "name": "Disjoncteur modulaire 16A",
+        "price": 24.50,
+        "imageUrl": "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=400&fit=crop",
+        "brandName": "Legrand",
+        "availability": "in_stock"
+      },
+      "addedAt": "2024-06-10T09:00:00Z"
+    },
+    {
+      "id": "fav-2",
+      "userId": "1",
+      "productId": "5",
+      "product": {
+        "id": "5",
+        "name": "Contacteur 25A",
+        "price": 45.20,
+        "imageUrl": "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=400&fit=crop",
+        "brandName": "Schneider Electric",
+        "availability": "in_stock"
+      },
+      "addedAt": "2024-06-12T14:30:00Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": "order-1",
+      "userId": "1",
+      "orderNumber": "REX-2024-001234",
+      "status": "delivered",
+      "items": [
+        {
+          "id": "order-item-1",
+          "productId": "2",
+          "product": {
+            "id": "2",
+            "name": "Câble H07V-U 2.5mm²",
+            "price": 1.85,
+            "imageUrl": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop",
+            "brandName": "Bizline"
+          },
+          "quantity": 100,
+          "price": 1.85,
+          "totalPrice": 185.00
+        }
+      ],
+      "subtotal": 185.00,
+      "taxAmount": 37.00,
+      "shippingAmount": 12.50,
+      "totalPrice": 234.50,
+      "shippingAddress": {
+        "id": "addr-2",
+        "name": "Jean Dupont",
+        "company": "Électricité Moderne",
+        "street": "456 Rue du Commerce",
+        "city": "Lyon",
+        "postalCode": "69002",
+        "country": "France"
+      },
+      "billingAddress": {
+        "id": "addr-1",
+        "name": "Jean Dupont",
+        "company": "Électricité Moderne",
+        "street": "123 Avenue de la République",
+        "city": "Lyon",
+        "postalCode": "69001",
+        "country": "France"
+      },
+      "paymentMethod": "credit_card",
+      "createdAt": "2024-06-01T10:00:00Z",
+      "updatedAt": "2024-06-03T16:30:00Z",
+      "estimatedDelivery": "2024-06-02T09:00:00Z",
+      "trackingNumber": "REX123456789"
+    },
+    {
+      "id": "order-2",
+      "userId": "1",
+      "orderNumber": "REX-2024-001235",
+      "status": "processing",
+      "items": [
+        {
+          "id": "order-item-2",
+          "productId": "4",
+          "product": {
+            "id": "4",
+            "name": "Prise de courant 2P+T",
+            "price": 12.30,
+            "imageUrl": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop",
+            "brandName": "Legrand"
+          },
+          "quantity": 10,
+          "price": 12.30,
+          "totalPrice": 123.00
+        }
+      ],
+      "subtotal": 123.00,
+      "taxAmount": 24.60,
+      "shippingAmount": 8.50,
+      "totalPrice": 156.10,
+      "shippingAddress": {
+        "id": "addr-2",
+        "name": "Jean Dupont",
+        "company": "Électricité Moderne",
+        "street": "456 Rue du Commerce",
+        "city": "Lyon",
+        "postalCode": "69002",
+        "country": "France"
+      },
+      "billingAddress": {
+        "id": "addr-1",
+        "name": "Jean Dupont",
+        "company": "Électricité Moderne",
+        "street": "123 Avenue de la République",
+        "city": "Lyon",
+        "postalCode": "69001",
+        "country": "France"
+      },
+      "paymentMethod": "bank_transfer",
+      "createdAt": "2024-06-14T14:30:00Z",
+      "updatedAt": "2024-06-15T09:15:00Z",
+      "estimatedDelivery": "2024-06-17T10:00:00Z"
+    },
+    {
+      "id": "order-3",
+      "userId": "1",
+      "orderNumber": "REX-2024-001236",
+      "status": "shipped",
+      "items": [
+        {
+          "id": "order-item-3",
+          "productId": "3",
+          "product": {
+            "id": "3",
+            "name": "Luminaire LED 36W",
+            "price": 89.90,
+            "imageUrl": "https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=400&h=400&fit=crop",
+            "brandName": "Philips"
+          },
+          "quantity": 2,
+          "price": 89.90,
+          "totalPrice": 179.80
+        },
+        {
+          "id": "order-item-4",
+          "productId": "6",
+          "product": {
+            "id": "6",
+            "name": "Goulotte GTL 13 modules",
+            "price": 78.40,
+            "imageUrl": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop",
+            "brandName": "Legrand"
+          },
+          "quantity": 1,
+          "price": 78.40,
+          "totalPrice": 78.40
+        }
+      ],
+      "subtotal": 258.20,
+      "taxAmount": 51.64,
+      "shippingAmount": 12.50,
+      "totalPrice": 322.34,
+      "shippingAddress": {
+        "id": "addr-2",
+        "name": "Jean Dupont",
+        "company": "Électricité Moderne",
+        "street": "456 Rue du Commerce",
+        "city": "Lyon",
+        "postalCode": "69002",
+        "country": "France"
+      },
+      "billingAddress": {
+        "id": "addr-1",
+        "name": "Jean Dupont",
+        "company": "Électricité Moderne",
+        "street": "123 Avenue de la République",
+        "city": "Lyon",
+        "postalCode": "69001",
+        "country": "France"
+      },
+      "paymentMethod": "credit_card",
+      "createdAt": "2024-05-20T09:00:00Z",
+      "updatedAt": "2024-05-22T14:30:00Z",
+      "estimatedDelivery": "2024-05-24T10:00:00Z",
+      "trackingNumber": "REX987654321"
+    },
+    {
+      "id": "order-4",
+      "userId": "1",
+      "orderNumber": "REX-2024-001237",
+      "status": "cancelled",
+      "items": [
+        {
+          "id": "order-item-5",
+          "productId": "5",
+          "product": {
+            "id": "5",
+            "name": "Contacteur 25A",
+            "price": 45.20,
+            "imageUrl": "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=400&fit=crop",
+            "brandName": "Schneider Electric"
+          },
+          "quantity": 5,
+          "price": 45.20,
+          "totalPrice": 226.00
+        }
+      ],
+      "subtotal": 226.00,
+      "taxAmount": 45.20,
+      "shippingAmount": 8.50,
+      "totalPrice": 279.70,
+      "shippingAddress": {
+        "id": "addr-2",
+        "name": "Jean Dupont",
+        "company": "Électricité Moderne",
+        "street": "456 Rue du Commerce",
+        "city": "Lyon",
+        "postalCode": "69002",
+        "country": "France"
+      },
+      "billingAddress": {
+        "id": "addr-1",
+        "name": "Jean Dupont",
+        "company": "Électricité Moderne",
+        "street": "123 Avenue de la République",
+        "city": "Lyon",
+        "postalCode": "69001",
+        "country": "France"
+      },
+      "paymentMethod": "credit_card",
+      "createdAt": "2024-05-10T16:20:00Z",
+      "updatedAt": "2024-05-11T08:45:00Z",
+      "cancelReason": "Demande client - changement de projet"
+    },
+    {
+      "id": "order-5",
+      "userId": "1",
+      "orderNumber": "REX-2024-001238",
+      "status": "pending",
+      "items": [
+        {
+          "id": "order-item-6",
+          "productId": "1",
+          "product": {
+            "id": "1",
+            "name": "Disjoncteur modulaire 16A",
+            "price": 24.50,
+            "imageUrl": "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&h=400&fit=crop",
+            "brandName": "Legrand"
+          },
+          "quantity": 20,
+          "price": 24.50,
+          "totalPrice": 490.00
+        },
+        {
+          "id": "order-item-7",
+          "productId": "2",
+          "product": {
+            "id": "2",
+            "name": "Câble H07V-U 2.5mm²",
+            "price": 1.85,
+            "imageUrl": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop",
+            "brandName": "Bizline"
+          },
+          "quantity": 500,
+          "price": 1.85,
+          "totalPrice": 925.00
+        }
+      ],
+      "subtotal": 1415.00,
+      "taxAmount": 283.00,
+      "shippingAmount": 25.00,
+      "totalPrice": 1723.00,
+      "shippingAddress": {
+        "id": "addr-2",
+        "name": "Jean Dupont",
+        "company": "Électricité Moderne",
+        "street": "456 Rue du Commerce",
+        "city": "Lyon",
+        "postalCode": "69002",
+        "country": "France"
+      },
+      "billingAddress": {
+        "id": "addr-1",
+        "name": "Jean Dupont",
+        "company": "Électricité Moderne",
+        "street": "123 Avenue de la République",
+        "city": "Lyon",
+        "postalCode": "69001",
+        "country": "France"
+      },
+      "paymentMethod": "bank_transfer",
+      "createdAt": "2024-06-16T11:00:00Z",
+      "updatedAt": "2024-06-16T11:00:00Z",
+      "estimatedDelivery": "2024-06-25T10:00:00Z"
+    },
+    {
+      "id": "order-6",
+      "userId": "1",
+      "orderNumber": "REX-2024-001239",
+      "status": "confirmed",
+      "items": [
+        {
+          "id": "order-item-8",
+          "productId": "4",
+          "product": {
+            "id": "4",
+            "name": "Prise de courant 2P+T",
+            "price": 12.30,
+            "imageUrl": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop",
+            "brandName": "Legrand"
+          },
+          "quantity": 25,
+          "price": 12.30,
+          "totalPrice": 307.50
+        }
+      ],
+      "subtotal": 307.50,
+      "taxAmount": 61.50,
+      "shippingAmount": 15.00,
+      "totalPrice": 384.00,
+      "shippingAddress": {
+        "id": "addr-2",
+        "name": "Jean Dupont",
+        "company": "Électricité Moderne",
+        "street": "456 Rue du Commerce",
+        "city": "Lyon",
+        "postalCode": "69002",
+        "country": "France"
+      },
+      "billingAddress": {
+        "id": "addr-1",
+        "name": "Jean Dupont",
+        "company": "Électricité Moderne",
+        "street": "123 Avenue de la République",
+        "city": "Lyon",
+        "postalCode": "69001",
+        "country": "France"
+      },
+      "paymentMethod": "check",
+      "createdAt": "2024-04-15T13:45:00Z",
+      "updatedAt": "2024-04-16T09:30:00Z",
+      "estimatedDelivery": "2024-04-20T10:00:00Z"
+    }
+  ],
+  "testimonials": [
+      {
+        "id": "1",
+        "author": "Bruno",
+        "content": "Bonjour, toujours au top, le site est intuitif et fonctionne de manière remarquable. BRAVO.",
+        "rating": 5,
+        "date": "2024-08-20"
+      },
+      {
+        "id": "2",
+        "author": "Mickael",
+        "content": "Le site est bien construit, les produits se trouvent facilement. Rapide, efficace.",
+        "rating": 5,
+        "date": "2024-03-12"
+      },
+      {
+        "id": "3",
+        "author": "Pascal",
+        "content": "Le moteur de recherche fonctionne de mieux en mieux.",
+        "rating": 5,
+        "date": "2024-07-10"
+      },
+      {
+        "id": "4",
+        "author": "Cyrille",
+        "content": "Simple rapide et efficace",
+        "rating": 5,
+        "date": "2024-06-18"
+      },
+      {
+        "id": "5",
+        "author": "Michel",
+        "content": "Trop facile ce site internet, bravo",
+        "rating": 5,
+        "date": "2024-04-19"
+      }
+  ],
+  "services": [
+      {
+        "id": "1",
+        "name": "Open",
+        "description": "Rexel vous accompagne dans vos obligations liées au décret tertiaire (Eco Energie Tertiaire) et dans vos démarches de réduction énergétiques.",
+        "imageUrl": "https://ext.same-assets.com/1793188226/2564760347.png",
+        "link": "https://open.rexelservices.fr/",
+        "features": ["Décret tertiaire", "Réduction énergétique", "Accompagnement"]
+      },
+      {
+        "id": "2",
+        "name": "Freshmile",
+        "description": "Freshmile est un opérateur de charge qui vous accompagne dans la supervision de vos bornes de recharge (facturation, assistance, maintenance..etc).",
+        "imageUrl": "https://ext.same-assets.com/1793188226/2344397350.png",
+        "link": "https://www.rexel.fr/frx/marques/freshmile",
+        "features": ["Bornes de recharge", "Facturation", "Maintenance"]
+      },
+      {
+        "id": "3",
+        "name": "Esabora",
+        "description": "Avec Esabora, je gère facilement mon entreprise (devis, commandes, etc.), et mes installations électriques et factures sont toujours conformes selon les normes en vigueur.",
+        "imageUrl": "https://ext.same-assets.com/1793188226/2951494861.png",
+        "link": "https://www.rexel.fr/frx/marques/esabora",
+        "features": ["Gestion d'entreprise", "Devis", "Conformité"]
+      },
+      {
+        "id": "4",
+        "name": "Safir",
+        "description": "Installateurs labellisés RGE, déduisez directement le montant des primes sur votre facture d'achat chez Rexel.",
+        "imageUrl": "https://ext.same-assets.com/1793188226/2692196257.png",
+        "link": "https://www.rexel.fr/frx/services/safir",
+        "features": ["Label RGE", "Primes", "Déduction facture"]
+      },
+      {
+        "id": "5",
+        "name": "R+",
+        "description": "Avec Rexel, bénéficiez de services vous permettant de vous faire livrer sans quitter votre chantier tout en améliorant votre empreinte carbone.",
+        "imageUrl": "https://ext.same-assets.com/1793188226/4171275297.png",
+        "link": "https://www.rexel.fr/frx/communication/rexel/rplus",
+        "features": ["Livraison chantier", "Empreinte carbone", "Service mobile"]
+      }
+  ],
+  "tools": [
+      {
+        "id": "1",
+        "name": "Paniers simplifiés",
+        "description": "Trouvez tous vos produits sur une seule page, composez votre panier et commandez rapidement.",
+        "imageUrl": "https://ext.same-assets.com/1793188226/1598773034.png",
+        "link": "/panier-simplifie"
+      },
+      {
+        "id": "2",
+        "name": "Configurateurs",
+        "description": "Rexel et ses partenaires offrent de nouveaux outils de configuration pour simplifier votre quotidien !",
+        "imageUrl": "https://ext.same-assets.com/1793188226/2912230969.png",
+        "link": "/configurateurs"
+      },
+      {
+        "id": "3",
+        "name": "Showroom 3D",
+        "description": "Le Showroom 3D vous permet de choisir des produits et finitions à visualiser en réalité augmentée chez vos clients.",
+        "imageUrl": "https://ext.same-assets.com/1793188226/3907395265.png",
+        "link": "/showroom-3D"
+      },
+      {
+        "id": "4",
+        "name": "Reconnaissance tableau électrique",
+        "description": "Facilitez vos installations électriques avec la reconnaissance de tableaux Rexel !",
+        "imageUrl": "https://ext.same-assets.com/1793188226/3850197054.png",
+        "link": "/reconnaissance-tableau"
+      }
+  ],
+  "promotions": [
+      {
+        "id": "1",
+        "title": "Confort été",
+        "description": "Jusqu'à -30% sur les solutions de climatisation et ventilation",
+        "imageUrl": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",
+        "link": "/promotions/confort-ete",
+        "validUntil": "2024-08-31",
+        "discount": "30%",
+        "category": "Climatisation"
+      },
+      {
+        "id": "2",
+        "title": "Éclairage LED",
+        "description": "Offres exceptionnelles sur l'éclairage LED professionnel",
+        "imageUrl": "https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=400&h=300&fit=crop",
+        "link": "/promotions/eclairage-led",
+        "validUntil": "2024-07-15",
+        "discount": "25%",
+        "category": "Éclairage"
+      },
+      {
+        "id": "3",
+        "title": "Smart Building",
+        "description": "Découvrez les solutions connectées pour bâtiments intelligents",
+        "imageUrl": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop",
+        "link": "/promotions/smart-building",
+        "validUntil": "2024-09-30",
+        "discount": "Nouveau",
+        "category": "Innovation"
+      }
+  ],
+  "stats": {
+    "dashboard": {
+      "totalProducts": 2000000,
+      "totalCategories": 14,
+      "totalBrands": 500,
+      "totalAgencies": 460,
+      "deliveryReferences": 35000,
+      "expertCount": 4000
+    }
+  }
+}
