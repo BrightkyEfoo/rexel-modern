@@ -1,9 +1,19 @@
 # Contexte Actif - Rexel Modern
 
 ## 🎯 Focus Actuel (Janvier 2025)
-**Pagination et Tri Avancés avec Lucid ORM + Standardisation API ✅**
+**Migration vers Caddy Reverse Proxy + Optimisation Déploiement ✅**
 
 ## 📋 Changements Récents
+
+### ✅ Migration vers Caddy Reverse Proxy
+1. **Remplacement de Nginx** - Caddy devient le reverse proxy principal avec SSL automatique
+2. **Configuration complète** - Rate limiting, CORS, headers de sécurité, health checks
+3. **Déploiement automatisé** - Workflow GitHub Actions mis à jour pour inclure Caddy
+4. **Nginx supprimé** - Service nginx retiré du docker-compose pour simplifier
+5. **Logs centralisés** - Tous les logs dans `~/rexel-modern/backend/logs/`
+6. **Health checks simplifiés** - Suppression des health checks stricts sur l'app
+7. **Transfert Caddyfile** - Workflow mis à jour pour transférer Caddyfile au déploiement
+8. **Documentation** - Guide complet CADDY.md créé
 
 ### ✅ Pagination Avancée avec Lucid ORM
 1. **Pagination native Lucid** - Utilisation de `.paginate(page, perPage)` au lieu de logique manuelle
@@ -66,7 +76,79 @@
 3. **Validation Zod** - Schémas mis à jour pour nouveaux formats
 4. **Cache optimisé** - Invalidation intelligente selon les opérations
 
+### ✅ Résolution Permissions Docker VPS
+**Problème :** Erreur "permission denied while trying to connect to the Docker daemon socket" lors du déploiement
+
+**Solution Implémentée :**
+1. **Workflow amélioré** - Détection automatique des problèmes Docker
+2. **Installation automatique** - Docker et Docker Compose si manquants
+3. **Configuration permissions** - Ajout automatique au groupe docker
+4. **Fallback sudo** - Adaptation automatique selon les permissions
+5. **Script de dépannage** - `scripts/fix-docker-permissions.sh` pour résolution manuelle
+
+### ✅ Workflow GitHub Actions Renforcé
+**Nouveau job `docker-setup`** :
+- ✨ Vérification installation Docker
+- 🔧 Installation automatique si manquant
+- 👥 Configuration groupe docker
+- 🧪 Tests d'accès avec retry logic
+- 📦 Installation Docker Compose
+- ⚡ Fallback sudo automatique
+
+**Jobs mis à jour avec détection sudo** :
+- `load-and-run` - Déploiement principal
+- `run-migrations` - Migrations base de données
+- `run-seeds` - Seeds base de données  
+- `health-check` - Vérifications santé
+- `cleanup` - Nettoyage images
+
+### ✅ Script de Dépannage Autonome
+**`scripts/fix-docker-permissions.sh`** :
+- 🔍 Diagnostic complet environnement Docker
+- 🛠️ Installation/configuration automatique
+- 👤 Gestion permissions utilisateur
+- 🌐 Création réseau projet
+- 📋 Rapport détaillé et instructions
+
+### ✅ Documentation Enrichie
+**`DEPLOYMENT.md`** mis à jour avec :
+- 🚨 Guide dépannage permissions Docker
+- 📖 Solutions manuelles étape par étape
+- 🔧 Script automatique
+- 🏥 Diagnostic avancé
+- ✅ Vérifications post-installation
+
 ## 🏗️ Architecture Actuelle
+
+### Infrastructure - Services Docker ✅
+```yaml
+# Services de production
+caddy:          # Reverse proxy principal (ports 80, 443, 2019)
+app:           # AdonisJS backend (port 3333)
+db:            # PostgreSQL (port 5432)
+minio:         # Object storage (ports 9000, 9001)
+redis:         # Cache (port 6379)
+```
+
+**Structure des dossiers :**
+```
+~/rexel-modern/backend/
+├── backups/        # Sauvegardes DB
+├── images/         # Images Docker
+├── uploads/        # Fichiers application
+├── minio-data/     # Stockage MinIO
+└── logs/           # Logs Caddy (access.log)
+```
+
+### Caddy Configuration ✅
+- ✨ **SSL automatique** avec Let's Encrypt
+- 🛡️ **Rate limiting** : 100 req/min API, 10 req/min uploads
+- 🔒 **Headers sécurité** : HSTS, CSP, X-Frame-Options, etc.
+- 🌐 **CORS** configuré pour développement
+- 🚀 **Démarrage simplifié** : Plus de dépendance strict aux health checks
+- 📝 **Logs structurés** avec rotation dans `~/logs/`
+- ⚡ **Compression** Gzip/Brotli automatique
+- 📋 **Transfert automatique** : Caddyfile inclus dans le déploiement
 
 ### Backend - Pagination Native Lucid ✅
 ```typescript
@@ -155,6 +237,18 @@ private normalizeResponse<T>(response: AxiosResponse): ApiResponse<T> {
 
 ## 📊 Endpoints Mis à Jour
 
+### Architecture d'accès ✅
+```
+Internet → Caddy (:80/:443) → AdonisJS (:3333)
+```
+
+**URLs principales :**
+- **Health** : `http://localhost/health` 
+- **API** : `http://localhost/api/*` (rate limited: 100/min)
+- **Uploads** : `http://localhost/api/files/*` (rate limited: 10/min)
+- **Staging** : `staging-api.kesimarket.com`
+- **Admin Caddy** : `http://localhost:2019` (optionnel)
+
 ### Produits
 - `GET /products?page=1&per_page=20&sort_by=name&sort_order=asc&search=term&category_id=1&brand_id=2&is_featured=true`
 - `GET /products/category/{id}?page=1&per_page=20&sort_by=price&sort_order=desc`
@@ -230,3 +324,90 @@ Tous les contrôleurs utilisent maintenant la pagination native de Lucid ORM ave
 - **Code DRY** - Méthodes réutilisables dans repositories
 - **Format uniforme** - Même structure de réponse partout
 - **Types synchronisés** - Frontend/Backend cohérents
+
+## 🏗️ Améliorations Workflow
+
+### Détection Intelligente Docker
+```bash
+# Nouveau système de détection
+USE_SUDO=""
+if ! docker ps &> /dev/null; then
+  if sudo docker ps &> /dev/null; then
+    USE_SUDO="sudo "
+  else
+    exit 1
+  fi
+fi
+
+# Utilisation dynamique
+${USE_SUDO}docker compose -f docker-compose.prod.yml up -d
+```
+
+### Job Docker Setup
+```yaml
+docker-setup:
+  name: Verify Docker Setup
+  steps:
+    - name: Verify and setup Docker environment
+      script: |
+        # Installation Docker si nécessaire
+        # Configuration permissions
+        # Tests d'accès avec retry
+        # Installation Docker Compose
+```
+
+### Configuration Robuste
+- **Retry logic** - Tentatives multiples avec délais
+- **Fallback sudo** - Adaptation automatique selon environnement
+- **Validation complète** - Vérification Docker + Compose + Network
+- **Logs détaillés** - Diagnostic précis des problèmes
+
+## 📊 Résolution Immédiate
+
+### Option 1: Solution Automatique (Recommandée)
+```bash
+# Sur le VPS
+ssh user@your-vps
+curl -O https://raw.githubusercontent.com/votre-repo/rexel-modern-backend/main/scripts/fix-docker-permissions.sh
+chmod +x fix-docker-permissions.sh
+./fix-docker-permissions.sh
+```
+
+### Option 2: Solution Manuelle Rapide
+```bash
+# Sur le VPS
+sudo usermod -aG docker $USER
+logout
+# Reconnexion SSH
+docker ps  # Test
+```
+
+### Option 3: Nouveau Déploiement
+- Relancer le workflow GitHub Actions
+- Le nouveau job `docker-setup` résoudra automatiquement
+
+## ⚡ Prochaines Actions Utilisateur
+
+### Immédiat ✨
+1. **Connectez-vous au VPS** via SSH
+2. **Exécutez le script de dépannage** (option 1 ci-dessus)
+3. **Reconnectez-vous** après modifications
+4. **Testez Docker** : `docker ps`
+5. **Relancez le déploiement** GitHub Actions
+
+### Si Script Non Disponible
+1. **Ajout groupe docker** : `sudo usermod -aG docker $USER`
+2. **Reconnexion SSH** : `logout` puis reconnexion
+3. **Test** : `docker ps`
+4. **Redéploiement** via GitHub Actions
+
+## 🔧 Diagnostic Rapide
+
+```bash
+# Vérifications essentielles
+docker --version                    # Installation
+sudo systemctl status docker        # Service
+groups $USER                       # Permissions
+ls -la /var/run/docker.sock        # Socket
+docker ps                          # Accès
+```

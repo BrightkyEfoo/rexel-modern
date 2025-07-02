@@ -1,3 +1,132 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js
 .next/
-.same/
-node_modules/
+.next
+out/
+
+# Environment files
+.env*
+!.env.production.example
+
+# Testing
+coverage/
+.nyc_output
+
+# Production build
+build/
+dist/
+
+# Development
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# Editor directories and files
+.vscode/
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# GitHub
+.github/
+
+# Deployment
+deploy/
+scripts/
+backup/
+backups/
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Configuration files
+.editorconfig
+.gitattributes
+.gitignore

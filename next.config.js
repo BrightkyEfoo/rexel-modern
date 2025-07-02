@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable standalone mode for Docker
+  output: 'standalone',
+  
   images: {
     unoptimized: true,
     domains: [
@@ -30,6 +33,17 @@ const nextConfig = {
         pathname: "/**",
       },
     ],
+  },
+
+  // Environment variables for client-side
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
+
+  // Experimental features
+  experimental: {
+    // Enable if using app directory
+    appDir: true,
   },
 };
 

@@ -1,35 +1,55 @@
-# 1. Build stage
-FROM node:20-alpine AS builder
+ARG NODE_IMAGE=node:20-alpine
 
+FROM $NODE_IMAGE AS base
+
+# All deps stage
+FROM base AS deps
 WORKDIR /app
-
-COPY package.json package-lock.json* ./
+COPY package*.json ./
 RUN npm ci
 
+# Production only deps stage  
+FROM base AS production-deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev --only=production
+
+# Build stage
+FROM base AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules /app/node_modules
 COPY . .
+
+# Build Next.js application
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-# 2. Production image
-FROM node:20-alpine AS runner
-
+# Production stage
+FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
+# Create nextjs user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/db.json ./db.json
+# Copy built application
+COPY --from=production-deps --chown=nextjs:nodejs /app/node_modules /app/node_modules
+COPY --from=build --chown=nextjs:nodejs /app/.next/standalone /app/
+COPY --from=build --chown=nextjs:nodejs /app/.next/static /app/.next/static
+COPY --from=build --chown=nextjs:nodejs /app/public /app/public
 
-RUN ls -al
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
 
-COPY --from=builder /app/db.json ./db.json
-
-RUN mkdir -p /app/public
-
-RUN ls -al
-
-RUN npm i -g concurrently
+USER nextjs
 
 EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]

@@ -1,0 +1,39 @@
+# Docker Compose override for local development
+# This file extends docker-compose.prod.yml for development purposes
+
+services:
+  app:
+    environment:
+      # Development overrides
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3333
+      NEXTAUTH_URL: http://localhost:3000
+      
+      # Debug mode
+      DEBUG: "nextjs:*"
+      
+    # Development volumes for hot reload
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+      
+    # Override command for development
+    command: npm run dev
+    
+    # Development ports
+    ports:
+      - '3000:3000'
+      
+  caddy:
+    # Development Caddyfile
+    volumes:
+      - ./Caddyfile.dev:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      
+    # Development environment
+    environment:
+      FRONTEND_DOMAIN: localhost
+      NEXT_PUBLIC_API_URL: http://localhost:3333
+      ACME_EMAIL: dev@localhost 

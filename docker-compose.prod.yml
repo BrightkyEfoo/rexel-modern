@@ -1,0 +1,82 @@
+networks:
+  rexel-frontend-network:
+    driver: bridge
+
+volumes:
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+  app_data:
+    driver: local
+
+services:
+  # Frontend Application
+  app:
+    image: rexel-frontend-prod:latest
+    container_name: rexel-frontend-prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      
+      # API Configuration
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-"Rexel Modern"}
+      NEXT_PUBLIC_APP_VERSION: ${NEXT_PUBLIC_APP_VERSION:-"1.0.0"}
+      
+      # Analytics & Monitoring
+      NEXT_PUBLIC_ANALYTICS_ID: ${NEXT_PUBLIC_ANALYTICS_ID}
+      NEXT_TELEMETRY_DISABLED: 1
+      
+      # Features flags
+      NEXT_PUBLIC_ENABLE_FEATURES: ${NEXT_PUBLIC_ENABLE_FEATURES}
+      
+      # Security
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      
+      # CDN & Assets
+      NEXT_PUBLIC_CDN_URL: ${NEXT_PUBLIC_CDN_URL}
+      NEXT_PUBLIC_ASSETS_URL: ${NEXT_PUBLIC_ASSETS_URL}
+    volumes:
+      - app_data:/app/data
+    ports:
+      - '3000:3000'
+    networks:
+      - rexel-frontend-network
+
+  # Caddy Reverse Proxy
+  caddy:
+    image: caddy:2-alpine
+    container_name: rexel-frontend-caddy-prod
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - '80:80'
+      - '443:443'
+      - '2020:2019' # Admin API (optional)
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./logs:/var/log/caddy
+    networks:
+      - rexel-frontend-network
+    environment:
+      # Domain configuration
+      FRONTEND_DOMAIN: ${FRONTEND_DOMAIN}
+      
+      # Enable admin API (optional)
+      CADDY_ADMIN: '0.0.0.0:2019'
+      
+      # Let's Encrypt email
+      ACME_EMAIL: ${ACME_EMAIL}
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost/api/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s 
