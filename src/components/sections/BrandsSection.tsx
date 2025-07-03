@@ -59,9 +59,9 @@ export function BrandsSection() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
-          {/* {brands?.data?.map((brand) => (
+          {brands?.data?.map((brand) => (
             <BrandCard key={brand.id} brand={brand} />
-          ))} */}
+          ))}
         </div>
 
         {/* View all brands */}

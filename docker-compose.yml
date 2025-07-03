@@ -1,9 +1,0 @@
-services:
-  web:
-    build: .
-    ports:
-      - "3002:3000"
-    environment:
-      - NODE_ENV=production
-    restart: unless-stopped 
-    command:  concurrently "npm run start" "npm run dev:api"

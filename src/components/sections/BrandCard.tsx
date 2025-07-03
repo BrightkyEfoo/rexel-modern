@@ -1,16 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ExternalLink } from 'lucide-react';
+import { Brand } from '@/lib/api/types';
 
 interface BrandCardProps {
-  brand: {
-    id: string;
-    name: string;
-    description: string;
-    logoUrl: string;
-    website?: string;
-    productCount: number;
-  };
+  brand: Brand;
 }
 
 export function BrandCard({ brand }: BrandCardProps) {
@@ -19,7 +13,7 @@ export function BrandCard({ brand }: BrandCardProps) {
       <Link href={`/marques/${brand.name.toLowerCase()}`} className="block">
         <div className="relative h-16 flex items-center justify-center mb-4">
           <Image
-            src={brand.logoUrl}
+            src={brand.logoUrl || '/images/logo.png'}
             alt={`Logo ${brand.name}`}
             width={120}
             height={60}
@@ -58,10 +52,10 @@ export function BrandCard({ brand }: BrandCardProps) {
       </Link>
 
       {/* External website link */}
-      {brand.website && (
+      {brand.websiteUrl && (
         <div className="mt-3 pt-3 border-t border-gray-100">
           <Link
-            href={brand.website}
+            href={brand.websiteUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-gray-500 hover:text-[#162e77] flex items-center justify-center group/link"
