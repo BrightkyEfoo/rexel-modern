@@ -13,7 +13,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-ENV_FILE="env.production.example"
+ENV_FILE_PROD="env.production.example"
+ENV_FILE_STAGING="env.staging.example"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
@@ -35,8 +36,8 @@ if ! gh auth status &> /dev/null; then
 fi
 
 # Vérifier que le fichier env.production.example existe
-if [[ ! -f "$PROJECT_ROOT/$ENV_FILE" ]]; then
-    echo -e "${RED}❌ Fichier $ENV_FILE non trouvé dans $PROJECT_ROOT${NC}"
+if [[ ! -f "$PROJECT_ROOT/$ENV_FILE_PROD" ]]; then
+    echo -e "${RED}❌ Fichier $ENV_FILE_PROD non trouvé dans $PROJECT_ROOT${NC}"
     exit 1
 fi
 
@@ -116,6 +117,7 @@ create_github_environments() {
 # Fonction pour parser et créer les secrets
 setup_secrets() {
     local env_name=$1
+    local env_file=$2
     
     echo -e "\n${BLUE}📋 Configuration des secrets pour: $env_name${NC}"
     echo "----------------------------------------"
@@ -144,7 +146,7 @@ setup_secrets() {
                     create_secret "$env_name" "$key" "$value"
                     ;;
             esac
-        done < "$PROJECT_ROOT/$ENV_FILE"
+        done < "$PROJECT_ROOT/$env_file"
         return
     fi
     
@@ -172,46 +174,24 @@ setup_secrets() {
             
             # Variables de domaines et URLs
             "FRONTEND_DOMAIN")
-                if [[ "$env_name" == "production" ]]; then
-                    create_secret "$env_name" "$key" "$value"
-                else
-                    staging_domain="${value/app./staging.}"
-                    create_secret "$env_name" "$key" "$staging_domain"
-                fi
+                create_secret "$env_name" "$key" "$value"
                 ;;
             "NEXTAUTH_URL")
-                if [[ "$env_name" == "production" ]]; then
-                    create_secret "$env_name" "$key" "$value"
-                else
-                    staging_url="${value/app./staging.}"
-                    create_secret "$env_name" "$key" "$staging_url"
-                fi
+                create_secret "$env_name" "$key" "$value"
                 ;;
             "NEXT_PUBLIC_API_URL")
-                if [[ "$env_name" == "production" ]]; then
-                    create_secret "$env_name" "$key" "$value"
-                else
-                    staging_api="${value/api./staging-api.}"
-                    create_secret "$env_name" "$key" "$staging_api"
-                fi
+                create_secret "$env_name" "$key" "$value"
                 ;;
             "NEXT_PUBLIC_SITE_URL")
-                if [[ "$env_name" == "production" ]]; then
-                    create_secret "$env_name" "$key" "$value"
-                else
-                    staging_site="${value/app./staging.}"
-                    create_secret "$env_name" "$key" "$staging_site"
-                fi
+                create_secret "$env_name" "$key" "$value"
                 ;;
             
             # Variables de sécurité
             "NEXTAUTH_SECRET")
                 if [[ "$env_name" == "production" ]]; then
-                    # Générer un secret sécurisé pour la production
                     prod_secret="$(openssl rand -base64 32)"
                     create_secret "$env_name" "$key" "$prod_secret"
                 else
-                    # Générer un secret pour staging
                     staging_secret="$(openssl rand -base64 32)"
                     create_secret "$env_name" "$key" "$staging_secret"
                 fi
@@ -222,12 +202,7 @@ setup_secrets() {
             
             # Variables publiques de l'application
             "NEXT_PUBLIC_APP_NAME")
-                if [[ "$env_name" == "production" ]]; then
-                    create_secret "$env_name" "$key" "$value"
-                else
-                    staging_name="$value Staging"
-                    create_secret "$env_name" "$key" "$staging_name"
-                fi
+                create_secret "$env_name" "$key" "$value"
                 ;;
             "NEXT_PUBLIC_APP_VERSION"|"NEXT_PUBLIC_API_VERSION"|"NEXT_PUBLIC_DEFAULT_LOCALE")
                 create_secret "$env_name" "$key" "$value"
@@ -235,12 +210,7 @@ setup_secrets() {
             
             # Variables SEO et metadata
             "NEXT_PUBLIC_SITE_NAME")
-                if [[ "$env_name" == "production" ]]; then
-                    create_secret "$env_name" "$key" "$value"
-                else
-                    staging_site_name="$value Staging"
-                    create_secret "$env_name" "$key" "$staging_site_name"
-                fi
+                create_secret "$env_name" "$key" "$value"
                 ;;
             "NEXT_PUBLIC_SITE_DESCRIPTION")
                 create_secret "$env_name" "$key" "$value"
@@ -273,26 +243,15 @@ setup_secrets() {
             
             # Variables CDN et assets (optionnelles)
             "NEXT_PUBLIC_CDN_URL"|"NEXT_PUBLIC_ASSETS_URL")
-                if [[ "$env_name" == "production" ]]; then
-                    create_secret "$env_name" "$key" "$value"
-                else
-                    staging_cdn="${value/cdn./staging-cdn.}"
-                    staging_cdn="${staging_cdn/assets./staging-assets.}"
-                    create_secret "$env_name" "$key" "$staging_cdn"
-                fi
+                create_secret "$env_name" "$key" "$value"
                 ;;
             
             # Variables de cache (optionnelles)
             "REDIS_URL")
-                if [[ "$env_name" == "production" ]]; then
-                    create_secret "$env_name" "$key" "$value"
-                else
-                    staging_redis="${value/redis:/redis-staging:}"
-                    create_secret "$env_name" "$key" "$staging_redis"
-                fi
+                create_secret "$env_name" "$key" "$value"
                 ;;
         esac
-    done < "$PROJECT_ROOT/$ENV_FILE"
+    done < "$PROJECT_ROOT/$env_file"
 }
 
 # Fonction principale
@@ -300,7 +259,7 @@ main() {
     local target_env=${1:-"both"}
     
     echo -e "🎯 Mode: $target_env"
-    echo -e "📁 Fichier env: $PROJECT_ROOT/$ENV_FILE"
+    echo -e "📁 Fichier env: $PROJECT_ROOT/$ENV_FILE_PROD"
     echo ""
     
     # Vérifier le repository
@@ -341,20 +300,20 @@ main() {
     # Configurer les secrets selon le mode
     case $target_env in
         "production")
-            setup_secrets "repository"
-            setup_secrets "production"
+            setup_secrets "repository" "$ENV_FILE_PROD"
+            setup_secrets "production" "$ENV_FILE_PROD"
             ;;
         "staging")
-            setup_secrets "repository"
-            setup_secrets "staging"
+            setup_secrets "repository" "$ENV_FILE_STAGING"
+            setup_secrets "staging" "$ENV_FILE_STAGING"
             ;;
         "both")
-            setup_secrets "repository"
-            setup_secrets "production"
-            setup_secrets "staging"
+            setup_secrets "repository" "$ENV_FILE_PROD"
+            setup_secrets "production" "$ENV_FILE_PROD"
+            setup_secrets "staging" "$ENV_FILE_STAGING"
             ;;
         "repository")
-            setup_secrets "repository"
+            setup_secrets "repository" "$ENV_FILE_PROD"
             ;;
         *)
             echo -e "${RED}❌ Mode invalide: $target_env${NC}"
@@ -383,7 +342,7 @@ main() {
     echo "• Les secrets NEXTAUTH_SECRET ont été générés automatiquement"
     echo "• Sauvegardez les valeurs générées pour vos services"
     echo "• Configurez vos domaines de production/staging"
-    echo "• Ajustez les variables placeholder dans $ENV_FILE si nécessaire"
+    echo "• Ajustez les variables placeholder dans $ENV_FILE_PROD et $ENV_FILE_STAGING si nécessaire"
 }
 
 # Aide
@@ -409,7 +368,7 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "  $0 production         # Repository + production uniquement"
     echo "  $0 repository         # Secrets communs uniquement"
     echo ""
-    echo "Le script lit les variables depuis: $ENV_FILE"
+    echo "Le script lit les variables depuis: $ENV_FILE_PROD et $ENV_FILE_STAGING"
     exit 0
 fi
 
