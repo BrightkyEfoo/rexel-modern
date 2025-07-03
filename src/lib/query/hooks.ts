@@ -1,5 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { SearchFilters, Product, Category, Brand, User, Cart } from '../api/types';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type {
+  SearchFilters,
+  Product,
+  Category,
+  Brand,
+  User,
+  Cart,
+} from "../api/types";
 import {
   productsService,
   categoriesService,
@@ -9,48 +16,50 @@ import {
   favoritesService,
   contentService,
   statsService,
-} from '../api/services';
+} from "../api/services";
 
 // Query Keys
 export const queryKeys = {
   // Products
-  products: ['products'] as const,
-  product: (id: string) => ['products', id] as const,
-  productsByCategory: (categoryId: string) => ['products', 'category', categoryId] as const,
-  featuredProducts: ['products', 'featured'] as const,
-  searchProducts: (query: string) => ['products', 'search', query] as const,
+  products: ["products"] as const,
+  product: (id: string) => ["products", id] as const,
+  productsByCategory: (categoryId: string) =>
+    ["products", "category", categoryId] as const,
+  featuredProducts: ["products", "featured"] as const,
+  searchProducts: (query: string) => ["products", "search", query] as const,
 
   // Categories
-  categories: ['categories'] as const,
-  category: (id: string) => ['categories', id] as const,
-  categoryBySlug: (slug: string) => ['categories', 'slug', slug] as const,
-  mainCategories: ['categories', 'main'] as const,
-  subCategories: (parentId: string) => ['categories', parentId, 'children'] as const,
+  categories: ["categories"] as const,
+  category: (id: string) => ["categories", id] as const,
+  categoryBySlug: (slug: string) => ["categories", "slug", slug] as const,
+  mainCategories: ["categories", "main"] as const,
+  subCategories: (parentId: string) =>
+    ["categories", parentId, "children"] as const,
 
   // Brands
-  brands: ['brands'] as const,
-  brand: (id: string) => ['brands', id] as const,
-  featuredBrands: ['brands', 'featured'] as const,
+  brands: ["brands"] as const,
+  brand: (id: string) => ["brands", id] as const,
+  featuredBrands: ["brands", "featured"] as const,
 
   // Users
-  currentUser: ['users', 'me'] as const,
+  currentUser: ["users", "me"] as const,
 
   // Cart
-  cart: ['cart'] as const,
-  cartCount: ['cart', 'count'] as const,
+  cart: ["cart"] as const,
+  cartCount: ["cart", "count"] as const,
 
   // Favorites
-  favorites: ['favorites'] as const,
-  isFavorite: (productId: string) => ['favorites', 'check', productId] as const,
+  favorites: ["favorites"] as const,
+  isFavorite: (productId: string) => ["favorites", "check", productId] as const,
 
   // Content
-  testimonials: ['content', 'testimonials'] as const,
-  services: ['content', 'services'] as const,
-  tools: ['content', 'tools'] as const,
-  promotions: ['content', 'promotions'] as const,
+  testimonials: ["content", "testimonials"] as const,
+  services: ["content", "services"] as const,
+  tools: ["content", "tools"] as const,
+  promotions: ["content", "promotions"] as const,
 
   // Stats
-  dashboardStats: ['stats', 'dashboard'] as const,
+  dashboardStats: ["stats", "dashboard"] as const,
 } as const;
 
 // Products Hooks
@@ -80,7 +89,7 @@ export function useFeaturedProducts() {
 export function useProductsByCategory(categoryId: string) {
   return useQuery({
     queryKey: queryKeys.productsByCategory(categoryId),
-    queryFn: () => productsService.getProductsByCategory(categoryId),
+    queryFn: () => productsService.getProductsByCategory(Number(categoryId)),
     enabled: !!categoryId,
   });
 }
@@ -127,7 +136,7 @@ export function useMainCategories() {
 export function useSubCategories(parentId: string) {
   return useQuery({
     queryKey: queryKeys.subCategories(parentId),
-    queryFn: () => categoriesService.getSubCategories(parentId),
+    queryFn: () => categoriesService.getSubCategories(Number(parentId)),
     enabled: !!parentId,
   });
 }
@@ -212,7 +221,7 @@ export function useUpdateUser() {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<User> }) =>
-      usersService.updateUser(id, data),
+      usersService.updateUser(Number(id), data),
     onSuccess: (data) => {
       queryClient.setQueryData(queryKeys.currentUser, data);
     },
@@ -240,8 +249,13 @@ export function useAddToCart() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ productId, quantity }: { productId: string; quantity?: number }) =>
-      cartService.addToCart(productId, quantity),
+    mutationFn: ({
+      productId,
+      quantity,
+    }: {
+      productId: string;
+      quantity?: number;
+    }) => cartService.addToCart(Number(productId), quantity),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
       queryClient.invalidateQueries({ queryKey: queryKeys.cartCount });
@@ -298,7 +312,7 @@ export function useFavorites() {
 export function useIsFavorite(productId: string) {
   return useQuery({
     queryKey: queryKeys.isFavorite(productId),
-    queryFn: () => favoritesService.isFavorite(productId),
+    queryFn: () => favoritesService.isFavorite(Number(productId)),
     enabled: !!productId,
     retry: false,
   });
@@ -308,7 +322,8 @@ export function useAddToFavorites() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (productId: string) => favoritesService.addToFavorites(productId),
+    mutationFn: (productId: string) =>
+      favoritesService.addToFavorites(Number(productId)),
     onSuccess: (_, productId) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.favorites });
       queryClient.setQueryData(queryKeys.isFavorite(productId), true);
@@ -320,7 +335,8 @@ export function useRemoveFromFavorites() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (productId: string) => favoritesService.removeFromFavorites(productId),
+    mutationFn: (productId: string) =>
+      favoritesService.removeFromFavorites(Number(productId)),
     onSuccess: (_, productId) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.favorites });
       queryClient.setQueryData(queryKeys.isFavorite(productId), false);

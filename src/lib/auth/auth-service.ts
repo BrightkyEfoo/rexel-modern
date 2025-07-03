@@ -22,12 +22,13 @@ export class AuthService {
         refreshToken: "",
         expiresIn: 0,
         user: {
-          id: "1",
+          id: 1,
           email: "user@example.com",
           firstName: "Jean",
           lastName: "Dupont",
           company: "Électricité Moderne",
           role: "customer",
+          isActive: true,
           preferences: {
             language: "fr",
             currency: "EUR",

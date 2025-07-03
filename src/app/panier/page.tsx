@@ -1,39 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import {
-  ShoppingCart,
-  Plus,
-  Minus,
-  Trash2,
-  Heart,
-  ArrowRight,
-  ArrowLeft,
-  Truck,
-  Shield,
-  CreditCard,
-  MapPin,
-  Package,
-  Tag,
-  AlertCircle,
-  Check,
-  Clock
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCart, useUpdateCartItem, useRemoveFromCart } from '@/lib/query/hooks';
 import { useAuthUser } from '@/lib/auth/auth-hooks';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+import { useCart, useRemoveFromCart, useUpdateCartItem } from '@/lib/query/hooks';
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Clock,
+  CreditCard,
+  Heart,
+  Minus,
+  Package,
+  Plus,
+  Shield,
+  ShoppingCart,
+  Trash2,
+  Truck
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 type CheckoutStep = 'cart' | 'shipping' | 'payment' | 'confirmation';
 
@@ -250,7 +247,7 @@ export default function CartPage() {
                         {/* Product Image */}
                         <div className="w-24 h-24 bg-gray-50 rounded-lg flex-shrink-0">
                           <Image
-                            src={item.product.imageUrl}
+                            src={item.product.imageUrl || '/placeholder.png'}
                             alt={item.product.name}
                             width={96}
                             height={96}
@@ -269,7 +266,7 @@ export default function CartPage() {
                                 {item.product.name}
                               </Link>
                               <div className="text-sm text-gray-600 mt-1">
-                                <Badge variant="secondary">{item.product.brandName}</Badge>
+                                <Badge variant="secondary">{item.product.brand?.name}</Badge>
                                 <span className="ml-2">SKU: {item.product.sku}</span>
                               </div>
                               {item.variant && (
@@ -1144,7 +1141,7 @@ function ConfirmationStep({
               <div key={item.id} className="flex items-center space-x-4 py-4 border-b border-gray-100 last:border-b-0">
                 <div className="w-16 h-16 bg-gray-50 rounded-lg">
                   <Image
-                    src={item.product.imageUrl}
+                    src={item.product.imageUrl || '/placeholder.png'}
                     alt={item.product.name}
                     width={64}
                     height={64}

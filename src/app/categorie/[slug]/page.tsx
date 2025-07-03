@@ -1,37 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
+import { FilterContent } from '@/components/category/FilterContent';
+import { ProductGrid } from '@/components/category/ProductGrid';
+import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import type { SearchFilters } from '@/lib/api/types';
+import { useAuthUser } from '@/lib/auth/auth-hooks';
+import { useAddToCart, useCategoryBySlug, useProducts } from '@/lib/query/hooks';
 import {
   Filter,
   Grid3X3,
-  List,
-  ChevronDown,
-  Star,
-  Heart,
-  ShoppingCart,
-  SlidersHorizontal,
-  X,
-  Check
+  List
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useCategoryBySlug, useProducts } from '@/lib/query/hooks';
-import { useAddToCart } from '@/lib/query/hooks';
-import { useAuthUser } from '@/lib/auth/auth-hooks';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import type { SearchFilters, CategoryDetail, Product, ApiResponse, PaginatedResponse } from '@/lib/api/types';
-import { FilterContent } from '@/components/category/FilterContent';
-import { ProductGrid } from '@/components/category/ProductGrid';
+import Link from 'next/link';
+import { useParams, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import type { CategoryDetail } from '@/lib/api/types';
 
 type SortOption = 'popularity' | 'price' | 'name' | 'newest';
 type AvailabilityOption = 'in_stock' | 'out_of_stock' | 'limited';
@@ -60,7 +47,7 @@ export default function CategoryPage() {
   const { user, isAuthenticated } = useAuthUser();
 
   const [filters, setFilters] = useState<ExtendedSearchFilters>({
-    categories: [categorySlug],
+    categories: [Number(categorySlug)],
     sortBy: 'popularity',
     sortOrder: 'desc',
     page: 1,
@@ -78,7 +65,7 @@ export default function CategoryPage() {
   // Update filters based on URL params
   useEffect(() => {
     const urlFilters: ExtendedSearchFilters = {
-      categories: [categorySlug],
+      categories: [Number(categorySlug)],
       sortBy: (searchParams.get('sort') as SortOption) || 'popularity',
       sortOrder: (searchParams.get('order') as 'asc' | 'desc') || 'desc',
       page: Number(searchParams.get('page')) || 1,
@@ -86,7 +73,7 @@ export default function CategoryPage() {
     };
 
     if (searchParams.get('brands')) {
-      urlFilters.brands = searchParams.get('brands')?.split(',');
+      urlFilters.brands = searchParams.get('brands')?.split(',').map(Number);
     }
 
     if (searchParams.get('minPrice') || searchParams.get('maxPrice')) {
@@ -118,7 +105,7 @@ export default function CategoryPage() {
 
   const clearFilters = () => {
     setFilters({
-      categories: [categorySlug],
+      categories: [Number(categorySlug)],
       sortBy: 'popularity',
       sortOrder: 'desc',
       page: 1,
@@ -165,7 +152,7 @@ export default function CategoryPage() {
     );
   }
 
-  const category = categoryResponse.data;
+  const category = categoryResponse.data as CategoryDetail;
 
   return (
     <div className="min-h-screen bg-background">
@@ -197,7 +184,7 @@ export default function CategoryPage() {
           <div className="mb-8">
             <h2 className="text-lg font-semibold mb-4">Sous-catégories</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {category.subcategories.map((subcat) => (
+              {category.subcategories.map((subcat: CategoryDetail['subcategories'][number]) => (
                 <Link
                   key={subcat.id}
                   href={`/categorie/${subcat.slug}`}

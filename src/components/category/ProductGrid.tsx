@@ -51,11 +51,14 @@ export function ProductGrid({
           <div className={`flex flex-col flex-1 ${viewMode === 'list' ? 'py-2' : 'p-4'}`}>
             <div className="flex-1">
               <h3 className="font-medium text-gray-900 line-clamp-2">{product.name}</h3>
+              {/* TODO: badge retiré car product.badge n'existe pas sur Product */}
+              {/*
               {product.badge && (
                 <span className="inline-block mt-2 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded">
                   {product.badge}
                 </span>
               )}
+              */}
               <p className="mt-2 text-sm text-gray-600 line-clamp-2">{product.description}</p>
             </div>
 
@@ -73,7 +76,7 @@ export function ProductGrid({
                 </div>
                 <Button
                   size="sm"
-                  onClick={() => onAddToCart(product.id)}
+                  onClick={() => onAddToCart(product.id.toString())}
                   disabled={!isAuthenticated}
                   className="bg-gray-900 hover:bg-gray-800"
                 >

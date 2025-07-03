@@ -90,7 +90,7 @@ export default function FavoritesPage() {
     for (const item of availableItems) {
       try {
         await addToCartMutation.mutateAsync({
-          productId: item.productId,
+          productId: item.productId.toString(),
           quantity: 1
         });
       } catch (error) {
@@ -105,7 +105,7 @@ export default function FavoritesPage() {
       if (searchQuery) {
         const searchLower = searchQuery.toLowerCase();
         if (!favorite.product.name.toLowerCase().includes(searchLower) &&
-            !favorite.product.brandName.toLowerCase().includes(searchLower)) {
+            !(favorite.product.brand?.name?.toLowerCase().includes(searchLower))) {
           return false;
         }
       }
@@ -356,7 +356,7 @@ function FavoritesGrid({
                 {/* Product Image */}
                 <div className="w-24 h-24 bg-gray-50 rounded-lg flex-shrink-0">
                   <Image
-                    src={favorite.product.imageUrl}
+                    src={favorite.product.imageUrl || '/placeholder.png'}
                     alt={favorite.product.name}
                     width={96}
                     height={96}
@@ -375,7 +375,7 @@ function FavoritesGrid({
                         {favorite.product.name}
                       </Link>
                       <div className="text-sm text-gray-600 mt-1">
-                        <Badge variant="secondary">{favorite.product.brandName}</Badge>
+                        <Badge variant="secondary">{favorite.product.brand?.name}</Badge>
                       </div>
                       <div className="flex items-center mt-2">
                         <div
@@ -407,7 +407,7 @@ function FavoritesGrid({
                     <div className="flex items-center space-x-2">
                       <Button
                         size="sm"
-                        onClick={() => onAddToCart(favorite.productId)}
+                        onClick={() => onAddToCart(favorite.productId.toString())}
                         disabled={
                           favorite.product.availability !== 'in_stock' ||
                           addToCartMutation.isPending
@@ -447,7 +447,7 @@ function FavoritesGrid({
             <Link href={`/produit/${favorite.productId}`}>
               <div className="aspect-square bg-gray-50 p-4">
                 <Image
-                  src={favorite.product.imageUrl}
+                  src={favorite.product.imageUrl || '/placeholder.png'}
                   alt={favorite.product.name}
                   width={200}
                   height={200}
@@ -486,7 +486,7 @@ function FavoritesGrid({
 
             <div className="flex items-center justify-between mb-3">
               <Badge variant="secondary" className="text-xs">
-                {favorite.product.brandName}
+                {favorite.product.brand?.name}
               </Badge>
               <div className="flex items-center">
                 <Star className="w-4 h-4 text-yellow-400 fill-current" />
@@ -505,7 +505,7 @@ function FavoritesGrid({
 
             <Button
               size="sm"
-              onClick={() => onAddToCart(favorite.productId)}
+              onClick={() => onAddToCart(favorite.productId.toString())}
               disabled={
                 favorite.product.availability !== 'in_stock' ||
                 addToCartMutation.isPending

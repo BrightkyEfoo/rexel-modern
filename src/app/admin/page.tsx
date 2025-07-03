@@ -97,15 +97,18 @@ export default function AdminDashboardPage() {
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase();
       if (!product.name.toLowerCase().includes(searchLower) &&
-          !product.brandName.toLowerCase().includes(searchLower) &&
-          !product.sku?.toLowerCase().includes(searchLower)) {
+          !(product.brand?.name?.toLowerCase().includes(searchLower)) &&
+          !(product.sku?.toLowerCase().includes(searchLower))) {
         return false;
       }
     }
 
     // Category filter
-    if (filterCategory !== 'all' && product.categoryId !== filterCategory) {
-      return false;
+    if (filterCategory !== 'all') {
+      const filterCategoryId = Number(filterCategory);
+      if (product.categoryId !== filterCategoryId) {
+        return false;
+      }
     }
 
     // Status filter
@@ -295,7 +298,7 @@ export default function AdminDashboardPage() {
                       <div key={product.id} className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-gray-100 rounded-lg">
                           <Image
-                            src={product.imageUrl}
+                            src={product.imageUrl ? product.imageUrl : '/placeholder.png'}
                             alt={product.name}
                             width={40}
                             height={40}
@@ -304,7 +307,7 @@ export default function AdminDashboardPage() {
                         </div>
                         <div className="flex-1">
                           <div className="font-medium text-sm">{product.name}</div>
-                          <div className="text-xs text-gray-600">{product.brandName}</div>
+                          <div className="text-xs text-gray-600">{product.brand?.name}</div>
                         </div>
                         <div className="text-sm font-semibold text-[#162e77]">
                           {product.price.toFixed(2)} €
@@ -342,7 +345,7 @@ export default function AdminDashboardPage() {
                     <SelectContent>
                       <SelectItem value="all">Toutes les catégories</SelectItem>
                       {categories?.data?.map(category => (
-                        <SelectItem key={category.id} value={category.id}>
+                        <SelectItem key={category.id} value={category.id.toString()}>
                           {category.name}
                         </SelectItem>
                       )) || []}
@@ -406,7 +409,7 @@ export default function AdminDashboardPage() {
                             <div className="flex items-center">
                               <div className="w-12 h-12 bg-gray-100 rounded-lg mr-4">
                                 <Image
-                                  src={product.imageUrl}
+                                  src={product.imageUrl ? product.imageUrl : '/placeholder.png'}
                                   alt={product.name}
                                   width={48}
                                   height={48}
@@ -417,14 +420,12 @@ export default function AdminDashboardPage() {
                                 <div className="text-sm font-medium text-gray-900">
                                   {product.name}
                                 </div>
-                                <div className="text-sm text-gray-500">
-                                  {product.brandName} • {product.sku}
-                                </div>
+                                <div className="text-sm text-gray-500">{product.brand?.name} • {product.sku}</div>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <Badge variant="secondary">{product.categoryName}</Badge>
+                            <Badge variant="secondary">{product.category?.name}</Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {product.price.toFixed(2)} €
