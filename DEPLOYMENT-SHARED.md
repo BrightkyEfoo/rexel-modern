@@ -267,6 +267,53 @@ docker network ls | grep rexel-net
 
 **Note** : Les workflows GitHub Actions créent automatiquement ce réseau, mais pour les déploiements manuels il faut le créer d'abord.
 
+### Problème : Network exists but verification failed
+
+**Symptôme** : 
+```
+out: ✅ Network 'rexel-net' already exists
+err: Error response from daemon: network rexel-net not found
+out: ❌ Network verification failed
+```
+
+**Cause** : **Faux positif** dans la détection - `grep` trouve quelque chose qui ressemble au réseau mais ce n'est pas le bon
+
+**Solutions** :
+
+#### 1. Script de nettoyage automatique (Recommandé)
+```bash
+cd ~/rexel-modern/backend
+chmod +x scripts/cleanup-network.sh
+./scripts/cleanup-network.sh
+```
+
+#### 2. Nettoyage manuel
+```bash
+# Voir tous les réseaux
+docker network ls
+
+# Supprimer le réseau corrompu
+docker network rm rexel-net --force
+
+# Recréer proprement
+docker network create rexel-net --driver bridge
+
+# Vérifier
+docker network inspect rexel-net
+```
+
+#### 3. Reset complet Docker (en dernier recours)
+```bash
+# Arrêter tous les conteneurs rexel
+docker stop $(docker ps -q -f name=rexel-) 2>/dev/null || true
+
+# Nettoyer les réseaux
+docker network prune -f
+
+# Recréer le réseau
+docker network create rexel-net --driver bridge
+```
+
 ### Problème : Database not ready / service "db" is not running
 
 **Symptôme** : 

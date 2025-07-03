@@ -206,6 +206,16 @@ services:
   - Création fichier `.env` pour docker-compose avec toutes les variables
   - Documentation dépannage complète avec vérifications manuelles
 
+#### Détection Réseau Incohérente (31/01/2025)
+- 🚨 **Issue** : `Network 'rexel-net' already exists` mais `network rexel-net not found` lors de la vérification
+- 🔍 **Cause** : Faux positif du `grep` - détection imprécise des réseaux existants
+- ✅ **Solutions implémentées** :
+  - Remplacement `grep` par `docker network inspect` (vérification précise)
+  - Logs détaillés avec `docker network ls` pour debugging
+  - Script de nettoyage automatique `scripts/cleanup-network.sh`
+  - Vérification immédiate après création du réseau
+  - Documentation dépannage avec solutions multiples (auto/manuel/reset)
+
 ### Phase 1 : Tests Architecture ✅
 - [ ] **Test déploiement complet** - Vérifier workflow GitHub Actions avec réseau
 - [ ] **Test connectivity** - Frontend ↔ Backend via réseau
