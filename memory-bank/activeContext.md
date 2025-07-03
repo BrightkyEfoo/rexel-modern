@@ -178,8 +178,36 @@ services:
 
 ## 🚀 Prochaines Étapes
 
+### ✅ Issues Critiques Résolues
+
+#### Réseau Docker Manquant (31/01/2025)
+- 🚨 **Issue** : `network rexel-net declared as external, but could not be found`
+- ✅ **Solution** : Ajout création automatique du réseau dans workflow backend
+- ✅ **Script créé** : `rexel-modern-backend/scripts/setup-docker-network.sh`
+- ✅ **Documentation** : Section dépannage ajoutée à DEPLOYMENT-SHARED.md
+- 📝 **Cause** : Le workflow backend ne créait pas le réseau partagé nécessaire
+- 🔧 **Fix workflow** : Detection + création automatique du réseau `rexel-net`
+
+#### Redémarrage Caddy après Déploiement Frontend
+- ✅ **Workflow frontend** : Redémarrage automatique de Caddy après déploiement
+- ✅ **Documentation** : Procédure manuelle ajoutée
+- 📝 **Nécessaire** : Caddy doit détecter les nouveaux conteneurs frontend sur le réseau
+
+#### Base de Données PostgreSQL ne Démarre Pas (31/01/2025)
+- 🚨 **Issue** : `Database not ready yet, waiting...` + `service "db" is not running`
+- 🔍 **Causes identifiées** :
+  - Configuration incohérente workflow vs docker-compose (DB_HOST externe vs interne)
+  - Locales PostgreSQL françaises incompatibles avec Alpine Linux
+  - Variables d'environnement manquantes/mal configurées
+- ✅ **Solutions implémentées** :
+  - Fix workflow pour utiliser services Docker internes (`DB_HOST=db`, `MINIO_HOST=minio`, `REDIS_HOST=redis`)
+  - Simplification locales PostgreSQL (`--lc-collate=C --lc-ctype=C`)
+  - Amélioration logique d'attente DB avec retry et logs détaillés
+  - Création fichier `.env` pour docker-compose avec toutes les variables
+  - Documentation dépannage complète avec vérifications manuelles
+
 ### Phase 1 : Tests Architecture ✅
-- [ ] **Test déploiement complet** - Vérifier workflow GitHub Actions
+- [ ] **Test déploiement complet** - Vérifier workflow GitHub Actions avec réseau
 - [ ] **Test connectivity** - Frontend ↔ Backend via réseau
 - [ ] **Test SSL** - Vérifier certificats tous domaines
 - [ ] **Test rate limiting** - Valider politiques par environnement

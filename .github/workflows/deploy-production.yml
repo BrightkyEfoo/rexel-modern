@@ -482,6 +482,58 @@ jobs:
               echo '⚠️  Frontend container may not be properly connected to shared network'
             fi
             
+            # Restart Caddy to detect new frontend container
+            echo 'Restarting Caddy reverse proxy to detect new frontend container...'
+            BACKEND_PATH="~/rexel-modern/backend"
+            
+            if [ -d "$BACKEND_PATH" ]; then
+              cd $BACKEND_PATH
+              
+              # Check if Caddy container exists
+              CADDY_CONTAINER=$(${USE_SUDO}docker ps -q -f name=rexel-caddy-prod)
+              
+              if [ ! -z "$CADDY_CONTAINER" ]; then
+                echo "🔄 Restarting Caddy container..."
+                ${USE_SUDO}docker restart $CADDY_CONTAINER
+                
+                # Wait for Caddy to restart and be ready
+                echo "⏳ Waiting for Caddy to restart..."
+                sleep 10
+                
+                # Verify Caddy is running
+                if ${USE_SUDO}docker ps -q -f name=rexel-caddy-prod | grep -q .; then
+                  echo "✅ Caddy restarted successfully!"
+                  
+                  # Test if Caddy can reach the frontend
+                  echo "🧪 Testing Caddy → Frontend connectivity..."
+                  if ${USE_SUDO}docker exec $CADDY_CONTAINER curl -f http://frontend:3000 > /dev/null 2>&1; then
+                    echo "✅ Caddy can reach frontend container!"
+                  else
+                    echo "⚠️  Caddy cannot reach frontend yet (may need more time)"
+                  fi
+                else
+                  echo "❌ Failed to restart Caddy container"
+                fi
+              else
+                echo "⚠️  Caddy container not found in backend stack"
+                echo "📋 Available containers:"
+                ${USE_SUDO}docker ps --format "table {{.Names}}\t{{.Status}}"
+              fi
+            else
+              echo "⚠️  Backend directory not found at $BACKEND_PATH"
+              echo "🔍 Searching for Caddy container..."
+              CADDY_CONTAINERS=$(${USE_SUDO}docker ps -f name=caddy --format "{{.Names}}")
+              if [ ! -z "$CADDY_CONTAINERS" ]; then
+                echo "Found Caddy containers: $CADDY_CONTAINERS"
+                echo "🔄 Restarting first Caddy container..."
+                ${USE_SUDO}docker restart $(echo $CADDY_CONTAINERS | head -n1)
+                sleep 10
+                echo "✅ Caddy restart attempted"
+              else
+                echo "❌ No Caddy containers found"
+              fi
+            fi
+            
             echo 'Frontend deployment completed - service is running!'
 
   health-check:

@@ -105,6 +105,10 @@ docker-compose -f docker-compose.prod.yml up -d
 # Depuis GitHub Actions ou manuellement  
 cd ~/rexel-modern/frontend
 docker-compose -f docker-compose.prod.yml up -d
+
+# ⚠️ IMPORTANT: Redémarrer Caddy pour détecter le nouveau conteneur frontend
+cd ~/rexel-modern/backend
+docker restart rexel-caddy-prod
 ```
 
 ## 🔄 GitHub Actions
@@ -241,6 +245,100 @@ docker-compose -f docker-compose.prod.yml ps
 docker exec rexel-caddy-prod curl http://frontend:3000
 docker exec rexel-caddy-prod curl http://app:3333/health
 ```
+
+### Problème : Network rexel-net not found
+
+**Symptôme** : `network rexel-net declared as external, but could not be found`
+
+**Cause** : Le réseau partagé n'existe pas encore sur le VPS
+
+**Solution** : Créer le réseau avant le déploiement
+```bash
+# Option 1: Script automatique
+cd ~/rexel-modern/backend
+./scripts/setup-docker-network.sh
+
+# Option 2: Commande manuelle
+docker network create rexel-net
+
+# Vérifier
+docker network ls | grep rexel-net
+```
+
+**Note** : Les workflows GitHub Actions créent automatiquement ce réseau, mais pour les déploiements manuels il faut le créer d'abord.
+
+### Problème : Database not ready / service "db" is not running
+
+**Symptôme** : 
+```
+out: Database not ready yet, waiting...
+err: service "db" is not running
+```
+
+**Causes possibles** :
+1. **Variables d'environnement manquantes** - Secrets GitHub non configurés
+2. **Configuration incohérente** - DB_HOST pointe vers service externe au lieu du conteneur interne
+3. **Locales PostgreSQL** - Problème avec les locales françaises sur Alpine Linux
+
+**Solutions** :
+
+#### 1. Vérifier les secrets GitHub
+Variables requises dans GitHub Secrets :
+```bash
+# Database
+DB_USER=rexel_user
+DB_PASSWORD=your_secure_password
+DB_DATABASE=rexel_modern
+
+# MinIO  
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=your_minio_secret_key
+MINIO_BUCKET=rexel-storage
+
+# Redis
+REDIS_PASSWORD=your_redis_password
+
+# Application
+APP_KEY=your_32_character_secret_key
+JWT_SECRET=your_jwt_secret_key
+CORS_ORIGINS=https://kesimarket.com,https://staging.kesimarket.com
+FRONTEND_URL=https://kesimarket.com
+```
+
+#### 2. Utiliser les services Docker internes
+Dans le workflow, configurez :
+```yaml
+DB_HOST=db          # Pas d'IP externe
+MINIO_HOST=minio    # Service interne
+REDIS_HOST=redis    # Service interne
+```
+
+#### 3. Vérification manuelle
+```bash
+# Vérifier que PostgreSQL démarre
+docker logs rexel-postgres-prod
+
+# Tester la connexion
+docker exec rexel-postgres-prod pg_isready -U your_user -d your_database
+
+# Vérifier les variables d'environnement
+docker exec rexel-postgres-prod env | grep POSTGRES
+```
+
+### Problème : Frontend pas accessible après déploiement
+
+**Symptôme** : Le frontend ne répond pas sur `kesimarket.com` ou `staging.kesimarket.com`
+
+**Solution** : Redémarrer Caddy après chaque déploiement frontend
+```bash
+cd ~/rexel-modern/backend
+docker restart rexel-caddy-prod
+
+# Vérifier que Caddy peut atteindre le frontend
+docker exec rexel-caddy-prod curl -f http://frontend:3000
+```
+
+**Pourquoi ?** : Quand un nouveau conteneur frontend est créé, Caddy doit redémarrer pour détecter la nouvelle instance sur le réseau Docker.
 
 ### Logs en temps réel
 
