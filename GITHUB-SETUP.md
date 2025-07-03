@@ -1,231 +1,328 @@
 # 🔐 Configuration GitHub Secrets - Rexel Modern Frontend
 
-Ce guide explique comment configurer les secrets GitHub nécessaires pour le déploiement automatique du frontend.
+Ce guide explique comment configurer les secrets GitHub nécessaires pour le déploiement automatique du frontend avec **GitHub CLI** (automatique) ou manuellement.
 
-## 📋 Secrets Requis
+## 🚀 Méthode Recommandée : Configuration Automatique
 
-### 🌐 Configuration VPS
+### 📋 Prérequis
 
-| Secret | Description | Exemple |
-|--------|-------------|---------|
-| `VPS_HOST` | Adresse IP ou domaine du serveur | `203.0.113.1` |
-| `VPS_USER` | Utilisateur SSH | `root` ou `ubuntu` |
-| `VPS_SSH_PRIVATE_KEY` | Clé privée SSH (format OpenSSH) | `-----BEGIN OPENSSH PRIVATE KEY-----` |
+1. **GitHub CLI** installé et configuré :
+```bash
+# Installation sur macOS
+brew install gh
 
-### 🏠 Domaines et URLs
+# Installation sur Ubuntu/Debian
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+sudo apt update
+sudo apt install gh
 
-| Secret | Description | Exemple |
-|--------|-------------|---------|
-| `FRONTEND_DOMAIN` | Domaine du frontend | `app.votredomaine.com` |
-| `NEXT_PUBLIC_API_URL` | URL de l'API backend | `https://api.votredomaine.com` |
-| `NEXTAUTH_URL` | URL d'authentification | `https://app.votredomaine.com` |
-| `NEXT_PUBLIC_SITE_URL` | URL publique du site | `https://app.votredomaine.com` |
+# Authentification
+gh auth login
+```
 
-### 🔒 Sécurité
+2. **Être dans le repository Git** du projet
 
-| Secret | Description | Génération |
-|--------|-------------|------------|
-| `NEXTAUTH_SECRET` | Secret NextAuth | `openssl rand -base64 32` |
-| `ACME_EMAIL` | Email pour certificats SSL | `admin@votredomaine.com` |
+### 🔄 Configuration Automatique
 
-### 📱 Application
-
-| Secret | Description | Exemple |
-|--------|-------------|---------|
-| `NEXT_PUBLIC_APP_NAME` | Nom de l'application | `"Rexel Modern"` |
-| `NEXT_PUBLIC_APP_VERSION` | Version de l'app | `"1.0.0"` |
-| `NEXT_PUBLIC_API_VERSION` | Version API | `"v1"` |
-| `NEXT_PUBLIC_DEFAULT_LOCALE` | Locale par défaut | `"fr"` |
-
-### 📊 Analytics & Monitoring (Optionnel)
-
-| Secret | Description |
-|--------|-------------|
-| `NEXT_PUBLIC_ANALYTICS_ID` | ID Google Analytics |
-| `NEXT_PUBLIC_GTM_ID` | ID Google Tag Manager |
-| `NEXT_PUBLIC_SENTRY_DSN` | DSN Sentry pour monitoring |
-
-### 🎛️ Features Flags
-
-| Secret | Description | Exemple |
-|--------|-------------|---------|
-| `NEXT_PUBLIC_ENABLE_FEATURES` | Features activées | `"auth,cart,favorites,search"` |
-| `NEXT_PUBLIC_ENABLE_PWA` | Activer PWA | `"true"` |
-| `NEXT_PUBLIC_ENABLE_OFFLINE` | Mode hors ligne | `"true"` |
-| `NEXT_PUBLIC_ENABLE_DARK_MODE` | Mode sombre | `"true"` |
-
-### 🌐 CDN & Assets (Optionnel)
-
-| Secret | Description |
-|--------|-------------|
-| `NEXT_PUBLIC_CDN_URL` | URL du CDN |
-| `NEXT_PUBLIC_ASSETS_URL` | URL des assets |
-
-### 🔑 Authentication (Optionnel)
-
-| Secret | Description |
-|--------|-------------|
-| `GITHUB_CLIENT_ID` | Client ID GitHub OAuth |
-| `GITHUB_CLIENT_SECRET` | Client Secret GitHub OAuth |
-| `GOOGLE_CLIENT_ID` | Client ID Google OAuth |
-| `GOOGLE_CLIENT_SECRET` | Client Secret Google OAuth |
-
-### 💳 Payment (Optionnel)
-
-| Secret | Description |
-|--------|-------------|
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Clé publique Stripe |
-| `STRIPE_SECRET_KEY` | Clé secrète Stripe |
-
-### 📧 Email (Optionnel)
-
-| Secret | Description |
-|--------|-------------|
-| `SMTP_HOST` | Serveur SMTP |
-| `SMTP_PORT` | Port SMTP |
-| `SMTP_USER` | Utilisateur SMTP |
-| `SMTP_PASSWORD` | Mot de passe SMTP |
-| `SMTP_FROM` | Email expéditeur |
-
-### 🗃️ Cache (Optionnel)
-
-| Secret | Description |
-|--------|-------------|
-| `REDIS_URL` | URL Redis pour cache |
-
-### 📄 SEO & Metadata
-
-| Secret | Description | Exemple |
-|--------|-------------|---------|
-| `NEXT_PUBLIC_SITE_NAME` | Nom du site | `"Rexel Modern"` |
-| `NEXT_PUBLIC_SITE_DESCRIPTION` | Description | `"Plateforme e-commerce moderne"` |
-
-## 🔧 Configuration dans GitHub
-
-### 1. Accéder aux Secrets
-
-1. Allez dans votre repository GitHub
-2. Cliquez sur **Settings**
-3. Dans la sidebar, cliquez sur **Secrets and variables** > **Actions**
-4. Cliquez sur **New repository secret**
-
-### 2. Ajouter les Secrets
-
-Pour chaque secret de la liste :
-
-1. Cliquez sur **New repository secret**
-2. Saisissez le **Name** (ex: `VPS_HOST`)
-3. Saisissez la **Secret** (la valeur)
-4. Cliquez sur **Add secret**
-
-### 3. Configuration VPS SSH
+Le script lit automatiquement les variables depuis `env.production.example` et les configure dans GitHub :
 
 ```bash
-# Sur votre machine locale
-ssh-keygen -t ed25519 -C "github-actions-frontend"
+# Configuration complète (production + staging + repository)
+./scripts/setup-github-secrets.sh
+
+# Options spécifiques
+./scripts/setup-github-secrets.sh production  # Production uniquement
+./scripts/setup-github-secrets.sh staging     # Staging uniquement  
+./scripts/setup-github-secrets.sh repository  # Secrets communs uniquement
+```
+
+### 🔧 Étapes Automatiques
+
+1. **Vérification des prérequis** - GitHub CLI et authentification
+2. **Lecture du fichier** `env.production.example` 
+3. **Création/vérification des environnements** GitHub (production, staging)
+4. **Génération automatique** des secrets sécurisés (NEXTAUTH_SECRET, etc.)
+5. **Adaptation pour chaque environnement** (URLs staging/production)
+6. **Création des secrets** dans GitHub via API
+
+### 📊 Variables Configurées Automatiquement
+
+#### 🌐 Variables VPS (Repository level)
+```bash
+VPS_HOST                    # IP ou domaine du serveur
+VPS_USER                    # Utilisateur SSH (ubuntu)
+VPS_SSH_PRIVATE_KEY         # Clé privée SSH complète
+```
+
+#### 🏠 Variables de Domaines (Environment specific)
+```bash
+FRONTEND_DOMAIN             # app.votredomaine.com → staging.votredomaine.com
+NEXTAUTH_URL                # URLs d'authentification
+NEXT_PUBLIC_API_URL         # URLs de l'API backend
+NEXT_PUBLIC_SITE_URL        # URLs du site
+```
+
+#### 🔒 Variables de Sécurité (Auto-générées)
+```bash
+NEXTAUTH_SECRET             # Généré automatiquement (32 chars)
+ACME_EMAIL                  # Email pour certificats SSL
+```
+
+#### 📱 Variables d'Application
+```bash
+NEXT_PUBLIC_APP_NAME        # "Rexel Modern" → "Rexel Modern Staging"
+NEXT_PUBLIC_APP_VERSION     # Version de l'application
+NEXT_PUBLIC_API_VERSION     # Version de l'API
+NEXT_PUBLIC_DEFAULT_LOCALE  # Langue par défaut
+```
+
+#### 🎛️ Variables Optionnelles
+```bash
+# Analytics & Monitoring
+NEXT_PUBLIC_ANALYTICS_ID
+NEXT_PUBLIC_GTM_ID
+NEXT_PUBLIC_SENTRY_DSN
+
+# Feature Flags
+NEXT_PUBLIC_ENABLE_FEATURES
+NEXT_PUBLIC_ENABLE_PWA
+NEXT_PUBLIC_ENABLE_DARK_MODE
+
+# Authentication
+GITHUB_CLIENT_ID
+GOOGLE_CLIENT_ID
+
+# Payment
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+
+# Email, CDN, Cache...
+```
+
+## ⚙️ Configuration Manuelle (Alternative)
+
+Si vous préférez configurer manuellement ou si GitHub CLI n'est pas disponible :
+
+### 1. Aller dans GitHub
+
+1. **Repository** > **Settings**
+2. **Secrets and variables** > **Actions**
+3. **New repository secret**
+
+### 2. Secrets Obligatoires (Repository level)
+
+| Secret | Description | Exemple |
+|--------|-------------|---------|
+| `VPS_HOST` | IP ou domaine du serveur | `203.0.113.1` |
+| `VPS_USER` | Utilisateur SSH | `ubuntu` |
+| `VPS_SSH_PRIVATE_KEY` | Clé privée SSH | `-----BEGIN OPENSSH PRIVATE KEY-----` |
+
+### 3. Secrets d'Environment (production/staging)
+
+Créer les environments **production** et **staging** :
+1. **Settings** > **Environments** > **New environment**
+2. Nommer : `production` ou `staging`
+3. Configurer les protection rules si nécessaire
+
+| Secret | Production | Staging |
+|--------|------------|---------|
+| `FRONTEND_DOMAIN` | `app.votredomaine.com` | `staging.votredomaine.com` |
+| `NEXTAUTH_URL` | `https://app.votredomaine.com` | `https://staging.votredomaine.com` |
+| `NEXT_PUBLIC_API_URL` | `https://api.votredomaine.com` | `https://staging-api.votredomaine.com` |
+| `NEXTAUTH_SECRET` | `$(openssl rand -base64 32)` | `$(openssl rand -base64 32)` |
+| `ACME_EMAIL` | `admin@votredomaine.com` | `admin@votredomaine.com` |
+
+## 🔑 Configuration SSH
+
+### Générer une Clé SSH Dédiée
+
+```bash
+# Générer clé SSH pour GitHub Actions
+ssh-keygen -t ed25519 -C "github-actions-frontend" -f ~/.ssh/github_actions_rexel_frontend
 
 # Copier la clé publique sur le serveur
-ssh-copy-id -i ~/.ssh/id_ed25519.pub user@votre-serveur
+ssh-copy-id -i ~/.ssh/github_actions_rexel_frontend.pub ubuntu@votre-serveur
 
-# Tester la connexion
-ssh -i ~/.ssh/id_ed25519 user@votre-serveur
-
-# Copier la clé privée dans le secret VPS_SSH_PRIVATE_KEY
-cat ~/.ssh/id_ed25519
+# Récupérer la clé privée pour GitHub Secret
+cat ~/.ssh/github_actions_rexel_frontend
 ```
 
-## 🎯 Secrets Minimaux pour Commencer
-
-Pour un déploiement basique, configurez au minimum :
+### Configuration Serveur
 
 ```bash
-# VPS (OBLIGATOIRE)
-VPS_HOST=votre-ip-serveur
-VPS_USER=ubuntu
-VPS_SSH_PRIVATE_KEY=votre-cle-privee-ssh
+# Sur le serveur, vérifier que la clé est ajoutée
+cat ~/.ssh/authorized_keys
 
-# Domaines (OBLIGATOIRE)
-FRONTEND_DOMAIN=app.votredomaine.com
-NEXT_PUBLIC_API_URL=https://api.votredomaine.com
-NEXTAUTH_URL=https://app.votredomaine.com
-
-# Sécurité (OBLIGATOIRE)
-NEXTAUTH_SECRET=$(openssl rand -base64 32)
-ACME_EMAIL=admin@votredomaine.com
-
-# Application (OBLIGATOIRE)
-NEXT_PUBLIC_APP_NAME="Rexel Modern"
-NEXT_PUBLIC_SITE_URL=https://app.votredomaine.com
+# Tester la connexion depuis votre machine
+ssh -i ~/.ssh/github_actions_rexel_frontend ubuntu@votre-serveur
 ```
 
-## 🚀 Script de Génération des Secrets
+## 🔍 Validation et Tests
+
+### Vérifier les Secrets GitHub
 
 ```bash
-#!/bin/bash
-# generate-secrets.sh
+# Lister les secrets repository
+gh secret list
 
-echo "=== Génération des secrets pour GitHub ===="
-echo ""
-
-echo "NEXTAUTH_SECRET=$(openssl rand -base64 32)"
-echo ""
-
-echo "# Copier ces valeurs dans GitHub Secrets:"
-echo "# Repository > Settings > Secrets and variables > Actions"
-echo ""
-
-echo "Secrets générés avec succès !"
+# Lister les secrets d'environment
+gh secret list --env production
+gh secret list --env staging
 ```
 
-## ✅ Vérification
-
-Une fois les secrets configurés :
-
-1. **Push sur main** → Déclenche le déploiement automatique
-2. **Pull Request** → Lance les tests et builds
-3. **Workflow manual** → Depuis l'onglet Actions
-
-### Commandes de Test
+### Tester le Déploiement
 
 ```bash
-# Vérifier les secrets depuis le workflow
-echo "Testing secrets availability..."
-echo "VPS_HOST: ${VPS_HOST:0:10}..."
-echo "FRONTEND_DOMAIN: ${FRONTEND_DOMAIN}"
-echo "NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:0:10}..."
+# Premier test : Push sur main
+git add .
+git commit -m "test: trigger deployment"
+git push origin main
+
+# Surveiller dans GitHub > Actions
 ```
 
-## 🔄 Mise à Jour des Secrets
-
-Pour modifier un secret :
-
-1. Allez dans **Settings** > **Secrets and variables** > **Actions**
-2. Cliquez sur le secret à modifier
-3. Cliquez sur **Update**
-4. Saisissez la nouvelle valeur
-5. Cliquez sur **Update secret**
-
-## 🆘 Dépannage
-
-### Erreur "Secret not found"
-
-- Vérifiez que le nom du secret correspond exactement
-- Les noms sont sensibles à la casse
-
-### Erreur de connexion SSH
+### Debugging
 
 ```bash
-# Tester la clé SSH
-ssh -i ~/.ssh/your-key user@server-ip
+# Voir les logs du workflow
+gh run list
+gh run view <run-id>
+
+# Tester SSH manuellement
+ssh -i ~/.ssh/github_actions_rexel_frontend ubuntu@votre-serveur
 ```
 
-### Variables d'environnement manquantes
+## 📋 Customisation du Script
 
-- Vérifiez que tous les secrets obligatoires sont configurés
-- Regardez les logs du workflow pour identifier les variables manquantes
+### Modifier les Variables
+
+Éditez `env.production.example` pour ajouter/modifier les variables :
+
+```bash
+# Ajouter une nouvelle variable
+NEXT_PUBLIC_CUSTOM_FEATURE=true
+
+# Le script la détectera automatiquement
+```
+
+### Adapter pour Votre Infrastructure
+
+```bash
+# Modifier le script pour vos besoins spécifiques
+# scripts/setup-github-secrets.sh
+
+# Ajouter de nouveaux cas dans la fonction setup_secrets()
+case $key in
+    "VOTRE_NOUVELLE_VARIABLE")
+        create_secret "$env_name" "$key" "$value"
+        ;;
+esac
+```
+
+## 🚨 Dépannage
+
+### GitHub CLI non connecté
+
+```bash
+# Réauthentification
+gh auth logout
+gh auth login
+
+# Vérifier les permissions
+gh auth status
+```
+
+### Environnements non trouvés
+
+```bash
+# Créer manuellement sur GitHub
+# Settings > Environments > New environment
+
+# Ou ignorer et utiliser repository level uniquement
+./scripts/setup-github-secrets.sh repository
+```
+
+### Variables non détectées
+
+```bash
+# Vérifier le format dans env.production.example
+# Format requis : KEY=value (sans espaces autour du =)
+
+# Débugger le script
+bash -x ./scripts/setup-github-secrets.sh
+```
+
+### Permissions insuffisantes
+
+```bash
+# Vérifier les permissions du repository
+gh api repos/:owner/:repo --jq .permissions
+
+# Le script nécessite des droits admin sur le repo
+```
+
+## 🔒 Sécurité
+
+### Best Practices
+
+- ✅ **Clés SSH dédiées** pour chaque projet
+- ✅ **Rotation régulière** des secrets
+- ✅ **Principe du moindre privilège** pour les accès
+- ✅ **Sauvegarde sécurisée** des clés générées
+- ✅ **Monitoring** des accès aux secrets
+
+### Audit des Secrets
+
+```bash
+# Vérifier l'utilisation des secrets
+gh api repos/:owner/:repo/actions/secrets
+
+# Logs d'audit des actions
+gh api repos/:owner/:repo/actions/runs
+```
 
 ## 📚 Ressources
 
-- [GitHub Actions Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
-- [SSH Key Management](https://docs.github.com/en/authentication/connecting-to-github-with-ssh)
-- [Next.js Environment Variables](https://nextjs.org/docs/basic-features/environment-variables) 
+### Documentation Officielle
+
+- [GitHub Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
+- [GitHub CLI](https://cli.github.com/manual/)
+- [GitHub Environments](https://docs.github.com/en/actions/deployment/targeting-different-environments)
+
+### Scripts et Outils
+
+- **Script principal** : `scripts/setup-github-secrets.sh`
+- **Configuration** : `env.production.example`
+- **Makefile** : `make github-setup`
+
+---
+
+## ✅ Checklist de Configuration
+
+### Configuration Automatique
+
+- [ ] GitHub CLI installé et configuré
+- [ ] Repository cloné et dans le bon dossier
+- [ ] Variables adaptées dans `env.production.example`
+- [ ] Script exécuté : `./scripts/setup-github-secrets.sh`
+- [ ] Secrets vérifiés sur GitHub
+- [ ] Clé SSH installée sur le serveur
+
+### Configuration Manuelle
+
+- [ ] Environments créés (production, staging)
+- [ ] Secrets repository configurés (VPS_*)
+- [ ] Secrets environment configurés (domaines, etc.)
+- [ ] Clé SSH générée et installée
+- [ ] Tests de connexion SSH réussis
+
+### Validation
+
+- [ ] `gh secret list` affiche tous les secrets
+- [ ] Workflow de test déclenché et réussi
+- [ ] Connexion SSH depuis GitHub Actions OK
+- [ ] Déploiement automatique fonctionnel
+
+---
+
+**🎉 Votre configuration GitHub Actions est maintenant complète et automatisée !** 

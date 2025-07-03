@@ -1,18 +1,14 @@
 networks:
-  rexel-frontend-network:
-    driver: bridge
+  rexel-net:
+    external: true
 
 volumes:
-  caddy_data:
-    driver: local
-  caddy_config:
-    driver: local
   app_data:
     driver: local
 
 services:
   # Frontend Application
-  app:
+  frontend:
     image: rexel-frontend-prod:latest
     container_name: rexel-frontend-prod
     restart: unless-stopped
@@ -45,37 +41,9 @@ services:
     ports:
       - '3000:3000'
     networks:
-      - rexel-frontend-network
-
-  # Caddy Reverse Proxy
-  caddy:
-    image: caddy:2-alpine
-    container_name: rexel-frontend-caddy-prod
-    restart: unless-stopped
-    depends_on:
-      - app
-    ports:
-      - '80:80'
-      - '443:443'
-      - '2020:2019' # Admin API (optional)
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-      - ./logs:/var/log/caddy
-    networks:
-      - rexel-frontend-network
-    environment:
-      # Domain configuration
-      FRONTEND_DOMAIN: ${FRONTEND_DOMAIN}
-      
-      # Enable admin API (optional)
-      CADDY_ADMIN: '0.0.0.0:2019'
-      
-      # Let's Encrypt email
-      ACME_EMAIL: ${ACME_EMAIL}
+      - rexel-net
     healthcheck:
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost/api/health']
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3000/api/health']
       interval: 30s
       timeout: 10s
       retries: 3

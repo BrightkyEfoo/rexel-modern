@@ -28,7 +28,7 @@ env:
   VPS_DEPLOY_PATH: ~/rexel-modern/frontend
   CONTAINER_NAME: rexel-frontend-prod
   CONTAINER_PORT: 3000
-  CADDY_CONTAINER_NAME: rexel-frontend-caddy-prod
+  NETWORK_NAME: rexel-net
 
 jobs:
   prepare-directory:
@@ -48,16 +48,14 @@ jobs:
             mkdir -p ${{ env.VPS_DEPLOY_PATH }}/backups
             mkdir -p ${{ env.VPS_DEPLOY_PATH }}/images
             mkdir -p ${{ env.VPS_DEPLOY_PATH }}/data
-            mkdir -p ${{ env.VPS_DEPLOY_PATH }}/logs
-            chmod 755 ${{ env.VPS_DEPLOY_PATH }}/logs
             chmod 755 ${{ env.VPS_DEPLOY_PATH }}/data
 
   docker-setup:
-    name: Verify Docker Setup
+    name: Verify Docker Setup and Network
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - name: Verify and setup Docker environment
+      - name: Verify Docker environment and shared network
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -135,12 +133,24 @@ jobs:
               echo "✅ Docker Compose is available"
             fi
             
+            # Check for shared network
+            echo "🔗 Checking shared Docker network..."
+            if ! docker network ls | grep -q ${{ env.NETWORK_NAME }}; then
+              echo "⚠️  Shared network '${{ env.NETWORK_NAME }}' not found!"
+              echo "Creating network '${{ env.NETWORK_NAME }}'..."
+              docker network create ${{ env.NETWORK_NAME }}
+              echo "✅ Network '${{ env.NETWORK_NAME }}' created"
+            else
+              echo "✅ Shared network '${{ env.NETWORK_NAME }}' exists"
+            fi
+            
             # Final verification
             echo "=== Final Docker Environment Status ==="
             docker --version || sudo docker --version
             docker compose version || docker-compose --version || sudo docker compose version
             echo "Docker daemon status: $(sudo systemctl is-active docker)"
             echo "User groups: $(groups $USER)"
+            echo "Shared network: $(docker network ls | grep ${{ env.NETWORK_NAME }})"
 
   checkout:
     name: Checkout Code
@@ -172,8 +182,54 @@ jobs:
       
       - name: Create production .env file
         run: |
-          cat > .env.production << EOF
-          # ===== GENERAL CONFIGURATION =====
+          if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+            cat > .env.production << EOF
+          # ===== ENVIRONMENT =====
+          NODE_ENV=production
+          NEXT_TELEMETRY_DISABLED=1
+          
+          # ===== APPLICATION =====
+          NEXT_PUBLIC_APP_NAME="${{ secrets.NEXT_PUBLIC_APP_NAME }} (Staging)"
+          NEXT_PUBLIC_APP_VERSION="${{ secrets.NEXT_PUBLIC_APP_VERSION }}-staging"
+          
+          # ===== STAGING DOMAINS & URLs =====
+          NEXT_PUBLIC_API_URL=https://staging-api.kesimarket.com
+          NEXTAUTH_URL=https://staging.kesimarket.com
+          NEXT_PUBLIC_SITE_URL=https://staging.kesimarket.com
+          
+          # ===== SECURITY =====
+          NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET_STAGING }}
+          
+          # ===== SSL/TLS =====
+          ACME_EMAIL=${{ secrets.ACME_EMAIL }}
+          
+          # ===== API CONFIGURATION =====
+          NEXT_PUBLIC_API_VERSION=${{ secrets.NEXT_PUBLIC_API_VERSION }}
+          
+          # ===== FEATURES FLAGS =====
+          NEXT_PUBLIC_ENABLE_FEATURES=${{ secrets.NEXT_PUBLIC_ENABLE_FEATURES }}
+          
+          # ===== CDN & ASSETS =====
+          NEXT_PUBLIC_CDN_URL=https://staging-cdn.kesimarket.com
+          NEXT_PUBLIC_ASSETS_URL=https://staging-assets.kesimarket.com
+          
+          # ===== FEATURE FLAGS =====
+          NEXT_PUBLIC_ENABLE_PWA=${{ secrets.NEXT_PUBLIC_ENABLE_PWA }}
+          NEXT_PUBLIC_ENABLE_OFFLINE=${{ secrets.NEXT_PUBLIC_ENABLE_OFFLINE }}
+          NEXT_PUBLIC_ENABLE_DARK_MODE=${{ secrets.NEXT_PUBLIC_ENABLE_DARK_MODE }}
+          
+          # ===== SEO & METADATA =====
+          NEXT_PUBLIC_SITE_NAME="${{ secrets.NEXT_PUBLIC_SITE_NAME }} (Staging)"
+          NEXT_PUBLIC_SITE_DESCRIPTION="${{ secrets.NEXT_PUBLIC_SITE_DESCRIPTION }}"
+          NEXT_PUBLIC_DEFAULT_LOCALE=${{ secrets.NEXT_PUBLIC_DEFAULT_LOCALE }}
+          
+          # ===== STAGING SPECIFIC =====
+          NEXT_PUBLIC_DEBUG_MODE=true
+          NEXT_PUBLIC_SHOW_STAGING_BANNER=true
+          EOF
+          else
+            cat > .env.production << EOF
+          # ===== ENVIRONMENT =====
           NODE_ENV=production
           NEXT_TELEMETRY_DISABLED=1
           
@@ -181,10 +237,10 @@ jobs:
           NEXT_PUBLIC_APP_NAME="${{ secrets.NEXT_PUBLIC_APP_NAME }}"
           NEXT_PUBLIC_APP_VERSION="${{ secrets.NEXT_PUBLIC_APP_VERSION }}"
           
-          # ===== DOMAINS & URLs =====
-          FRONTEND_DOMAIN=${{ secrets.FRONTEND_DOMAIN }}
-          NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
-          NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
+          # ===== PRODUCTION DOMAINS & URLs =====
+          NEXT_PUBLIC_API_URL=https://api.kesimarket.com
+          NEXTAUTH_URL=https://kesimarket.com
+          NEXT_PUBLIC_SITE_URL=https://kesimarket.com
           
           # ===== SECURITY =====
           NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
@@ -204,8 +260,8 @@ jobs:
           NEXT_PUBLIC_ENABLE_FEATURES=${{ secrets.NEXT_PUBLIC_ENABLE_FEATURES }}
           
           # ===== CDN & ASSETS =====
-          NEXT_PUBLIC_CDN_URL=${{ secrets.NEXT_PUBLIC_CDN_URL }}
-          NEXT_PUBLIC_ASSETS_URL=${{ secrets.NEXT_PUBLIC_ASSETS_URL }}
+          NEXT_PUBLIC_CDN_URL=https://cdn.kesimarket.com
+          NEXT_PUBLIC_ASSETS_URL=https://assets.kesimarket.com
           
           # ===== SOCIAL AUTH (Optional) =====
           GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}
@@ -233,11 +289,11 @@ jobs:
           NEXT_PUBLIC_ENABLE_DARK_MODE=${{ secrets.NEXT_PUBLIC_ENABLE_DARK_MODE }}
           
           # ===== SEO & METADATA =====
-          NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
           NEXT_PUBLIC_SITE_NAME="${{ secrets.NEXT_PUBLIC_SITE_NAME }}"
           NEXT_PUBLIC_SITE_DESCRIPTION="${{ secrets.NEXT_PUBLIC_SITE_DESCRIPTION }}"
           NEXT_PUBLIC_DEFAULT_LOCALE=${{ secrets.NEXT_PUBLIC_DEFAULT_LOCALE }}
           EOF
+          fi
       
       - name: Verify .env file created
         run: |
@@ -273,7 +329,6 @@ jobs:
           path: |
             rexel-frontend-prod.tar
             docker-compose.prod.yml
-            Caddyfile
           retention-days: 7
 
   transfer-image:
@@ -294,7 +349,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           port: 22
-          source: "rexel-frontend-prod.tar,docker-compose.prod.yml,Caddyfile"
+          source: "rexel-frontend-prod.tar,docker-compose.prod.yml"
           target: ${{ env.VPS_DEPLOY_PATH }}/
       
       - name: Create backup and organize files
@@ -316,22 +371,15 @@ jobs:
             # Move new image to images directory
             mv ${{ env.VPS_DEPLOY_PATH }}/rexel-frontend-prod.tar ${{ env.VPS_DEPLOY_PATH }}/images/rexel-frontend-prod-current.tar
             
-            # Verify Caddyfile exists
-            if [ ! -f ${{ env.VPS_DEPLOY_PATH }}/Caddyfile ]; then
-              echo "❌ Caddyfile not found in deployment directory!"
-              ls -la ${{ env.VPS_DEPLOY_PATH }}/
-              exit 1
-            else
-              echo "✅ Caddyfile found and ready"
-            fi
+            echo "✅ Files organized and ready for deployment"
 
   load-and-run:
-    name: Load and Run Services with Docker Compose
+    name: Load and Run Frontend Service
     runs-on: ubuntu-latest
     environment: production
     needs: [transfer-image]
     steps:
-      - name: Deploy with Docker Compose
+      - name: Deploy Frontend with Docker Compose
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -355,80 +403,14 @@ jobs:
               echo "✅ Docker accessible without sudo"
             fi
             
-            # Create production .env file
-            cat > .env.production << EOF
-            # ===== GENERAL CONFIGURATION =====
-            NODE_ENV=production
-            NEXT_TELEMETRY_DISABLED=1
-            
-            # ===== APPLICATION =====
-            NEXT_PUBLIC_APP_NAME="${{ secrets.NEXT_PUBLIC_APP_NAME }}"
-            NEXT_PUBLIC_APP_VERSION="${{ secrets.NEXT_PUBLIC_APP_VERSION }}"
-            
-            # ===== DOMAINS & URLs =====
-            FRONTEND_DOMAIN=${{ secrets.FRONTEND_DOMAIN }}
-            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
-            NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
-            
-            # ===== SECURITY =====
-            NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-            
-            # ===== SSL/TLS =====
-            ACME_EMAIL=${{ secrets.ACME_EMAIL }}
-            
-            # ===== API CONFIGURATION =====
-            NEXT_PUBLIC_API_VERSION=${{ secrets.NEXT_PUBLIC_API_VERSION }}
-            
-            # ===== ANALYTICS & MONITORING =====
-            NEXT_PUBLIC_ANALYTICS_ID=${{ secrets.NEXT_PUBLIC_ANALYTICS_ID }}
-            NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}
-            NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
-            
-            # ===== FEATURES FLAGS =====
-            NEXT_PUBLIC_ENABLE_FEATURES=${{ secrets.NEXT_PUBLIC_ENABLE_FEATURES }}
-            
-            # ===== CDN & ASSETS =====
-            NEXT_PUBLIC_CDN_URL=${{ secrets.NEXT_PUBLIC_CDN_URL }}
-            NEXT_PUBLIC_ASSETS_URL=${{ secrets.NEXT_PUBLIC_ASSETS_URL }}
-            
-            # ===== SOCIAL AUTH (Optional) =====
-            GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}
-            GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}
-            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-            
-            # ===== PAYMENT (Optional) =====
-            NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
-            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
-            
-            # ===== EMAIL (Optional) =====
-            SMTP_HOST=${{ secrets.SMTP_HOST }}
-            SMTP_PORT=${{ secrets.SMTP_PORT }}
-            SMTP_USER=${{ secrets.SMTP_USER }}
-            SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
-            SMTP_FROM=${{ secrets.SMTP_FROM }}
-            
-            # ===== REDIS (Optional for caching) =====
-            REDIS_URL=${{ secrets.REDIS_URL }}
-            
-            # ===== FEATURE FLAGS =====
-            NEXT_PUBLIC_ENABLE_PWA=${{ secrets.NEXT_PUBLIC_ENABLE_PWA }}
-            NEXT_PUBLIC_ENABLE_OFFLINE=${{ secrets.NEXT_PUBLIC_ENABLE_OFFLINE }}
-            NEXT_PUBLIC_ENABLE_DARK_MODE=${{ secrets.NEXT_PUBLIC_ENABLE_DARK_MODE }}
-            
-            # ===== SEO & METADATA =====
-            NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
-            NEXT_PUBLIC_SITE_NAME="${{ secrets.NEXT_PUBLIC_SITE_NAME }}"
-            NEXT_PUBLIC_SITE_DESCRIPTION="${{ secrets.NEXT_PUBLIC_SITE_DESCRIPTION }}"
-            NEXT_PUBLIC_DEFAULT_LOCALE=${{ secrets.NEXT_PUBLIC_DEFAULT_LOCALE }}
-            EOF
-            
-            # Create rexel-frontend-network if it doesn't exist
-            if ! ${USE_SUDO}docker network ls | grep -q rexel-frontend-network; then
-              echo 'Creating rexel-frontend-network...'
-              ${USE_SUDO}docker network create rexel-frontend-network
+            # Verify shared network exists
+            if ! ${USE_SUDO}docker network ls | grep -q ${{ env.NETWORK_NAME }}; then
+              echo "❌ Shared network '${{ env.NETWORK_NAME }}' not found!"
+              echo "Please ensure the backend is deployed first or run the network setup script."
+              echo "Creating network as fallback..."
+              ${USE_SUDO}docker network create ${{ env.NETWORK_NAME }}
             else
-              echo 'rexel-frontend-network already exists'
+              echo "✅ Shared network '${{ env.NETWORK_NAME }}' exists"
             fi
             
             # Load the new Docker image
@@ -438,13 +420,13 @@ jobs:
             IMAGE_NAME=$(${USE_SUDO}docker images --format "table {{.Repository}}:{{.Tag}}" | grep rexel-frontend-prod | grep -v latest | head -n 1)
             ${USE_SUDO}docker tag $IMAGE_NAME rexel-frontend-prod:latest
             
-            # Stop existing services
-            echo 'Stopping existing services...'
+            # Stop existing frontend service
+            echo 'Stopping existing frontend service...'
             ${USE_SUDO}docker compose -f docker-compose.prod.yml down || echo 'No existing services to stop'
             
-            # Start application service first
+            # Start frontend application
             echo 'Starting frontend application...'
-            ${USE_SUDO}docker compose -f docker-compose.prod.yml up -d app
+            ${USE_SUDO}docker compose -f docker-compose.prod.yml up -d frontend
             
             # Wait for application to be ready
             echo "Waiting for frontend application to be ready..."
@@ -476,46 +458,31 @@ jobs:
               attempt=$((attempt + 1))
             done
             
-            # Start Caddy reverse proxy
-            echo 'Starting Caddy reverse proxy...'
-            
-            # Verify Caddyfile before starting
-            if [ ! -f Caddyfile ]; then
-              echo "❌ Caddyfile not found! Cannot start Caddy."
-              ls -la .
-              exit 1
-            fi
-            
-            ${USE_SUDO}docker compose -f docker-compose.prod.yml up -d caddy
-            
-            # Wait for Caddy to start
-            echo 'Waiting for Caddy to start...'
-            sleep 15
-            
             # Check if services are running
             echo 'Checking service status...'
             echo '📋 Container Status:'
             ${USE_SUDO}docker ps -f name=rexel-frontend- --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
             
-            # Check main containers
+            # Check main container
             app_running=$(${USE_SUDO}docker ps -q -f name=${{ env.CONTAINER_NAME }})
-            caddy_running=$(${USE_SUDO}docker ps -q -f name=${{ env.CADDY_CONTAINER_NAME }})
             
             if [ ! -z "$app_running" ]; then
               echo '✅ Frontend application container is running!'
             else
               echo '❌ Frontend application container failed to start!'
-              ${USE_SUDO}docker compose -f docker-compose.prod.yml logs app
+              ${USE_SUDO}docker compose -f docker-compose.prod.yml logs frontend
               exit 1
             fi
             
-            if [ ! -z "$caddy_running" ]; then
-              echo '✅ Caddy reverse proxy is running!'
+            # Test connectivity to shared network
+            echo 'Testing network connectivity...'
+            if ${USE_SUDO}docker network inspect ${{ env.NETWORK_NAME }} --format '{{.Containers}}' | grep -q ${{ env.CONTAINER_NAME }}; then
+              echo '✅ Frontend container is connected to shared network!'
             else
-              echo '⚠️  Caddy container not running'
+              echo '⚠️  Frontend container may not be properly connected to shared network'
             fi
             
-            echo 'Frontend deployment completed - services are running!'
+            echo 'Frontend deployment completed - service is running!'
 
   health-check:
     name: Final Health Check
@@ -552,20 +519,17 @@ jobs:
             echo "📋 Container Status:"
             ${USE_SUDO}docker ps -f name=rexel-frontend- --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
             
-            # Check Caddy specifically
-            echo -e "\n🌐 Caddy Reverse Proxy Status:"
-            if [ $(${USE_SUDO}docker ps -q -f name=${{ env.CADDY_CONTAINER_NAME }}) ]; then
-              echo "✅ Caddy container is running"
-              ${USE_SUDO}docker logs --tail=5 ${{ env.CADDY_CONTAINER_NAME }}
+            # Check network connectivity
+            echo -e "\n🔗 Network Connectivity:"
+            if ${USE_SUDO}docker network inspect ${{ env.NETWORK_NAME }} --format '{{.Containers}}' | grep -q ${{ env.CONTAINER_NAME }}; then
+              echo "✅ Frontend container is connected to shared network '${{ env.NETWORK_NAME }}'"
             else
-              echo "❌ Caddy container not running"
-              echo "Available containers:"
-              ${USE_SUDO}docker ps -a -f name=${{ env.CADDY_CONTAINER_NAME }}
+              echo "❌ Frontend container not connected to shared network"
             fi
             
             # Check application logs (last 10 lines)
             echo -e "\n📝 Application Logs (last 10 lines):"
-            ${USE_SUDO}docker compose -f docker-compose.prod.yml logs --tail=10 app
+            ${USE_SUDO}docker compose -f docker-compose.prod.yml logs --tail=10 frontend
             
             # Test frontend health endpoint
             echo -e "\n🩺 Frontend Health Check:"
@@ -579,7 +543,6 @@ jobs:
             # Check services status
             echo -e "\n🌐 Services Status:"
             app_running=$(${USE_SUDO}docker ps -q -f name=${{ env.CONTAINER_NAME }})
-            caddy_running=$(${USE_SUDO}docker ps -q -f name=${{ env.CADDY_CONTAINER_NAME }})
             
             if [ ! -z "$app_running" ]; then
               echo "✅ Frontend application container is running"
@@ -587,15 +550,27 @@ jobs:
               echo "❌ Frontend application container not running"
             fi
             
-            if [ ! -z "$caddy_running" ]; then
-              echo "✅ Caddy container is running"
+            # Check if Caddy proxy is available (should be in backend)
+            echo -e "\n🔄 Reverse Proxy Status:"
+            if ${USE_SUDO}docker ps -f name=caddy --format "table {{.Names}}\t{{.Status}}" | grep -q caddy; then
+              echo "✅ Caddy reverse proxy is running (managed by backend)"
             else
-              echo "❌ Caddy container not running"
+              echo "⚠️  Caddy reverse proxy not found - check backend deployment"
             fi
             
             # Check disk space
             echo -e "\n💾 Disk Space:"
             df -h ${{ env.VPS_DEPLOY_PATH }}
+            
+            # Show expected URLs
+            echo -e "\n🌐 Expected URLs:"
+            if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+              echo "Frontend: https://staging.kesimarket.com"
+              echo "API: https://staging-api.kesimarket.com"
+            else
+              echo "Frontend: https://kesimarket.com"
+              echo "API: https://api.kesimarket.com"
+            fi
             
             echo -e "\n=== HEALTH CHECK COMPLETE ==="
 
@@ -633,9 +608,6 @@ jobs:
             cd ${{ env.VPS_DEPLOY_PATH }}/backups
             ls -t rexel-frontend-prod-backup-*.tar 2>/dev/null | tail -n +4 | xargs -r rm -f
             
-            # Clean up old logs (keep last 7 days)
-            find ${{ env.VPS_DEPLOY_PATH }} -name "*.log" -type f -mtime +7 -delete 2>/dev/null || true
-            
             echo "✅ Cleanup completed"
 
       - name: Deployment Summary
@@ -647,17 +619,18 @@ jobs:
           echo "| **Environment** | ${{ github.event.inputs.environment || 'production' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **Repository** | ${{ github.repository }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **Commit** | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Rebuild Cache** | ${{ github.event.inputs.rebuild_cache || 'false' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Docker Image** | ${{ env.DOCKER_IMAGE_NAME }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Network** | ${{ env.NETWORK_NAME }} (shared) |" >> $GITHUB_STEP_SUMMARY
           echo "| **Container** | ${{ env.CONTAINER_NAME }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Port** | ${{ env.CONTAINER_PORT }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Deploy Path** | ${{ env.VPS_DEPLOY_PATH }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 Services Deployed" >> $GITHUB_STEP_SUMMARY
-          echo "- 🚀 **Rexel Frontend** (Next.js 15)" >> $GITHUB_STEP_SUMMARY
-          echo "- 🌐 **Caddy Reverse Proxy** (Load Balancer & SSL)" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+            echo "🌐 **Staging URLs:** " >> $GITHUB_STEP_SUMMARY
+            echo "- Frontend: https://staging.kesimarket.com" >> $GITHUB_STEP_SUMMARY
+            echo "- API: https://staging-api.kesimarket.com" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🌐 **Production URLs:** " >> $GITHUB_STEP_SUMMARY
+            echo "- Frontend: https://kesimarket.com" >> $GITHUB_STEP_SUMMARY
+            echo "- API: https://api.kesimarket.com" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🔗 Next Steps" >> $GITHUB_STEP_SUMMARY
-          echo "1. Verify frontend is responding correctly" >> $GITHUB_STEP_SUMMARY
-          echo "2. Test API connectivity to backend" >> $GITHUB_STEP_SUMMARY
-          echo "3. Check SSL certificate installation" >> $GITHUB_STEP_SUMMARY
-          echo "4. Verify all features are working correctly" >> $GITHUB_STEP_SUMMARY 
+          echo "ℹ️ **Note:** Reverse proxy managed by backend deployment" >> $GITHUB_STEP_SUMMARY 
