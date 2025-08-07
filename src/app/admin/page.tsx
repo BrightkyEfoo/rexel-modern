@@ -138,7 +138,7 @@ export default function AdminDashboardPage() {
               Dashboard Administrateur
             </h1>
             <p className="text-gray-600">
-              Bienvenue {user?.firstName}, gérez votre catalogue et vos commandes
+              Bienvenue {user?.fullName}, gérez votre catalogue et vos commandes
             </p>
           </div>
 

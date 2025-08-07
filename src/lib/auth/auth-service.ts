@@ -8,6 +8,7 @@ import type {
   TokenPayload,
   ApiResponse,
 } from "../api/types";
+import { UserType } from "../types/user";
 
 export class AuthService {
   private readonly ACCESS_TOKEN_KEY = "rexel_access_token";
@@ -24,23 +25,15 @@ export class AuthService {
         user: {
           id: 1,
           email: "user@example.com",
-          firstName: "Jean",
-          lastName: "Dupont",
-          company: "Électricité Moderne",
-          role: "customer",
-          isActive: true,
-          preferences: {
-            language: "fr",
-            currency: "EUR",
-            notifications: true,
-            newsletter: false,
-          },
+          fullName: "Jean Dupont",
+          type: UserType.CUSTOMER,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
           addresses: [
             {
               id: "addr-1",
               type: "billing",
               name: "Jean Dupont",
-              company: "Électricité Moderne",
               street: "123 Avenue de la République",
               city: "Lyon",
               postalCode: "69001",
@@ -51,7 +44,6 @@ export class AuthService {
               id: "addr-2",
               type: "shipping",
               name: "Jean Dupont",
-              company: "Électricité Moderne",
               street: "456 Rue du Commerce",
               city: "Lyon",
               postalCode: "69002",
@@ -59,10 +51,6 @@ export class AuthService {
               isDefault: false,
             },
           ],
-          createdAt: "2024-01-01T00:00:00Z",
-          updatedAt: "2024-06-15T10:00:00Z",
-          lastLogin: "2024-06-15T10:00:00Z",
-          isVerified: true,
         },
       };
     } catch (error) {
