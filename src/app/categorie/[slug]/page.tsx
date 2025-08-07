@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import type { SearchFilters } from '@/lib/api/types';
 import { useAuthUser } from '@/lib/auth/auth-hooks';
-import { useAddToCart, useCategoryBySlug, useProducts } from '@/lib/query/hooks';
+import { useAddToCart, useCategoryBySlug, useProductsByCategorySlug } from '@/lib/query/hooks';
 import {
   Filter,
   Grid3X3,
@@ -47,7 +47,6 @@ export default function CategoryPage() {
   const { user, isAuthenticated } = useAuthUser();
 
   const [filters, setFilters] = useState<ExtendedSearchFilters>({
-    categories: [Number(categorySlug)],
     sortBy: 'popularity',
     sortOrder: 'desc',
     page: 1,
@@ -59,13 +58,12 @@ export default function CategoryPage() {
 
   // Get data
   const { data: categoryResponse, isLoading: categoryLoading } = useCategoryBySlug(categorySlug);
-  const { data: productsResponse, isLoading: productsLoading } = useProducts(filters);
+  const { data: productsResponse, isLoading: productsLoading } = useProductsByCategorySlug(categorySlug, filters);
   const addToCartMutation = useAddToCart();
 
   // Update filters based on URL params
   useEffect(() => {
     const urlFilters: ExtendedSearchFilters = {
-      categories: [Number(categorySlug)],
       sortBy: (searchParams.get('sort') as SortOption) || 'popularity',
       sortOrder: (searchParams.get('order') as 'asc' | 'desc') || 'desc',
       page: Number(searchParams.get('page')) || 1,
@@ -105,7 +103,6 @@ export default function CategoryPage() {
 
   const clearFilters = () => {
     setFilters({
-      categories: [Number(categorySlug)],
       sortBy: 'popularity',
       sortOrder: 'desc',
       page: 1,
@@ -153,6 +150,9 @@ export default function CategoryPage() {
   }
 
   const category = categoryResponse.data as CategoryDetail;
+  const hasProducts = productsResponse?.data && productsResponse.data.length > 0;
+
+  console.log("hasProducts", productsResponse);
 
   return (
     <div className="min-h-screen bg-background">
@@ -171,135 +171,175 @@ export default function CategoryPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             {category.name}
           </h1>
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 mb-6">
             {category.description}
           </p>
-          <div className="text-sm text-gray-500">
-            {category.productCount} produits disponibles
-          </div>
+          
+          {/* Sous-catégories directement après la description */}
+          {category.subcategories && category.subcategories.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Explorez nos sous-catégories</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {category.subcategories.map((subcat: CategoryDetail['subcategories'][number]) => (
+                  <Link
+                    key={subcat.id}
+                    href={`/categorie/${subcat.slug}`}
+                    className="group relative bg-white border border-gray-200 rounded-xl p-6 hover:border-[#162e77] hover:shadow-lg transition-all duration-200 overflow-hidden"
+                  >
+                    {/* Icône de catégorie */}
+                    <div className="w-12 h-12 bg-[#162e77] bg-opacity-10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                      <div className="w-6 h-6 bg-[#162e77] rounded opacity-80"></div>
+                    </div>
+                    
+                    {/* Contenu */}
+                    <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-[#162e77] transition-colors">
+                      {subcat.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-3 overflow-hidden text-ellipsis" style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical'
+                    }}>
+                      {subcat.description}
+                    </p>
+                    
+                    {/* Badge produits */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-gray-500">
+                        {subcat.productCount} produits
+                      </span>
+                      <div className="w-5 h-5 text-[#162e77] opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    {/* Effet de hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#162e77] to-blue-600 opacity-0 group-hover:opacity-5 transition-opacity"></div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Compteur de produits seulement s'il y en a */}
+          {hasProducts && (
+            <div className="text-sm text-gray-500 mt-6">
+              {category.productCount} produits disponibles
+            </div>
+          )}
         </div>
 
-        {/* Subcategories */}
-        {category.subcategories && category.subcategories.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">Sous-catégories</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {category.subcategories.map((subcat: CategoryDetail['subcategories'][number]) => (
-                <Link
-                  key={subcat.id}
-                  href={`/categorie/${subcat.slug}`}
-                  className="p-4 border border-gray-200 rounded-lg hover:border-[#162e77] hover:bg-blue-50 transition-colors"
+        {/* Section produits - affichée seulement s'il y a des produits */}
+        {hasProducts && (
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Filters Sidebar */}
+            <div className="lg:w-1/4">
+              {/* Mobile Filter Button */}
+              <div className="lg:hidden mb-4">
+                <Sheet open={showFilters} onOpenChange={setShowFilters}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" className="w-full">
+                      <Filter className="w-4 h-4 mr-2" />
+                      Filtres
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-80">
+                    <SheetHeader>
+                      <SheetTitle>Filtres</SheetTitle>
+                    </SheetHeader>
+                    <FilterContent
+                      categoryData={category}
+                      filters={filters}
+                      priceRange={priceRange}
+                      onFilterChange={handleFilterChange}
+                      onPriceChange={setPriceRange}
+                      onClearFilters={clearFilters}
+                    />
+                  </SheetContent>
+                </Sheet>
+              </div>
+
+              {/* Desktop Filters */}
+              <div className="hidden lg:block">
+                <FilterContent
+                  categoryData={category}
+                  filters={filters}
+                  priceRange={priceRange}
+                  onFilterChange={handleFilterChange}
+                  onPriceChange={setPriceRange}
+                  onClearFilters={clearFilters}
+                />
+              </div>
+            </div>
+
+            {/* Products Section */}
+            <div className="lg:w-3/4">
+              {/* Titre de section produits */}
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Produits disponibles</h2>
+                <p className="text-gray-600">Découvrez notre sélection de produits dans cette catégorie</p>
+              </div>
+
+              {/* View Controls */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-4">
+                  <Button
+                    variant={viewMode === 'grid' ? 'default' : 'outline'}
+                    size="icon"
+                    onClick={() => setViewMode('grid')}
+                  >
+                    <Grid3X3 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'outline'}
+                    size="icon"
+                    onClick={() => setViewMode('list')}
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <Select
+                  value={filters.sortBy}
+                  onValueChange={(value: SortOption) => handleFilterChange({ sortBy: value })}
                 >
-                  <h3 className="font-medium text-gray-900">{subcat.name}</h3>
-                  <p className="text-sm text-gray-500">{subcat.productCount} produits</p>
-                </Link>
-              ))}
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Trier par" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SORT_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Products Grid */}
+              {productsLoading ? (
+                <div className="animate-pulse">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="h-64 bg-gray-200 rounded"></div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <ProductGrid
+                  products={productsResponse.data}
+                  viewMode={viewMode}
+                  onAddToCart={(productId) => addToCartMutation.mutate({ productId, quantity: 1 })}
+                  isAuthenticated={isAuthenticated}
+                />
+              )}
             </div>
           </div>
         )}
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:w-1/4">
-            {/* Mobile Filter Button */}
-            <div className="lg:hidden mb-4">
-              <Sheet open={showFilters} onOpenChange={setShowFilters}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" className="w-full">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filtres
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-80">
-                  <SheetHeader>
-                    <SheetTitle>Filtres</SheetTitle>
-                  </SheetHeader>
-                  <FilterContent
-                    categoryData={category}
-                    filters={filters}
-                    priceRange={priceRange}
-                    onFilterChange={handleFilterChange}
-                    onPriceChange={setPriceRange}
-                    onClearFilters={clearFilters}
-                  />
-                </SheetContent>
-              </Sheet>
-            </div>
 
-            {/* Desktop Filters */}
-            <div className="hidden lg:block">
-              <FilterContent
-                categoryData={category}
-                filters={filters}
-                priceRange={priceRange}
-                onFilterChange={handleFilterChange}
-                onPriceChange={setPriceRange}
-                onClearFilters={clearFilters}
-              />
-            </div>
-          </div>
-
-          {/* Products Section */}
-          <div className="lg:w-3/4">
-            {/* View Controls */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
-                  size="icon"
-                  onClick={() => setViewMode('grid')}
-                >
-                  <Grid3X3 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="icon"
-                  onClick={() => setViewMode('list')}
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-              </div>
-
-              <Select
-                value={filters.sortBy}
-                onValueChange={(value: SortOption) => handleFilterChange({ sortBy: value })}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Trier par" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SORT_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Products Grid */}
-            {productsLoading ? (
-              <div className="animate-pulse">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="h-64 bg-gray-200 rounded"></div>
-                  ))}
-                </div>
-              </div>
-            ) : productsResponse?.data ? (
-              <ProductGrid
-                products={productsResponse.data}
-                viewMode={viewMode}
-                onAddToCart={(productId) => addToCartMutation.mutate({ productId, quantity: 1 })}
-                isAuthenticated={isAuthenticated}
-              />
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-600">Aucun produit trouvé</p>
-              </div>
-            )}
-          </div>
-        </div>
       </main>
 
       <Footer />

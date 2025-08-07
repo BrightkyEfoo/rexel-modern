@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRegister, useAuthUser } from '@/lib/auth/auth-hooks';
 import type { RegisterData } from '@/lib/api/types';
+import { appConfig } from '@/lib/config/app';
+import { Logo } from '@/components/ui/logo';
 
 interface FormErrors {
   email?: string;
@@ -140,30 +142,26 @@ export default function RegisterPage() {
   const passwordStrength = getPasswordStrength(formData.password);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-muted to-background flex items-center justify-center p-4">
       <div className="max-w-2xl w-full space-y-8">
         {/* Header */}
         <div className="text-center">
           <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-            <div className="w-12 h-12 bg-[#162e77] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">R</span>
-            </div>
+            <Logo variant="light" size="md" showText={false} />
             <div className="text-left">
-              <div className="text-xl font-bold text-[#162e77]">Rexel</div>
-              <div className="text-xs text-gray-500">France</div>
+              <div className="text-xl font-bold text-primary">{appConfig.name}</div>
+              <div className="text-xs text-muted-foreground">{appConfig.country}</div>
             </div>
           </Link>
 
-          <h2 className="text-3xl font-bold text-gray-900">
-            Créer un compte
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Rejoignez la communauté Rexel et profitez d'avantages exclusifs
+          <h2 className="text-2xl font-bold text-center mb-2">Créer un compte</h2>
+          <p className="text-muted-foreground text-center mb-6">
+            Rejoignez la communauté KesiMarket et profitez d'avantages exclusifs
           </p>
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-card rounded-2xl shadow-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Alert */}
             {registerMutation.error && (
@@ -179,68 +177,68 @@ export default function RegisterPage() {
             <div className="grid md:grid-cols-2 gap-6">
               {/* First Name */}
               <div className="space-y-2">
-                <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="firstName" className="text-sm font-medium text-foreground">
                   Prénom *
                 </Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                   <Input
                     id="firstName"
                     type="text"
                     placeholder="Jean"
                     value={formData.firstName}
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    className={`pl-10 ${errors.firstName ? 'border-red-300 focus:border-red-500' : ''}`}
+                    className={`pl-10 ${errors.firstName ? 'border-destructive focus:border-destructive' : ''}`}
                     disabled={registerMutation.isPending}
                   />
                 </div>
                 {errors.firstName && (
-                  <p className="text-sm text-red-600">{errors.firstName}</p>
+                  <p className="text-sm text-destructive">{errors.firstName}</p>
                 )}
               </div>
 
               {/* Last Name */}
               <div className="space-y-2">
-                <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="lastName" className="text-sm font-medium text-foreground">
                   Nom *
                 </Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                   <Input
                     id="lastName"
                     type="text"
                     placeholder="Dupont"
                     value={formData.lastName}
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    className={`pl-10 ${errors.lastName ? 'border-red-300 focus:border-red-500' : ''}`}
+                    className={`pl-10 ${errors.lastName ? 'border-destructive focus:border-destructive' : ''}`}
                     disabled={registerMutation.isPending}
                   />
                 </div>
                 {errors.lastName && (
-                  <p className="text-sm text-red-600">{errors.lastName}</p>
+                  <p className="text-sm text-destructive">{errors.lastName}</p>
                 )}
               </div>
             </div>
 
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">
                 Adresse email professionnelle *
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="jean.dupont@entreprise.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`pl-10 ${errors.email ? 'border-red-300 focus:border-red-500' : ''}`}
+                  className={`pl-10 ${errors.email ? 'border-destructive focus:border-destructive' : ''}`}
                   disabled={registerMutation.isPending}
                 />
               </div>
               {errors.email && (
-                <p className="text-sm text-red-600">{errors.email}</p>
+                <p className="text-sm text-destructive">{errors.email}</p>
               )}
             </div>
 
@@ -248,69 +246,69 @@ export default function RegisterPage() {
             <div className="grid md:grid-cols-2 gap-6">
               {/* Company */}
               <div className="space-y-2">
-                <Label htmlFor="company" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="company" className="text-sm font-medium text-foreground">
                   Entreprise
                 </Label>
                 <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                   <Input
                     id="company"
                     type="text"
                     placeholder="Nom de votre entreprise"
                     value={formData.company}
                     onChange={(e) => handleInputChange('company', e.target.value)}
-                    className={`pl-10 ${errors.company ? 'border-red-300 focus:border-red-500' : ''}`}
+                    className={`pl-10 ${errors.company ? 'border-destructive focus:border-destructive' : ''}`}
                     disabled={registerMutation.isPending}
                   />
                 </div>
                 {errors.company && (
-                  <p className="text-sm text-red-600">{errors.company}</p>
+                  <p className="text-sm text-destructive">{errors.company}</p>
                 )}
               </div>
 
               {/* Phone */}
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="phone" className="text-sm font-medium text-foreground">
                   Téléphone
                 </Label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                   <Input
                     id="phone"
                     type="tel"
                     placeholder="01 23 45 67 89"
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className={`pl-10 ${errors.phone ? 'border-red-300 focus:border-red-500' : ''}`}
+                    className={`pl-10 ${errors.phone ? 'border-destructive focus:border-destructive' : ''}`}
                     disabled={registerMutation.isPending}
                   />
                 </div>
                 {errors.phone && (
-                  <p className="text-sm text-red-600">{errors.phone}</p>
+                  <p className="text-sm text-destructive">{errors.phone}</p>
                 )}
               </div>
             </div>
 
             {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="password" className="text-sm font-medium text-foreground">
                 Mot de passe *
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Créez un mot de passe sécurisé"
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`pl-10 pr-10 ${errors.password ? 'border-red-300 focus:border-red-500' : ''}`}
+                  className={`pl-10 pr-10 ${errors.password ? 'border-destructive focus:border-destructive' : ''}`}
                   disabled={registerMutation.isPending}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -320,48 +318,48 @@ export default function RegisterPage() {
               {formData.password && (
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                    <div className="flex-1 bg-muted rounded-full h-2">
                       <div
                         className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                         style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
                       />
                     </div>
-                    <span className="text-xs text-gray-600">{passwordStrength.label}</span>
+                    <span className="text-xs text-muted-foreground">{passwordStrength.label}</span>
                   </div>
                 </div>
               )}
 
               {errors.password && (
-                <p className="text-sm text-red-600">{errors.password}</p>
+                <p className="text-sm text-destructive">{errors.password}</p>
               )}
             </div>
 
             {/* Confirm Password */}
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">
                 Confirmer le mot de passe *
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="Confirmez votre mot de passe"
                   value={formData.confirmPassword}
                   onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                  className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-red-300 focus:border-red-500' : ''}`}
+                  className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-destructive focus:border-destructive' : ''}`}
                   disabled={registerMutation.isPending}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-sm text-red-600">{errors.confirmPassword}</p>
+                <p className="text-sm text-destructive">{errors.confirmPassword}</p>
               )}
             </div>
 
@@ -379,28 +377,28 @@ export default function RegisterPage() {
                       setErrors(prev => ({ ...prev, terms: undefined }));
                     }
                   }}
-                  className="h-4 w-4 text-[#162e77] focus:ring-[#162e77] border-gray-300 rounded mt-1"
+                  className="h-4 w-4 text-primary focus:ring-primary border-border rounded mt-1"
                 />
-                <label htmlFor="terms" className="text-sm text-gray-700">
+                <label htmlFor="terms" className="text-sm text-foreground">
                   J'accepte les{' '}
-                  <Link href="/conditions-utilisation" className="text-[#162e77] hover:text-[#1e40af] font-medium">
+                  <Link href="/conditions-utilisation" className="text-primary hover:text-primary/80 font-medium">
                     conditions d'utilisation
                   </Link>{' '}
                   et la{' '}
-                  <Link href="/politique-confidentialite" className="text-[#162e77] hover:text-[#1e40af] font-medium">
+                  <Link href="/politique-confidentialite" className="text-primary hover:text-primary/80 font-medium">
                     politique de confidentialité
                   </Link>
                 </label>
               </div>
               {errors.terms && (
-                <p className="text-sm text-red-600">{errors.terms}</p>
+                <p className="text-sm text-destructive">{errors.terms}</p>
               )}
             </div>
 
             {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full bg-[#162e77] hover:bg-[#1e40af] text-white font-semibold py-3"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3"
               disabled={registerMutation.isPending}
             >
               {registerMutation.isPending ? (
@@ -419,11 +417,11 @@ export default function RegisterPage() {
 
           {/* Login Link */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Déjà un compte ?{' '}
               <Link
                 href="/auth/login"
-                className="font-medium text-[#162e77] hover:text-[#1e40af]"
+                className="font-medium text-primary hover:text-primary/80"
               >
                 Se connecter
               </Link>
@@ -432,26 +430,24 @@ export default function RegisterPage() {
         </div>
 
         {/* Benefits */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Les avantages de votre compte Rexel
-          </h3>
+        <div className="bg-card rounded-2xl shadow-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Les avantages de votre compte KesiMarket</h3>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-gray-600">Prix préférentiels</span>
+              <span className="text-sm text-muted-foreground">Prix préférentiels</span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-gray-600">Suivi de commandes</span>
+              <span className="text-sm text-muted-foreground">Suivi de commandes</span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-gray-600">Support prioritaire</span>
+              <span className="text-sm text-muted-foreground">Support prioritaire</span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-gray-600">Offres exclusives</span>
+              <span className="text-sm text-muted-foreground">Offres exclusives</span>
             </div>
           </div>
         </div>

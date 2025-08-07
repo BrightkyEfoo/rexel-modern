@@ -1,3 +1,5 @@
+import { UserType } from '../types/user.js'
+
 export interface ApiResponse<T> {
   data: T;
   message?: string;
@@ -122,15 +124,10 @@ export interface Brand {
 export interface User {
   id: number;
   email: string;
-  firstName?: string;
-  lastName?: string;
-  company?: string;
-  role?: 'customer' | 'admin' | 'vendor';
-  isActive: boolean;
+  fullName?: string;
+  type: UserType;
   createdAt: string;
   updatedAt: string;
-  lastLogin?: string;
-  isVerified?: boolean;
   
   // Frontend extended properties
   preferences?: {

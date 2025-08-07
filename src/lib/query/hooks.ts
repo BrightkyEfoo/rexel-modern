@@ -25,6 +25,8 @@ export const queryKeys = {
   product: (id: string) => ["products", id] as const,
   productsByCategory: (categoryId: string) =>
     ["products", "category", categoryId] as const,
+  productsByCategorySlug: (categorySlug: string) =>
+    ["products", "category-slug", categorySlug] as const,
   featuredProducts: ["products", "featured"] as const,
   searchProducts: (query: string) => ["products", "search", query] as const,
 
@@ -91,6 +93,14 @@ export function useProductsByCategory(categoryId: string) {
     queryKey: queryKeys.productsByCategory(categoryId),
     queryFn: () => productsService.getProductsByCategory(Number(categoryId)),
     enabled: !!categoryId,
+  });
+}
+
+export function useProductsByCategorySlug(categorySlug: string, filters?: SearchFilters) {
+  return useQuery({
+    queryKey: [...queryKeys.productsByCategorySlug(categorySlug), filters],
+    queryFn: () => productsService.getProductsByCategorySlug(categorySlug, filters),
+    enabled: !!categorySlug,
   });
 }
 

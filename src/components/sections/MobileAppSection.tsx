@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ArrowRight, Download, Smartphone, Zap, ShoppingCart, Bell, Star, Award, CreditCard, Gift, Box } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Logo } from '@/components/ui/logo';
 
 export function MobileAppSection() {
   return (
@@ -27,10 +28,8 @@ export function MobileAppSection() {
                 </Badge>
               </div>
 
-              <h2 className="text-3xl lg:text-4xl font-bold text-foreground leading-tight">
-                Emportez tout Rexel
-                <br />
-                <span className="text-primary">dans votre poche</span>
+              <h2 className="text-3xl font-bold mb-4">
+                Emportez tout KesiMarket
               </h2>
 
               <p className="text-lg text-muted-foreground leading-relaxed">
@@ -122,9 +121,9 @@ export function MobileAppSection() {
                     {/* App header */}
                     <div className="text-center mb-6">
                       <div className="w-16 h-16 bg-primary-foreground rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <span className="text-primary font-bold text-xl">R</span>
+                        <Logo variant="light" size="md" showText={false} />
                       </div>
-                      <h3 className="text-primary-foreground font-bold text-lg">Rexel France</h3>
+                      <h3 className="text-primary-foreground font-bold text-lg">KesiMarket</h3>
                       <p className="text-primary-foreground/80 text-sm">2M+ références</p>
                     </div>
 

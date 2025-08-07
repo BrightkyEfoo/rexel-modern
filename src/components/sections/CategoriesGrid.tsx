@@ -89,19 +89,7 @@ export function CategoriesGrid() {
 
   if (error) {
     return (
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4 text-center">
-          <div className="text-red-600 mb-4">
-            Erreur lors du chargement des catégories
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="text-blue-600 hover:underline"
-          >
-            Réessayer
-          </button>
-        </div>
-      </section>
+      null
     );
   }
 

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, ChevronRight, ArrowRight, Zap, Shield, Clock } from 'lucide-react';
+import { Logo } from '@/components/ui/logo';
 
 const heroSlides = [
   {
@@ -34,7 +35,7 @@ const heroSlides = [
   },
   {
     id: 3,
-    title: 'Rexel Expo 2024',
+    title: 'KesiMarket Expo 2024',
     subtitle: 'Le plus grand événement de l\'électricité',
     description: 'Rencontrez nos experts et découvrez les dernières innovations.',
     image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&h=600&fit=crop',
@@ -279,11 +280,7 @@ export function HeroSection() {
                 transition={{ duration: 0.5, delay: 0.5 }}
                 className="w-80 h-80 bg-primary-foreground/5 backdrop-blur-lg rounded-2xl border border-primary-foreground/20 flex items-center justify-center"
               >
-                <div className="w-32 h-32 bg-primary-foreground/20 rounded-full flex items-center justify-center">
-                  <div className="w-16 h-16 bg-primary-foreground rounded-full flex items-center justify-center">
-                    <span className="text-primary font-bold text-2xl">R</span>
-                  </div>
-                </div>
+                <Logo variant="light" size="lg" showText={false} />
               </motion.div>
             </div>
           </motion.div>

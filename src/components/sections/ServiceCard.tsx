@@ -44,7 +44,7 @@ export function ServiceCard({
             variant="secondary"
             className="bg-primary/10 text-primary hover:bg-primary/20"
           >
-            Solution Rexel
+            Solution KesiMarket
           </Badge>
           {service.name === "Open" && (
             <Badge

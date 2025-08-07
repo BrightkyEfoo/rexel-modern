@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import ClientBody from './ClientBody';
 import { QueryProvider } from '@/lib/query/provider';
+import { appConfig } from '@/lib/config/app';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -10,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Rexel France | Fournisseur de matériel électrique moderne',
-  description: 'Leader de la distribution professionnelle de produits et services pour le monde de l\'énergie. Une expérience d\'achat moderne et simplifiée.',
-  keywords: 'matériel électrique, Rexel, distribution électrique, éclairage, câbles, appareillage',
+  title: appConfig.seo.title,
+  description: appConfig.seo.description,
+  keywords: appConfig.seo.keywords,
 };
 
 export default function RootLayout({

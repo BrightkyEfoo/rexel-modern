@@ -36,6 +36,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuthUser } from "@/lib/auth/auth-hooks";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { appConfig } from '@/lib/config/app';
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -707,7 +708,7 @@ export default function OrderDetailPage() {
                         <div>
                           <div className="font-medium">Email</div>
                           <div className="text-sm text-gray-600">
-                            support@rexel.fr
+                            {appConfig.contact.supportEmail}
                           </div>
                           <div className="text-xs text-gray-500">
                             Réponse sous 24h

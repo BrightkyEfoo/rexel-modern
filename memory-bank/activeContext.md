@@ -1,7 +1,7 @@
 # Contexte Actif - Rexel Modern
 
 ## 🎯 Focus Actuel (Janvier 2025)
-**✅ Architecture Caddy Partagée Implémentée - Frontend & Backend Unifiés**
+**✅ Architecture Caddy Partagée Implémentée + Système de Types d'Utilisateurs Unifié + Pages Auth Thématisées + Filtres Dynamiques Backend**
 
 ## 📋 Changements Récents (Architecture Partagée)
 
@@ -77,6 +77,90 @@ services:
 - ✅ `transfer-image` : Plus de transfert Caddyfile
 - ✅ `load-and-run` : Déploiement uniquement du service `frontend`
 - ✅ `health-check` : Vérification connectivité réseau partagé
+
+### ✅ Système de Filtres Dynamiques Backend (31/01/2025)
+
+#### Architecture des Métadonnées
+- ✅ **Table pivot** - `product_metadata` avec clés/valeurs dynamiques
+- ✅ **Types de valeurs** - string, number, boolean, json pour flexibilité
+- ✅ **Index optimisés** - Performance pour les requêtes de filtrage
+- ✅ **Contrainte unique** - Évite les doublons par produit/clé
+
+#### API Endpoints
+- ✅ **Filtres dynamiques** - `/products?is_promo=true&couleur=rouge,bleu&materiau=plastique`
+- ✅ **Filtres disponibles** - `GET /products/filters` - Liste des filtres
+- ✅ **Valeurs par filtre** - `GET /products/filters/{key}/values` - Valeurs disponibles
+- ✅ **Intégration complète** - Filtres dans toutes les requêtes produits
+
+#### Métadonnées par Défaut
+- ✅ **is_promo** - Produits en promotion
+- ✅ **is_destockage** - Produits en destockage
+- ✅ **couleur** - Couleur du produit
+- ✅ **materiau** - Matériau utilisé
+- ✅ **dimensions** - Dimensions du produit
+- ✅ **poids** - Poids en grammes
+- ✅ **garantie** - Durée de garantie
+- ✅ **certification** - Certifications (CE, etc.)
+- ✅ **pays_origine** - Pays d'origine
+- ✅ **reference_fabricant** - Référence fabricant
+
+### ✅ Système de Types d'Utilisateurs Unifié (31/01/2025)
+
+**Backend (AdonisJS) :**
+- ✅ **Enum UserType** - `app/types/user.ts` avec `ADMIN` et `CUSTOMER`
+- ✅ **Migration** - Champ `type` (enum: 'admin', 'customer') dans table `users`
+- ✅ **Modèle User** - Champ `type: UserType` avec import de l'enum
+- ✅ **Seeder** - 5 utilisateurs de test (1 admin + 4 customers)
+
+**Frontend (Next.js) :**
+- ✅ **Enum UserType** - `src/lib/types/user.ts` identique au backend
+- ✅ **Types API** - Interface `User` mise à jour avec `type: UserType`
+- ✅ **Cohérence** - Même enum partagé entre backend et frontend
+
+**Comptes de test créés :**
+- **Admin** : `admin@rexel.com` (admin123) - Type: `ADMIN`
+- **Customers** : 4 comptes avec différents emails (customer123) - Type: `CUSTOMER`
+
+**Avantages du système :**
+- ✅ **Type Safety** - TypeScript garantit l'utilisation des bonnes valeurs
+- ✅ **Cohérence** - Même enum partagé entre backend et frontend
+- ✅ **Simplicité** - Un seul champ `type` au lieu de `user_type`
+- ✅ **Extensibilité** - Facile d'ajouter de nouveaux types d'utilisateurs
+- ✅ **Maintenance** - Centralisation de la logique des types
+
+### ✅ Pages d'Authentification Thématisées (01/02/2025)
+
+**Migration vers couleurs du thème Tailwind :**
+
+#### Page de Connexion (`/auth/login/page.tsx`)
+- ✅ **Arrière-plan** : `from-gray-50 to-gray-100` → `from-muted to-background`
+- ✅ **Logo** : `bg-[#162e77]` → `bg-primary` et `text-white` → `text-primary-foreground`
+- ✅ **Titre Rexel** : `text-[#162e77]` → `text-primary`
+- ✅ **Sous-titre** : `text-gray-500` → `text-muted-foreground`
+- ✅ **Titre principal** : `text-gray-900` → `text-foreground`
+- ✅ **Description** : `text-gray-600` → `text-muted-foreground`
+- ✅ **Formulaire** : `bg-white` → `bg-card`
+- ✅ **Labels** : `text-gray-700` → `text-foreground`
+- ✅ **Icônes** : `text-gray-400` → `text-muted-foreground`
+- ✅ **Erreurs** : `border-red-300 focus:border-red-500` → `border-destructive focus:border-destructive`
+- ✅ **Messages d'erreur** : `text-red-600` → `text-destructive`
+- ✅ **Checkbox** : `text-[#162e77] focus:ring-[#162e77] border-gray-300` → `text-primary focus:ring-primary border-border`
+- ✅ **Liens** : `text-[#162e77] hover:text-[#1e40af]` → `text-primary hover:text-primary/80`
+- ✅ **Bouton** : `bg-[#162e77] hover:bg-[#1e40af] text-white` → `bg-primary hover:bg-primary/90 text-primary-foreground`
+- ✅ **Section avantages** : `bg-white` → `bg-card` et `text-gray-900` → `text-foreground`
+- ✅ **Texte des avantages** : `text-gray-600` → `text-muted-foreground`
+
+#### Page d'Inscription (`/auth/register/page.tsx`)
+- ✅ **Toutes les mêmes modifications** que la page de connexion
+- ✅ **Barre de force du mot de passe** : `bg-gray-200` → `bg-muted`
+- ✅ **Label de force** : `text-gray-600` → `text-muted-foreground`
+
+**Avantages de la thématisation :**
+- ✅ **Cohérence avec le thème** - Utilisation des variables CSS définies dans `globals.css`
+- ✅ **Support du mode sombre** - Les couleurs s'adapteront automatiquement
+- ✅ **Maintenabilité** - Plus facile de changer les couleurs globalement
+- ✅ **Accessibilité** - Les couleurs du thème respectent les contrastes d'accessibilité
+- ✅ **Pas de couleurs codées en dur** - Utilisation exclusive des classes Tailwind du thème
 
 ### ✅ Variables d'Environnement Restructurées
 
@@ -221,6 +305,10 @@ services:
 - [ ] **Test connectivity** - Frontend ↔ Backend via réseau
 - [ ] **Test SSL** - Vérifier certificats tous domaines
 - [ ] **Test rate limiting** - Valider politiques par environnement
+- [ ] **Test authentification** - Vérifier système de types d'utilisateurs
+- [ ] **Test comptes admin/customer** - Valider séparation des rôles
+- [ ] **Test filtres dynamiques** - Vérifier API filtres et métadonnées
+- [ ] **Test filtres multiples** - Valider combinaison de filtres
 
 ### Phase 2 : Optimisations
 - [ ] **Health checks avancés** - Monitoring inter-services

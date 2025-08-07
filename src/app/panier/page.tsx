@@ -861,7 +861,7 @@ function PaymentStep({
                   </div>
                   <div>
                     <div className="font-semibold">Chèque</div>
-                    <div className="text-sm text-gray-600">À l'ordre de Rexel France</div>
+                    <div className="text-sm text-gray-600">À l'ordre de KesiMarket</div>
                   </div>
                 </div>
               </div>

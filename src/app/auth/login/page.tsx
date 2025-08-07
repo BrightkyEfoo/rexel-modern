@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useLogin, useAuthUser } from '@/lib/auth/auth-hooks';
 import type { LoginCredentials } from '@/lib/api/types';
+import { appConfig } from '@/lib/config/app';
+import { Logo } from '@/components/ui/logo';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -71,30 +73,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-muted to-background flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
           <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-            <div className="w-12 h-12 bg-[#162e77] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">R</span>
-            </div>
+            <Logo variant="light" size="md" showText={false} />
             <div className="text-left">
-              <div className="text-xl font-bold text-[#162e77]">Rexel</div>
-              <div className="text-xs text-gray-500">France</div>
+              <div className="text-xl font-bold text-primary">{appConfig.name}</div>
+              <div className="text-xs text-muted-foreground">{appConfig.country}</div>
             </div>
           </Link>
 
-          <h2 className="text-3xl font-bold text-gray-900">
-            Connexion
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Accédez à votre compte Rexel
+          <h2 className="text-2xl font-bold text-center mb-2">Connexion</h2>
+          <p className="text-muted-foreground text-center mb-6">
+            Accédez à votre compte KesiMarket
           </p>
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-card rounded-2xl shadow-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Alert */}
             {loginMutation.error && (
@@ -108,52 +106,52 @@ export default function LoginPage() {
 
             {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">
                 Adresse email
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="votre.email@entreprise.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`pl-10 ${errors.email ? 'border-red-300 focus:border-red-500' : ''}`}
+                  className={`pl-10 ${errors.email ? 'border-destructive focus:border-destructive' : ''}`}
                   disabled={loginMutation.isPending}
                 />
               </div>
               {errors.email && (
-                <p className="text-sm text-red-600">{errors.email}</p>
+                <p className="text-sm text-destructive">{errors.email}</p>
               )}
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="password" className="text-sm font-medium text-foreground">
                 Mot de passe
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Votre mot de passe"
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`pl-10 pr-10 ${errors.password ? 'border-red-300 focus:border-red-500' : ''}`}
+                  className={`pl-10 pr-10 ${errors.password ? 'border-destructive focus:border-destructive' : ''}`}
                   disabled={loginMutation.isPending}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-sm text-red-600">{errors.password}</p>
+                <p className="text-sm text-destructive">{errors.password}</p>
               )}
             </div>
 
@@ -164,16 +162,16 @@ export default function LoginPage() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-[#162e77] focus:ring-[#162e77] border-gray-300 rounded"
+                  className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-foreground">
                   Se souvenir de moi
                 </label>
               </div>
 
               <Link
                 href="/auth/forgot-password"
-                className="text-sm text-[#162e77] hover:text-[#1e40af] font-medium"
+                className="text-sm text-primary hover:text-primary/80 font-medium"
               >
                 Mot de passe oublié ?
               </Link>
@@ -182,7 +180,7 @@ export default function LoginPage() {
             {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full bg-[#162e77] hover:bg-[#1e40af] text-white font-semibold py-3"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3"
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending ? (
@@ -201,11 +199,11 @@ export default function LoginPage() {
 
           {/* Sign Up Link */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Pas encore de compte ?{' '}
               <Link
                 href="/auth/register"
-                className="font-medium text-[#162e77] hover:text-[#1e40af]"
+                className="font-medium text-primary hover:text-primary/80"
               >
                 Créer un compte
               </Link>
@@ -214,26 +212,24 @@ export default function LoginPage() {
         </div>
 
         {/* Benefits */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Pourquoi créer un compte Rexel ?
-          </h3>
+        <div className="bg-card rounded-2xl shadow-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Pourquoi créer un compte KesiMarket ?</h3>
           <div className="space-y-3">
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-gray-600">Prix personnalisés et remises exclusives</span>
+              <span className="text-sm text-muted-foreground">Prix personnalisés et remises exclusives</span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-gray-600">Suivi de commandes en temps réel</span>
+              <span className="text-sm text-muted-foreground">Suivi de commandes en temps réel</span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-gray-600">Historique d'achats et favoris</span>
+              <span className="text-sm text-muted-foreground">Historique d'achats et favoris</span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-gray-600">Support client dédié</span>
+              <span className="text-sm text-muted-foreground">Support client dédié</span>
             </div>
           </div>
         </div>

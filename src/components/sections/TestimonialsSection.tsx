@@ -175,9 +175,7 @@ export function TestimonialsSection() {
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Ils parlent de Rexel.fr
-          </h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Ils parlent de KesiMarket.fr</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
             Découvrez ce que nos clients pensent de notre service et de notre plateforme
           </p>

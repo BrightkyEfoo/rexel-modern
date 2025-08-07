@@ -38,6 +38,35 @@ export class ProductsService {
     return apiClient.get<Product[]>(`/opened/products/category/${categoryId}`);
   }
 
+  async getProductsByCategorySlug(categorySlug: string, filters?: SearchFilters): Promise<PaginatedResponse<Product>> {
+    const params = this.buildCategorySearchParams(filters);
+    const response = await apiClient.get<{
+      data: Product[];
+      meta: {
+        total: number;
+        per_page: number;
+        current_page: number;
+        last_page: number;
+      };
+      category?: {
+        id: number;
+        name: string;
+        slug: string;
+        description?: string;
+        breadcrumb_slugs: string[];
+      };
+      message: string;
+      status: number;
+      timestamp: string;
+    }>(`/opened/products/category/${categorySlug}`, { params });
+    
+    // Retourner la structure PaginatedResponse standard
+    return {
+      data: response.data.data,
+      meta: response.data.meta
+    };
+  }
+
   async getProductsByBrand(brandId: number): Promise<ApiResponse<Product[]>> {
     return apiClient.get<Product[]>(`/opened/products/brand/${brandId}`);
   }
@@ -81,6 +110,40 @@ export class ProductsService {
     //   params._sort = filters.sortBy;
     //   params._order = filters.sortOrder || 'asc';
     // }
+
+    return params;
+  }
+
+  private buildCategorySearchParams(filters?: SearchFilters): Record<string, unknown> {
+    if (!filters) return {};
+
+    const params: Record<string, unknown> = {};
+
+    if (filters.query) params.search = filters.query;
+    if (filters.brands?.length) params.brandId = filters.brands[0];
+    if (filters.page) params.page = filters.page;
+    if (filters.limit) params.per_page = filters.limit;
+    if (filters.sortBy) params.sort_by = filters.sortBy;
+    if (filters.sortOrder) params.sort_order = filters.sortOrder;
+
+    // Gestion des filtres de prix
+    if (filters.priceRange) {
+      if (filters.priceRange.min) params.min_price = filters.priceRange.min;
+      if (filters.priceRange.max) params.max_price = filters.priceRange.max;
+    }
+
+    // Gestion de la disponibilité
+    if (filters.availability?.length) {
+      const availabilityMap = {
+        'in_stock': 'true',
+        'out_of_stock': 'false',
+        'limited': 'limited'
+      };
+      const availabilityValues = filters.availability.map(av => availabilityMap[av]).filter(Boolean);
+      if (availabilityValues.length > 0) {
+        params.in_stock = availabilityValues.join(',');
+      }
+    }
 
     return params;
   }

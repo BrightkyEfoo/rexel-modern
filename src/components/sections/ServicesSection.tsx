@@ -68,9 +68,8 @@ export function ServicesSection() {
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
             Nos services et solutions
           </h2>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Découvrez l'écosystème complet de services Rexel pour vous
-            accompagner dans tous vos projets, de la conception à la réalisation
+          <p className="text-muted-foreground mb-8">
+            Découvrez tous les services et solutions KesiMarket pour vos projets énergétiques
           </p>
         </div>
 
@@ -92,9 +91,9 @@ export function ServicesSection() {
               Découvrez tous les services et solutions Rexel
             </h3>
             <p className="text-primary-foreground/80 mb-6 max-w-2xl mx-auto">
-              De la gestion énergétique aux bornes de recharge, en passant par
-              la conformité réglementaire, Rexel vous accompagne dans la
-              transformation de votre métier.
+              De la gestion énergétique aux solutions d'éclairage, en passant par
+              la conformité réglementaire, KesiMarket vous accompagne dans
+              tous vos projets énergétiques.
             </p>
             <Button
               size="lg"

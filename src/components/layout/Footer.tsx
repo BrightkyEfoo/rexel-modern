@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   MapPin,
   Phone,
@@ -17,6 +16,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Logo } from '@/components/ui/logo';
+import { appConfig } from '@/lib/config/app';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -53,17 +54,9 @@ export function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Logo and social */}
             <div className="space-y-6">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-xl">R</span>
-                </div>
-                <div>
-                  <div className="text-xl font-bold text-foreground">Rexel</div>
-                  <div className="text-sm text-muted-foreground">France</div>
-                </div>
-              </div>
+              <Logo variant="light" size="lg" showText={true} />
               <p className="text-muted-foreground">
-                Votre partenaire de confiance pour tous vos besoins en matériel électrique
+                Votre partenaire de confiance pour tous vos besoins en matériel énergétique au Cameroun
               </p>
               <div className="flex space-x-4">
                 <Link
@@ -92,22 +85,22 @@ export function Footer() {
               <h4 className="font-semibold text-foreground mb-4">Liens rapides</h4>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/catalogue" className="text-muted-foreground hover:text-primary">
+                  <Link href="/catalogue" className="text-muted-foreground hover:text-foreground transition-colors">
                     Catalogue
                   </Link>
                 </li>
                 <li>
-                  <Link href="/promotions" className="text-muted-foreground hover:text-primary">
-                    Promotions
+                  <Link href="/nouveautes" className="text-muted-foreground hover:text-foreground transition-colors">
+                    Nouveautés
                   </Link>
                 </li>
                 <li>
-                  <Link href="/services" className="text-muted-foreground hover:text-primary">
-                    Services
+                  <Link href="/points-relais" className="text-muted-foreground hover:text-foreground transition-colors">
+                    Points de relais
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="text-muted-foreground hover:text-primary">
+                  <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
                     Contact
                   </Link>
                 </li>
@@ -148,15 +141,15 @@ export function Footer() {
               <ul className="space-y-2">
                 <li className="flex items-center space-x-2 text-muted-foreground">
                   <Phone className="w-4 h-4" />
-                  <span>01 23 45 67 89</span>
+                  <span>{appConfig.contact.phone}</span>
                 </li>
                 <li className="flex items-center space-x-2 text-muted-foreground">
                   <Mail className="w-4 h-4" />
-                  <span>contact@rexel.fr</span>
+                  <span>{appConfig.contact.email}</span>
                 </li>
                 <li className="flex items-center space-x-2 text-muted-foreground">
                   <MapPin className="w-4 h-4" />
-                  <span>123 rue de l'Électricité, 75000 Paris</span>
+                  <span>{appConfig.contact.address}</span>
                 </li>
               </ul>
             </div>
@@ -196,7 +189,7 @@ export function Footer() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-muted-foreground">
-              © {currentYear} Rexel. Tous droits réservés.
+              © {currentYear} KesiMarket. Tous droits réservés.
             </div>
             <div className="flex space-x-6">
               <Link href="/mentions-legales" className="text-sm text-muted-foreground hover:text-primary">

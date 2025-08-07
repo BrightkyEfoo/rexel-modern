@@ -2,76 +2,72 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Search, ShoppingCart, User, Menu, MapPin, Settings, Heart, Phone, Mail, Grid } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from '@/components/ui/navigation-menu';
-import { cn } from '@/lib/utils';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Logo } from '@/components/ui/logo';
+import { 
+  Menu, 
+  Search, 
+  Heart, 
+  ShoppingCart, 
+  User, 
+  Grid, 
+  Sparkles, 
+  MapPin, 
+  Package,
+  Phone,
+  Mail
+} from 'lucide-react';
 import { useAuthUser, useLogout } from '@/lib/auth/auth-hooks';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { appConfig } from '@/lib/config/app';
 
 interface HeaderProps {
   className?: string;
 }
 
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <Link href={href} className="text-sm font-medium text-muted-foreground hover:text-primary">
+  <Link href={href} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
     {children}
   </Link>
 );
 
 const MobileNavLink = ({ href, children, onNavigate }: { href: string; children: React.ReactNode; onNavigate: () => void }) => (
-  <Link
-    href={href}
-    className="flex items-center space-x-3 py-2 text-lg font-medium text-foreground hover:text-primary"
-    onClick={onNavigate}
-  >
+  <Link href={href} onClick={onNavigate} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted transition-colors">
     {children}
   </Link>
 );
 
 export function Header({ className }: HeaderProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, isAuthenticated } = useAuthUser();
+  const { isAuthenticated, user } = useAuthUser();
   const logoutMutation = useLogout();
 
   const categories = [
-    'Fils et câbles',
-    'Distribution d\'énergie',
+    'Câbles et connexions',
     'Éclairage',
-    'Appareillage',
-    'Chauffage',
-    'Outillage',
+    'Interrupteurs et prises',
+    'Tableaux électriques',
+    'Disjoncteurs et fusibles',
+    'Matériel de sécurité',
+    'Équipements industriels',
+    'Solutions d\'énergie renouvelable'
   ];
 
   const handleLogout = () => {
     logoutMutation.mutate();
   };
-  
+
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   const authContent = isAuthenticated ? (
     <>
-      <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
-      <DropdownMenuSeparator />
+      <DropdownMenuItem asChild>
+        <Link href="/profile">Mon profil</Link>
+      </DropdownMenuItem>
       <DropdownMenuItem asChild>
         <Link href="/commandes">Mes commandes</Link>
       </DropdownMenuItem>
@@ -100,21 +96,25 @@ export function Header({ className }: HeaderProps) {
       <div className="bg-primary text-primary-foreground py-2">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <div className="flex items-center space-x-2">
                 <Phone className="w-4 h-4" />
-                <span className="text-sm">01 23 45 67 89</span>
+                <span className="text-xs sm:text-sm">{appConfig.contact.phone}</span>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="hidden sm:flex items-center space-x-2">
                 <Mail className="w-4 h-4" />
-                <span className="text-sm">contact@rexel.fr</span>
+                <span className="text-sm">{appConfig.contact.email}</span>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/aide" className="text-sm hover:text-primary-foreground/80">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <Link href="/points-relais" className="hidden sm:flex items-center space-x-1 text-sm hover:text-primary-foreground/80">
+                <MapPin className="w-4 h-4" />
+                <span>Points de relais</span>
+              </Link>
+              <Link href="/aide" className="text-xs sm:text-sm hover:text-primary-foreground/80">
                 Aide
               </Link>
-              <Link href="/contact" className="text-sm hover:text-primary-foreground/80">
+              <Link href="/contact" className="text-xs sm:text-sm hover:text-primary-foreground/80">
                 Contact
               </Link>
             </div>
@@ -136,26 +136,30 @@ export function Header({ className }: HeaderProps) {
               <SheetContent side="left" className="flex flex-col w-full sm:w-[320px]">
                 <SheetHeader className="border-b pb-4">
                   <SheetTitle>
-                    <Link href="/" className="flex items-center space-x-3" onClick={closeMobileMenu}>
-                      <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                        <span className="text-primary-foreground font-bold text-xl">R</span>
-                      </div>
-                      <div className="text-xl font-bold text-primary">Rexel</div>
+                    <Link href="/" onClick={closeMobileMenu}>
+                      <Logo variant="dark" size="sm" />
                     </Link>
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="flex-grow flex flex-col space-y-2 mt-6">
                   <MobileNavLink href="/catalogue" onNavigate={closeMobileMenu}>
                     <Grid className="w-5 h-5" />
-                    <span>Catalogue</span>
+                    <span>Catalogue <Badge variant="secondary" className="ml-1 text-[8px] p-[0px] px-0.5">Soon</Badge></span>
                   </MobileNavLink>
-                  <MobileNavLink href="/services" onNavigate={closeMobileMenu}>
-                    <span>Services</span>
+                  <MobileNavLink href="/nouveautes" onNavigate={closeMobileMenu}>
+                    <Sparkles className="w-5 h-5" />
+                    <span>Nouveautés</span>
                   </MobileNavLink>
+                  <MobileNavLink href="/points-relais" onNavigate={closeMobileMenu}>
+                    <MapPin className="w-5 h-5" />
+                    <span>Points de relais</span>
+                  </MobileNavLink>
+                  <div className="flex items-center space-x-3 p-3 rounded-lg text-muted-foreground cursor-not-allowed opacity-50">
+                    <span>Services <Badge variant="secondary" className="ml-1 text-[8px] p-[0px] px-0.5">Soon</Badge></span>
+                  </div>
                   <MobileNavLink href="/contact" onNavigate={closeMobileMenu}>
                     <span>Contact</span>
                   </MobileNavLink>
-                  {/* More links can be added here */}
                 </nav>
                 <div className="mt-auto pt-6 border-t">
                   {isAuthenticated ? (
@@ -182,11 +186,8 @@ export function Header({ className }: HeaderProps) {
             </Sheet>
 
             {/* Logo */}
-            <Link href="/" className="hidden md:flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-xl">R</span>
-              </div>
-              <div className="text-xl font-bold text-primary">Rexel</div>
+            <Link href="/" className="hidden md:block">
+              <Logo variant="dark" size="lg" />
             </Link>
 
             {/* Search */}
@@ -223,6 +224,10 @@ export function Header({ className }: HeaderProps) {
                   </div>
                 </DialogContent>
               </Dialog>
+              <Link href="/nouveautes" className="hidden md:flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-primary">
+                <Sparkles className="w-4 h-4" />
+                <span>Nouveautés</span>
+              </Link>
               <Link href="/favoris" className="relative group">
                 <Heart className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                 <Badge variant="default" className="absolute -top-2 -right-2 w-5 h-5 justify-center p-0">3</Badge>
@@ -247,46 +252,57 @@ export function Header({ className }: HeaderProps) {
       </div>
 
       {/* Navigation */}
-      <div className="bg-background border-b hidden md:block">
+      <div className="bg-slate-50 border-b hidden md:block">
         <div className="container mx-auto px-4">
           <nav className="flex items-center space-x-8 h-12">
-            <NavLink href="/catalogue">
-              <div className="flex items-center space-x-1">
-              <Grid className="w-4 h-4" />
-              <span>Catalogue</span>
-              </div>
-            </NavLink>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-primary">
+                  <Package className="w-4 h-4" />
+                  <span>Produits</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-64 p-4">
+                <DropdownMenuLabel className="text-base font-semibold">Catégories</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <div className="grid grid-cols-1 gap-1 mt-2">
+                  {categories.map((category, index) => (
+                    <DropdownMenuItem key={index} asChild>
+                      <Link href={`/categorie/${category.toLowerCase().replace(/\s+/g, '-')}`} className="flex items-center py-2 px-3 rounded-md hover:bg-slate-100">
+                        {category}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <div className="relative group">
+              <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
+                <Grid className="w-4 h-4" />
+                <span>Catalogue <Badge variant="secondary" className="ml-1 text-[8px] p-[0px] px-0.5">Soon</Badge></span>
+              </span>
+            </div>
             <div className="relative group">
               <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
                 <span>Promotions</span>
-                <Badge variant="secondary" className="ml-1 text-[10px] p-0.5">Soon</Badge>
+                <Badge variant="secondary" className="ml-1 text-[8px] p-[0px] px-0.5">Soon</Badge>
               </span>
             </div>
-            <NavLink href="/services">Services</NavLink>
+            <div className="relative group">
+              <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
+                <span>Services <Badge variant="secondary" className="ml-1 text-[8px] p-[0px] px-0.5">Soon</Badge></span>
+              </span>
+            </div>
             <div className="relative group">
               <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
                 <span>Solutions</span>
-                <Badge variant="secondary" className="ml-1 text-[10px] p-0.5">Soon</Badge>
+                <Badge variant="secondary" className="ml-1 text-[8px] p-[0px] px-0.5">Soon</Badge>
               </span>
             </div>
             <NavLink href="/contact">Contact</NavLink>
           </nav>
         </div>
       </div>
-
-      {/* Promo banner */}
-      {/* <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white py-2">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm">
-            <span className="font-semibold">Nouveau client ?</span> Entrez le code promo
-            <span className="font-bold bg-white text-green-600 px-2 py-1 rounded mx-2">BIENV202</span>
-            valable pour votre 1ère commande et bénéficiez de 20€ HT de réduction dès 200€ d'achat HT.
-            <Link href="/code-promo" className="underline ml-2 hover:text-green-200">
-              En savoir plus
-            </Link>
-          </p>
-        </div>
-      </div> */}
     </header>
   );
 }

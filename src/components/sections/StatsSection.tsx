@@ -16,7 +16,7 @@ const statsData = [
     icon: Building2,
     value: '460',
     label: 'agences proches de vous',
-    description: 'Partout en France',
+    description: 'Partout au Cameroun',
     color: 'text-green-600',
     bgColor: 'bg-green-50',
   },
@@ -85,15 +85,10 @@ export function StatsSection() {
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Rexel en chiffres
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Leader de la distribution professionnelle de produits et services pour le monde de l'énergie
-          </p>
-        </div>
-
+        <h2 className="text-3xl font-bold text-center mb-12">KesiMarket en chiffres</h2>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+          Leader de la distribution professionnelle de produits et services pour le monde de l'énergie au Cameroun
+        </p>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
           {displayStats.map((stat, index) => {
             const Icon = stat.icon;
