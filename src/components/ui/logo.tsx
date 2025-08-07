@@ -15,12 +15,6 @@ export function Logo({ variant = 'light', size = 'md', showText = true, classNam
     lg: 'w-16 h-16',
   };
 
-  const sizes = {
-    sm: 16,
-    md: 24,
-    lg: 32,
-  }
-
   const textSizes = {
     sm: 'text-sm',
     md: 'text-xl',

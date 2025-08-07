@@ -39,6 +39,7 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=production-deps --chown=nextjs:nodejs /app/node_modules /app/node_modules
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone /app/
 COPY --from=build --chown=nextjs:nodejs /app/.next/static /app/.next/static
+COPY --from=build --chown=nextjs:nodejs /app/public /app/public
 
 USER nextjs
 
