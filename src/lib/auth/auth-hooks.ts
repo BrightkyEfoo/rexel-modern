@@ -62,20 +62,21 @@ export function useRegister() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (userData: RegisterData) => authService.register(userData),
-    onSuccess: (data: AuthResponse) => {
-      // Update auth status
-      queryClient.setQueryData(authKeys.isAuthenticated, true);
-      queryClient.setQueryData(authKeys.currentUser, data.user);
-
-      // Invalidate all queries to refresh with authenticated state
-      queryClient.invalidateQueries();
+    mutationFn: (userData: RegisterData) => {
+      console.log('🚀 Frontend register mutation called:', { email: userData.email });
+      return authService.register(userData);
     },
-    onError: () => {
-      // Clear auth data on error
-      queryClient.setQueryData(authKeys.isAuthenticated, false);
-      queryClient.removeQueries({ queryKey: authKeys.currentUser });
-    }
+    onSuccess: (data: AuthResponse) => {
+      // Note: Pour le register, on ne met pas à jour les données d'auth
+      // car l'utilisateur doit d'abord vérifier son email
+      console.log('✅ Registration successful, need OTP verification');
+    },
+    onError: (error) => {
+      // Ne pas invalider les queries sur erreur de register
+      console.error('❌ Registration error:', error);
+    },
+    // Empêcher les appels multiples rapprochés
+    retry: false,
   });
 }
 
@@ -164,12 +165,12 @@ export function useResendVerificationEmail() {
 // Auth state helpers
 export function useAuthUser() {
   const { data: user, isLoading, error } = useCurrentUser();
-  const isAuthenticated = authService.isAuthenticated();
+  const { data: isAuthenticated } = useIsAuthenticated();
 
   return {
     user: user || null,
     isLoading,
-    isAuthenticated,
+    isAuthenticated: isAuthenticated || false,
     error,
     hasRole: (role: string) => authService.hasRole(role),
     hasAnyRole: (roles: string[]) => authService.hasAnyRole(roles)

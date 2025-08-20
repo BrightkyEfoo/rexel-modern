@@ -3,72 +3,87 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Lock, Mail, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Lock, Mail, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormField } from '@/components/ui/form-field';
 import { useLogin, useAuthUser } from '@/lib/auth/auth-hooks';
-import type { LoginCredentials } from '@/lib/api/types';
+import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 import { appConfig } from '@/lib/config/app';
 import { Logo } from '@/components/ui/logo';
+import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthUser();
   const loginMutation = useLogin();
-
-  const [formData, setFormData] = useState<LoginCredentials>({
-    email: '',
-    password: ''
-  });
+  const { redirectAfterAuth } = useAuthRedirect();
+  const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<Partial<LoginCredentials>>({});
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onChange',
+  });
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/');
+      redirectAfterAuth();
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, redirectAfterAuth]);
 
-  const validateForm = (): boolean => {
-    const newErrors: Partial<LoginCredentials> = {};
-
-    if (!formData.email) {
-      newErrors.email = 'L\'email est requis';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Format d\'email invalide';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Le mot de passe est requis';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Le mot de passe doit contenir au moins 6 caractères';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      await loginMutation.mutateAsync(formData);
-      router.push('/');
-    } catch (error) {
-      // Error handled by mutation
-    }
-  };
-
-  const handleInputChange = (field: keyof LoginCredentials, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      await loginMutation.mutateAsync(data);
+      
+      // Connexion réussie - rediriger vers la page précédente
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté à votre compte.",
+      });
+      
+      redirectAfterAuth();
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'type' in error &&
+        error.type === 'VERIFICATION_REQUIRED'
+      ) {
+        // Compte non vérifié - rediriger vers OTP (pas de redirection vers previous URL)
+        const verificationError = error as {
+          type: 'VERIFICATION_REQUIRED';
+          userId: number;
+          email: string;
+        };
+        
+        toast({
+          title: "Vérification requise",
+          description: "Votre compte doit être vérifié. Un code vous a été envoyé par email.",
+          variant: "default",
+        });
+        
+        const params = new URLSearchParams({
+          userId: verificationError.userId.toString(),
+          email: verificationError.email,
+        });
+        router.push(`/auth/verify-otp?${params.toString()}`);
+      } else {
+        // Erreur de connexion
+        toast({
+          title: "Erreur de connexion",
+          description: "Email ou mot de passe incorrect.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -93,7 +108,7 @@ export default function LoginPage() {
 
         {/* Form */}
         <div className="bg-card rounded-2xl shadow-lg p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Error Alert */}
             {loginMutation.error && (
               <Alert variant="destructive">
@@ -105,55 +120,33 @@ export default function LoginPage() {
             )}
 
             {/* Email Field */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-foreground">
-                Adresse email
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="votre.email@entreprise.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`pl-10 ${errors.email ? 'border-destructive focus:border-destructive' : ''}`}
-                  disabled={loginMutation.isPending}
-                />
-              </div>
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email}</p>
-              )}
-            </div>
+            <FormField
+              name="email"
+              label="Adresse email"
+              type="email"
+              placeholder="votre.email@entreprise.com"
+              register={register}
+              error={errors.email}
+              disabled={loginMutation.isPending}
+              required
+              icon={Mail}
+            />
 
             {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-foreground">
-                Mot de passe
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Votre mot de passe"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`pl-10 pr-10 ${errors.password ? 'border-destructive focus:border-destructive' : ''}`}
-                  disabled={loginMutation.isPending}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password}</p>
-              )}
-            </div>
+            <FormField
+              name="password"
+              label="Mot de passe"
+              type="password"
+              placeholder="Votre mot de passe"
+              register={register}
+              error={errors.password}
+              disabled={loginMutation.isPending}
+              required
+              icon={Lock}
+              showPasswordToggle
+              onTogglePassword={() => setShowPassword(!showPassword)}
+              showPassword={showPassword}
+            />
 
             {/* Remember Me & Forgot Password */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
@@ -181,7 +174,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3"
-              disabled={loginMutation.isPending}
+              disabled={loginMutation.isPending || !isValid}
             >
               {loginMutation.isPending ? (
                 <div className="flex items-center space-x-2">

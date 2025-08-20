@@ -47,15 +47,25 @@ export function FilterContent({
           <Slider
             value={priceRange}
             onValueChange={onPriceChange}
+            min={categoryData.filters?.priceRange?.min || 0}
             max={categoryData.filters?.priceRange?.max || 1000}
             step={10}
             className="w-full"
+            minStepsBetweenThumbs={1}
           />
         </div>
-        <div className="flex items-center space-x-2 text-sm text-gray-600">
-          <span>{priceRange[0]}€</span>
-          <span>-</span>
-          <span>{priceRange[1]}€</span>
+        <div className="flex items-center justify-between text-sm text-gray-600">
+          <div className="flex flex-col items-start">
+            <span className="text-xs text-gray-500">Min</span>
+            <span className="font-medium">{priceRange[0]}€</span>
+          </div>
+          <div className="flex flex-col items-end">
+            <span className="text-xs text-gray-500">Max</span>
+            <span className="font-medium">{priceRange[1]}€</span>
+          </div>
+        </div>
+        <div className="text-xs text-gray-500 text-center">
+          Fourchette: {priceRange[0]}€ - {priceRange[1]}€
         </div>
       </div>
 

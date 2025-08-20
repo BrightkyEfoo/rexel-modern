@@ -3,121 +3,99 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Lock, Mail, ArrowRight, AlertCircle, CheckCircle2, User, Building2, Phone } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Lock, Mail, ArrowRight, AlertCircle, CheckCircle2, User, Building2, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormField } from '@/components/ui/form-field';
+import { FormCheckbox } from '@/components/ui/form-checkbox';
 import { useRegister, useAuthUser } from '@/lib/auth/auth-hooks';
-import type { RegisterData } from '@/lib/api/types';
+import { registerSchema, type RegisterFormData } from '@/lib/validations/auth';
 import { appConfig } from '@/lib/config/app';
 import { Logo } from '@/components/ui/logo';
-
-interface FormErrors {
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-  firstName?: string;
-  lastName?: string;
-  company?: string;
-  phone?: string;
-  terms?: string;
-}
+import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect';
+import { useToast } from '@/hooks/use-toast';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthUser();
   const registerMutation = useRegister();
-
-  const [formData, setFormData] = useState<RegisterData & { confirmPassword: string }>({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
-    company: '',
-    phone: ''
-  });
+  const { redirectAfterAuth } = useAuthRedirect();
+  const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    mode: 'onChange',
+  });
+
+  const password = watch('password');
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/');
+      redirectAfterAuth();
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, redirectAfterAuth]);
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    // Email validation
-    if (!formData.email) {
-      newErrors.email = 'L\'email est requis';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Format d\'email invalide';
-    }
-
-    // Password validation
-    if (!formData.password) {
-      newErrors.password = 'Le mot de passe est requis';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Le mot de passe doit contenir au moins 8 caractères';
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre';
-    }
-
-    // Confirm password validation
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Veuillez confirmer le mot de passe';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
-    }
-
-    // Name validation
-    if (!formData.firstName) {
-      newErrors.firstName = 'Le prénom est requis';
-    }
-    if (!formData.lastName) {
-      newErrors.lastName = 'Le nom est requis';
-    }
-
-    // Phone validation (optional but validated if provided)
-    if (formData.phone && !/^(\+33|0)[1-9](\d{8})$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Format de téléphone invalide';
-    }
-
-    // Terms validation
-    if (!acceptedTerms) {
-      newErrors.terms = 'Vous devez accepter les conditions d\'utilisation';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
-    const { confirmPassword, ...registerData } = formData;
+  const onSubmit = async (data: RegisterFormData) => {
+    const { confirmPassword, acceptedTerms, ...registerData } = data;
 
     try {
-      await registerMutation.mutateAsync(registerData);
-      router.push('/');
-    } catch (error) {
-      // Error handled by mutation
-    }
-  };
-
-  const handleInputChange = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
-    if (errors[field as keyof FormErrors]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      const response = await registerMutation.mutateAsync(registerData);
+      
+      // Inscription réussie - toujours rediriger vers OTP
+      toast({
+        title: "Inscription réussie",
+        description: "Un code de vérification vous a été envoyé par email.",
+      });
+      
+      // Rediriger vers OTP avec les données de la réponse
+      const params = new URLSearchParams({
+        userId: response.data.userId.toString(),
+        email: registerData.email,
+      });
+      router.push(`/auth/verify-otp?${params.toString()}`);
+      
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'type' in error &&
+        error.type === 'VERIFICATION_REQUIRED'
+      ) {
+        // Même traitement que le succès - rediriger vers OTP
+        const verificationError = error as {
+          type: 'VERIFICATION_REQUIRED';
+          userId: number;
+          email: string;
+        };
+        
+        toast({
+          title: "Inscription réussie",
+          description: "Un code de vérification vous a été envoyé par email.",
+        });
+        
+        const params = new URLSearchParams({
+          userId: verificationError.userId.toString(),
+          email: verificationError.email,
+        });
+        router.push(`/auth/verify-otp?${params.toString()}`);
+      } else {
+        // Erreur d'inscription
+        toast({
+          title: "Erreur d'inscription",
+          description: "Une erreur est survenue lors de l'inscription. Veuillez réessayer.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -139,7 +117,7 @@ export default function RegisterPage() {
     };
   };
 
-  const passwordStrength = getPasswordStrength(formData.password);
+  const passwordStrength = getPasswordStrength(password || '');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-muted to-background flex items-center justify-center p-4">
@@ -162,7 +140,7 @@ export default function RegisterPage() {
 
         {/* Form */}
         <div className="bg-card rounded-2xl shadow-lg p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Error Alert */}
             {registerMutation.error && (
               <Alert variant="destructive">
@@ -176,146 +154,91 @@ export default function RegisterPage() {
             {/* Personal Information */}
             <div className="grid md:grid-cols-2 gap-6">
               {/* First Name */}
-              <div className="space-y-2">
-                <Label htmlFor="firstName" className="text-sm font-medium text-foreground">
-                  Prénom *
-                </Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                  <Input
-                    id="firstName"
-                    type="text"
-                    placeholder="Jean"
-                    value={formData.firstName}
-                    onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    className={`pl-10 ${errors.firstName ? 'border-destructive focus:border-destructive' : ''}`}
-                    disabled={registerMutation.isPending}
-                  />
-                </div>
-                {errors.firstName && (
-                  <p className="text-sm text-destructive">{errors.firstName}</p>
-                )}
-              </div>
+              <FormField
+                name="firstName"
+                label="Prénom"
+                type="text"
+                placeholder="Jean"
+                register={register}
+                error={errors.firstName}
+                disabled={registerMutation.isPending}
+                required
+                icon={User}
+              />
 
               {/* Last Name */}
-              <div className="space-y-2">
-                <Label htmlFor="lastName" className="text-sm font-medium text-foreground">
-                  Nom *
-                </Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                  <Input
-                    id="lastName"
-                    type="text"
-                    placeholder="Dupont"
-                    value={formData.lastName}
-                    onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    className={`pl-10 ${errors.lastName ? 'border-destructive focus:border-destructive' : ''}`}
-                    disabled={registerMutation.isPending}
-                  />
-                </div>
-                {errors.lastName && (
-                  <p className="text-sm text-destructive">{errors.lastName}</p>
-                )}
-              </div>
+              <FormField
+                name="lastName"
+                label="Nom"
+                type="text"
+                placeholder="Dupont"
+                register={register}
+                error={errors.lastName}
+                disabled={registerMutation.isPending}
+                required
+                icon={User}
+              />
             </div>
 
             {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-foreground">
-                Adresse email professionnelle *
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="jean.dupont@entreprise.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`pl-10 ${errors.email ? 'border-destructive focus:border-destructive' : ''}`}
-                  disabled={registerMutation.isPending}
-                />
-              </div>
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email}</p>
-              )}
-            </div>
+            <FormField
+              name="email"
+              label="Adresse email professionnelle"
+              type="email"
+              placeholder="jean.dupont@entreprise.com"
+              register={register}
+              error={errors.email}
+              disabled={registerMutation.isPending}
+              required
+              icon={Mail}
+            />
 
             {/* Company and Phone */}
             <div className="grid md:grid-cols-2 gap-6">
               {/* Company */}
-              <div className="space-y-2">
-                <Label htmlFor="company" className="text-sm font-medium text-foreground">
-                  Entreprise
-                </Label>
-                <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                  <Input
-                    id="company"
-                    type="text"
-                    placeholder="Nom de votre entreprise"
-                    value={formData.company}
-                    onChange={(e) => handleInputChange('company', e.target.value)}
-                    className={`pl-10 ${errors.company ? 'border-destructive focus:border-destructive' : ''}`}
-                    disabled={registerMutation.isPending}
-                  />
-                </div>
-                {errors.company && (
-                  <p className="text-sm text-destructive">{errors.company}</p>
-                )}
-              </div>
+              <FormField
+                name="company"
+                label="Entreprise"
+                type="text"
+                placeholder="Nom de votre entreprise"
+                register={register}
+                error={errors.company}
+                disabled={registerMutation.isPending}
+                icon={Building2}
+              />
 
               {/* Phone */}
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-sm font-medium text-foreground">
-                  Téléphone
-                </Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="01 23 45 67 89"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className={`pl-10 ${errors.phone ? 'border-destructive focus:border-destructive' : ''}`}
-                    disabled={registerMutation.isPending}
-                  />
-                </div>
-                {errors.phone && (
-                  <p className="text-sm text-destructive">{errors.phone}</p>
-                )}
-              </div>
+              <FormField
+                name="phone"
+                label="Téléphone"
+                type="tel"
+                placeholder="01 23 45 67 89"
+                register={register}
+                error={errors.phone}
+                disabled={registerMutation.isPending}
+                icon={Phone}
+              />
             </div>
 
             {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-foreground">
-                Mot de passe *
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Créez un mot de passe sécurisé"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`pl-10 pr-10 ${errors.password ? 'border-destructive focus:border-destructive' : ''}`}
-                  disabled={registerMutation.isPending}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
+              <FormField
+                name="password"
+                label="Mot de passe"
+                type="password"
+                placeholder="Créez un mot de passe sécurisé"
+                register={register}
+                error={errors.password}
+                disabled={registerMutation.isPending}
+                required
+                icon={Lock}
+                showPasswordToggle
+                onTogglePassword={() => setShowPassword(!showPassword)}
+                showPassword={showPassword}
+              />
 
               {/* Password Strength */}
-              {formData.password && (
+              {password && (
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <div className="flex-1 bg-muted rounded-full h-2">
@@ -328,58 +251,32 @@ export default function RegisterPage() {
                   </div>
                 </div>
               )}
-
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password}</p>
-              )}
             </div>
 
             {/* Confirm Password */}
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">
-                Confirmer le mot de passe *
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirmez votre mot de passe"
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                  className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-destructive focus:border-destructive' : ''}`}
-                  disabled={registerMutation.isPending}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword}</p>
-              )}
-            </div>
+            <FormField
+              name="confirmPassword"
+              label="Confirmer le mot de passe"
+              type="password"
+              placeholder="Confirmez votre mot de passe"
+              register={register}
+              error={errors.confirmPassword}
+              disabled={registerMutation.isPending}
+              required
+              icon={Lock}
+              showPasswordToggle
+              onTogglePassword={() => setShowConfirmPassword(!showConfirmPassword)}
+              showPassword={showConfirmPassword}
+            />
 
             {/* Terms and Conditions */}
-            <div className="space-y-2">
-              <div className="flex items-start space-x-3">
-                <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  checked={acceptedTerms}
-                  onChange={(e) => {
-                    setAcceptedTerms(e.target.checked);
-                    if (errors.terms) {
-                      setErrors(prev => ({ ...prev, terms: undefined }));
-                    }
-                  }}
-                  className="h-4 w-4 text-primary focus:ring-primary border-border rounded mt-1"
-                />
-                <label htmlFor="terms" className="text-sm text-foreground">
+            <FormCheckbox
+              name="acceptedTerms"
+              register={register}
+              error={errors.acceptedTerms}
+              disabled={registerMutation.isPending}
+              label={
+                <>
                   J'accepte les{' '}
                   <Link href="/conditions-utilisation" className="text-primary hover:text-primary/80 font-medium">
                     conditions d'utilisation
@@ -388,18 +285,15 @@ export default function RegisterPage() {
                   <Link href="/politique-confidentialite" className="text-primary hover:text-primary/80 font-medium">
                     politique de confidentialité
                   </Link>
-                </label>
-              </div>
-              {errors.terms && (
-                <p className="text-sm text-destructive">{errors.terms}</p>
-              )}
-            </div>
+                </>
+              }
+            />
 
             {/* Submit Button */}
             <Button
               type="submit"
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3"
-              disabled={registerMutation.isPending}
+              disabled={registerMutation.isPending || !isValid}
             >
               {registerMutation.isPending ? (
                 <div className="flex items-center space-x-2">

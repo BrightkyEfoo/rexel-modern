@@ -18,42 +18,41 @@ export class AuthService {
   // Login user
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      return {
-        accessToken: "",
-        refreshToken: "",
-        expiresIn: 0,
-        user: {
-          id: 1,
-          email: "user@example.com",
-          fullName: "Jean Dupont",
-          type: UserType.CUSTOMER,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          addresses: [
-            {
-              id: "addr-1",
-              type: "billing",
-              name: "Jean Dupont",
-              street: "123 Avenue de la République",
-              city: "Lyon",
-              postalCode: "69001",
-              country: "France",
-              isDefault: true,
-            },
-            {
-              id: "addr-2",
-              type: "shipping",
-              name: "Jean Dupont",
-              street: "456 Rue du Commerce",
-              city: "Lyon",
-              postalCode: "69002",
-              country: "France",
-              isDefault: false,
-            },
-          ],
-        },
-      };
-    } catch (error) {
+      const response = await apiClient.post<{
+        message: string;
+        data: {
+          user: User;
+          token: string;
+        };
+      }>('/opened/auth/login', credentials);
+
+      if (response.data.data.user && response.data.data.token) {
+        // Stocker le token et l'utilisateur
+        localStorage.setItem(this.ACCESS_TOKEN_KEY, response.data.data.token);
+        localStorage.setItem(this.USER_KEY, JSON.stringify(response.data.data.user));
+
+        return {
+          accessToken: response.data.data.token,
+          refreshToken: '', // Pas utilisé dans notre implémentation
+          expiresIn: 86400, // 24h par défaut
+          user: {
+            ...response.data.data.user,
+            addresses: [], // Pas d'adresses pour l'instant
+          },
+        };
+      }
+
+      throw new Error('Invalid response format');
+    } catch (error: any) {
+      if (error.response?.data?.data?.requiresVerification) {
+        // L'utilisateur doit vérifier son email
+        throw {
+          type: 'VERIFICATION_REQUIRED',
+          message: error.response.data.message,
+          userId: error.response.data.data.userId,
+          email: error.response.data.data.email,
+        };
+      }
       throw this.handleAuthError(error);
     }
   }
@@ -61,18 +60,33 @@ export class AuthService {
   // Register new user
   async register(userData: RegisterData): Promise<AuthResponse> {
     try {
-      const response = await apiClient.post<AuthResponse>(
-        "/auth/register",
-        userData
-      );
+      const response = await apiClient.post<{
+        message: string;
+        data: {
+          userId: number;
+          email: string;
+          requiresVerification: boolean;
+        };
+      }>('/opened/auth/register', userData);
 
-      if (response.data) {
-        this.storeTokens(response.data);
-        this.storeUser(response.data.user);
+      console.log('response', response)
+
+      if (response.data.data.requiresVerification) {
+        // Retourner les informations pour la vérification
+        throw {
+          type: 'VERIFICATION_REQUIRED',
+          message: response.data.message,
+          userId: response.data.data.userId,
+          email: response.data.data.email,
+        };
       }
 
-      return response.data;
-    } catch (error) {
+      // En cas de succès direct (ne devrait pas arriver dans notre cas)
+      throw new Error('Unexpected registration flow');
+    } catch (error: any) {
+      if (error.type === 'VERIFICATION_REQUIRED') {
+        throw error;
+      }
       throw this.handleAuthError(error);
     }
   }
@@ -80,9 +94,9 @@ export class AuthService {
   // Logout user
   async logout(): Promise<void> {
     try {
-      const refreshToken = this.getRefreshToken();
-      if (refreshToken) {
-        await apiClient.post("/auth/logout", { refreshToken });
+      const accessToken = this.getAccessToken();
+      if (accessToken) {
+        await apiClient.post("/secured/auth/logout");
       }
     } catch (error) {
       console.warn("Logout request failed:", error);
@@ -91,48 +105,23 @@ export class AuthService {
     }
   }
 
-  // Refresh access token
-  async refreshToken(): Promise<AuthResponse> {
-    const refreshToken = this.getRefreshToken();
 
-    if (!refreshToken) {
-      throw new Error("No refresh token available");
-    }
-
-    try {
-      const response = await apiClient.post<AuthResponse>("/auth/refresh", {
-        refreshToken,
-      });
-
-      if (response.data) {
-        this.storeTokens(response.data);
-        this.storeUser(response.data.user);
-      }
-
-      return response.data;
-    } catch (error) {
-      this.clearStorage();
-      throw this.handleAuthError(error);
-    }
-  }
 
   // Get current user
   async getCurrentUser(): Promise<User> {
     const token = this.getAccessToken();
 
-    if (!token || this.isTokenExpired(token)) {
-      throw new Error("No valid token available");
+    if (!token) {
+      throw new Error("No access token available");
     }
 
     try {
-      const response = await apiClient.get<User>("/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await apiClient.get<{
+        data: User;
+      }>("/secured/auth/me");
 
-      this.storeUser(response.data);
-      return response.data;
+      localStorage.setItem(this.USER_KEY, JSON.stringify(response.data.data));
+      return response.data.data;
     } catch (error) {
       throw this.handleAuthError(error);
     }
@@ -142,7 +131,7 @@ export class AuthService {
   async updateProfile(userData: Partial<User>): Promise<User> {
     try {
       const response = await apiClient.put<User>("/auth/profile", userData);
-      this.storeUser(response.data);
+      localStorage.setItem(this.USER_KEY, JSON.stringify(response.data));
       return response.data;
     } catch (error) {
       throw this.handleAuthError(error);
@@ -155,7 +144,7 @@ export class AuthService {
     newPassword: string
   ): Promise<void> {
     try {
-      await apiClient.post("/auth/change-password", {
+      await apiClient.post("/secured/auth/change-password", {
         currentPassword,
         newPassword,
       });
@@ -176,7 +165,7 @@ export class AuthService {
   // Reset password with token
   async resetPassword(token: string, newPassword: string): Promise<void> {
     try {
-      await apiClient.post("/auth/password-reset/confirm", {
+      await apiClient.post("/opened/auth/password-reset/confirm", {
         token,
         password: newPassword,
       });
@@ -209,10 +198,7 @@ export class AuthService {
     return localStorage.getItem(this.ACCESS_TOKEN_KEY);
   }
 
-  getRefreshToken(): string | null {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
-  }
+
 
   getStoredUser(): User | null {
     if (typeof window === "undefined") return null;
@@ -229,7 +215,8 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     const token = this.getAccessToken();
-    return token !== null && !this.isTokenExpired(token);
+    const user = this.getStoredUser();
+    return token !== null && user !== null;
   }
 
   isTokenExpired(token: string): boolean {
@@ -278,19 +265,6 @@ export class AuthService {
   }
 
   // Private methods
-  private storeTokens(authData: AuthResponse): void {
-    if (typeof window === "undefined") return;
-
-    localStorage.setItem(this.ACCESS_TOKEN_KEY, authData.accessToken);
-    localStorage.setItem(this.REFRESH_TOKEN_KEY, authData.refreshToken);
-  }
-
-  private storeUser(user: User): void {
-    if (typeof window === "undefined") return;
-
-    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-  }
-
   private clearStorage(): void {
     if (typeof window === "undefined") return;
 

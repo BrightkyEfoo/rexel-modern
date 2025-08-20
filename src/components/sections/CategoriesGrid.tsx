@@ -131,7 +131,7 @@ export function CategoriesGrid() {
 
                   {/* Category Info */}
                   <div className="text-center flex-1 flex flex-col justify-center">
-                    <h3 className="font-semibold text-gray-900 text-sm leading-tight mb-2 group-hover:text-[#162e77] transition-colors">
+                    <h3 className="font-semibold text-gray-900 text-sm leading-tight mb-2 group-hover:text-primary-dark transition-colors">
                       {category.name}
                     </h3>
                     <p className="text-xs text-gray-500 mb-2">
@@ -142,13 +142,13 @@ export function CategoriesGrid() {
 
                   {/* Hover Arrow */}
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="w-6 h-6 bg-[#162e77] text-white rounded-full flex items-center justify-center">
+                    <div className="w-6 h-6 bg-primary-dark text-white rounded-full flex items-center justify-center">
                       <ArrowRight className="w-3 h-3" />
                     </div>
                   </div>
 
                   {/* Gradient overlay on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#162e77]/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
               </Link>
             );
@@ -159,7 +159,7 @@ export function CategoriesGrid() {
         <div className="text-center mt-12">
           <Link
             href="/categories"
-            className="inline-flex items-center space-x-2 text-[#162e77] hover:text-[#1e40af] font-semibold text-lg group"
+            className="inline-flex items-center space-x-2 text-primary-dark hover:text-primary-hover font-semibold text-lg group"
           >
             <span>Voir toutes nos catégories</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />

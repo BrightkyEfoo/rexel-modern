@@ -61,11 +61,11 @@ export function ToolsSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <Sparkles className="w-6 h-6 text-[#162e77]" />
-            <Badge variant="secondary" className="bg-[#162e77]/10 text-[#162e77]">
+            <Sparkles className="w-6 h-6 text-primary-dark" />
+            <Badge variant="secondary" className="bg-primary-dark/10 text-primary-dark">
               Outils innovants
             </Badge>
-            <Sparkles className="w-6 h-6 text-[#162e77]" />
+            <Sparkles className="w-6 h-6 text-primary-dark" />
           </div>
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Nos outils pour vous simplifier la vie
@@ -83,14 +83,14 @@ export function ToolsSection() {
             return (
               <div
                 key={tool.id}
-                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-[#162e77]/20 overflow-hidden"
+                className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-primary-dark/20 overflow-hidden"
               >
                 {/* Background gradient effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#162e77]/5 via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-dark/5 via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 {/* Tool icon */}
                 <div className="relative mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#162e77]/10 to-blue-500/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary-dark/10 to-blue-500/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     {tool.imageUrl ? (
                       <Image
                         src={tool.imageUrl}
@@ -106,7 +106,7 @@ export function ToolsSection() {
                         }}
                       />
                     ) : null}
-                    <IconComponent className="w-8 h-8 text-[#162e77]" style={{ display: tool.imageUrl ? 'none' : 'block' }} />
+                    <IconComponent className="w-8 h-8 text-primary-dark" style={{ display: tool.imageUrl ? 'none' : 'block' }} />
                   </div>
 
                   {/* Special badge for innovative tools */}
@@ -121,7 +121,7 @@ export function ToolsSection() {
 
                 {/* Tool content */}
                 <div className="relative space-y-4">
-                  <h3 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-[#162e77] transition-colors">
+                  <h3 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-primary-dark transition-colors">
                     {tool.name}
                   </h3>
 
@@ -161,7 +161,7 @@ export function ToolsSection() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full group/btn border-gray-200 text-gray-700 hover:border-[#162e77] hover:text-[#162e77] hover:bg-[#162e77]/5"
+                    className="w-full group/btn border-gray-200 text-gray-700 hover:border-primary-dark hover:text-primary-dark hover:bg-primary-dark/5"
                     asChild
                   >
                     <Link href={tool.link}>
@@ -173,7 +173,7 @@ export function ToolsSection() {
 
                 {/* Hover indicator */}
                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="w-6 h-6 bg-[#162e77] text-white rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 bg-primary-dark text-white rounded-full flex items-center justify-center">
                     <ArrowRight className="w-3 h-3" />
                   </div>
                 </div>
@@ -221,7 +221,7 @@ export function ToolsSection() {
           <div className="text-center mt-8">
             <Button
               size="lg"
-              className="bg-[#162e77] text-white hover:bg-[#1e40af]"
+              className="bg-primary-dark text-white hover:bg-primary-hover"
               asChild
             >
               <Link href="/outils">

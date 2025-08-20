@@ -280,7 +280,7 @@ export function HeroSection() {
                 transition={{ duration: 0.5, delay: 0.5 }}
                 className="w-80 h-80 bg-primary-foreground/5 backdrop-blur-lg rounded-2xl border border-primary-foreground/20 flex items-center justify-center"
               >
-                <Logo variant="light" size="lg" showText={false} />
+                <Logo variant="light-plus" size="lg" showText={false} />
               </motion.div>
             </div>
           </motion.div>

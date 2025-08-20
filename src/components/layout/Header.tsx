@@ -23,7 +23,10 @@ import {
   Mail
 } from 'lucide-react';
 import { useAuthUser, useLogout } from '@/lib/auth/auth-hooks';
+import { useMainCategories } from '@/lib/query/hooks';
 import { appConfig } from '@/lib/config/app';
+import { CartPreview } from '@/components/cart/CartPreview';
+import { AuthLink } from '@/components/auth/AuthLink';
 
 interface HeaderProps {
   className?: string;
@@ -45,17 +48,10 @@ export function Header({ className }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isAuthenticated, user } = useAuthUser();
   const logoutMutation = useLogout();
+  const { data: categoriesResponse, isLoading: categoriesLoading } = useMainCategories();
 
-  const categories = [
-    'Câbles et connexions',
-    'Éclairage',
-    'Interrupteurs et prises',
-    'Tableaux électriques',
-    'Disjoncteurs et fusibles',
-    'Matériel de sécurité',
-    'Équipements industriels',
-    'Solutions d\'énergie renouvelable'
-  ];
+  // Extraire les catégories de la réponse API
+  const categories = categoriesResponse?.data || [];
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -177,8 +173,8 @@ export function Header({ className }: HeaderProps) {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <Button asChild className="w-full" onClick={closeMobileMenu}><Link href="/auth/login">Connexion</Link></Button>
-                      <Button variant="outline" asChild className="w-full" onClick={closeMobileMenu}><Link href="/auth/register">Créer un compte</Link></Button>
+                      <Button asChild className="w-full" onClick={closeMobileMenu}><AuthLink href="/auth/login">Connexion</AuthLink></Button>
+                      <Button variant="outline" asChild className="w-full" onClick={closeMobileMenu}><AuthLink href="/auth/register">Créer un compte</AuthLink></Button>
                     </div>
                   )}
                 </div>
@@ -187,7 +183,7 @@ export function Header({ className }: HeaderProps) {
 
             {/* Logo */}
             <Link href="/" className="hidden md:block">
-              <Logo variant="dark" size="lg" />
+              <Logo variant="dark" size="xxl" />
             </Link>
 
             {/* Search */}
@@ -224,28 +220,42 @@ export function Header({ className }: HeaderProps) {
                   </div>
                 </DialogContent>
               </Dialog>
-              <Link href="/nouveautes" className="hidden md:flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-primary">
+                            <Link href="/nouveautes" className="hidden md:flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-primary">
                 <Sparkles className="w-4 h-4" />
                 <span>Nouveautés</span>
               </Link>
-              <Link href="/favoris" className="relative group">
-                <Heart className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                <Badge variant="default" className="absolute -top-2 -right-2 w-5 h-5 justify-center p-0">3</Badge>
-              </Link>
-              <Link href="/panier" className="relative group">
-                <ShoppingCart className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                <Badge variant="default" className="absolute -top-2 -right-2 w-5 h-5 justify-center p-0">2</Badge>
-              </Link>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <User className="w-6 h-6" />
-                </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  {authContent}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              
+              {isAuthenticated ? (
+                // Utilisateur connecté - Afficher toutes les fonctionnalités
+                <>
+                  <Link href="/favoris" className="relative group">
+                    <Heart className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <Badge variant="default" className="absolute -top-2 -right-2 w-5 h-5 justify-center p-0">3</Badge>
+                  </Link>
+                  <CartPreview isAuthenticated={isAuthenticated} />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <User className="w-6 h-6" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      {authContent}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
+              ) : (
+                // Utilisateur non connecté - Afficher panier et boutons d'authentification
+                <>
+                  <CartPreview isAuthenticated={isAuthenticated} />
+                  <Button asChild variant="outline" size="sm">
+                    <AuthLink href="/auth/register">Inscription</AuthLink>
+                  </Button>
+                  <Button asChild size="sm">
+                    <AuthLink href="/auth/login">Connexion</AuthLink>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -266,13 +276,19 @@ export function Header({ className }: HeaderProps) {
                 <DropdownMenuLabel className="text-base font-semibold">Catégories</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <div className="grid grid-cols-1 gap-1 mt-2">
-                  {categories.map((category, index) => (
-                    <DropdownMenuItem key={index} asChild>
-                      <Link href={`/categorie/${category.toLowerCase().replace(/\s+/g, '-')}`} className="flex items-center py-2 px-3 rounded-md hover:bg-slate-100">
-                        {category}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
+                  {categoriesLoading ? (
+                    <div className="py-2 px-3 text-muted-foreground">Chargement...</div>
+                  ) : categories.length > 0 ? (
+                    categories.map((category) => (
+                      <DropdownMenuItem key={category.id} asChild>
+                        <Link href={`/categorie/${category.slug}`} className="flex items-center py-2 px-3 rounded-md hover:bg-slate-100">
+                          {category.name}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))
+                  ) : (
+                    <div className="py-2 px-3 text-muted-foreground">Aucune catégorie disponible</div>
+                  )}
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -296,7 +312,7 @@ export function Header({ className }: HeaderProps) {
             <div className="relative group">
               <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
                 <span>Solutions</span>
-                <Badge variant="secondary" className="ml-1 text-[8px] p-[0px] px-0.5">Soon</Badge>
+                <Badge variant="secondary" className="ml-1 text-xs p-0 px-0.5">Soon</Badge>
               </span>
             </div>
             <NavLink href="/contact">Contact</NavLink>

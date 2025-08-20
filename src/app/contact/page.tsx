@@ -344,7 +344,7 @@ export default function ContactPage() {
                     <Phone className="w-5 h-5 mr-2" />
                     Appeler maintenant
                   </Button>
-                  <Button variant="outline" size="lg" className="font-semibold border-white text-white hover:bg-white hover:text-primary">
+                  <Button variant="outline" size="lg"  className="">
                     <MessageSquare className="w-5 h-5 mr-2" />
                     Chat en ligne
                   </Button>

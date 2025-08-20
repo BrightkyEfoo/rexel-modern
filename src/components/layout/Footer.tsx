@@ -54,7 +54,7 @@ export function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Logo and social */}
             <div className="space-y-6">
-              <Logo variant="light" size="lg" showText={true} />
+              <Logo variant="light" size="xxl" className='!w-44' showText={true} />
               <p className="text-muted-foreground">
                 Votre partenaire de confiance pour tous vos besoins en matériel énergétique au Cameroun
               </p>

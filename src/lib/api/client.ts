@@ -2,7 +2,7 @@ import axios, {
   type AxiosError,
   type AxiosInstance,
   type AxiosResponse,
-  InternalAxiosRequestConfig
+  InternalAxiosRequestConfig,
 } from "axios";
 import { z } from "zod";
 import type {
@@ -55,9 +55,9 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 
 // Interface pour le token d'authentification
 interface AuthToken {
-  access_token: string
-  type: string
-  expires_at?: string
+  access_token: string;
+  type: string;
+  expires_at?: string;
 }
 
 export class ApiClient {
@@ -88,29 +88,36 @@ export class ApiClient {
     this.instance.interceptors.request.use(
       (configParams) => {
         const config = configParams as CustomAxiosRequestConfig;
-        const url = config.url || '';
+        const url = config.url || "";
 
         // Handle /secured routes - require authentication
-        if (url.startsWith('/secured')) {
+        if (url.startsWith("/secured")) {
           const token = this.getAuthToken();
-          
+
           if (!token) {
-            // Redirect to login if no token
-            if (typeof window !== 'undefined') {
-              window.location.href = '/auth/login';
-            }
-            return Promise.reject(new Error('No authentication token'));
+            // Ne pas rediriger automatiquement, laisser le composant gérer
+            console.warn('🚫 No auth token for secured route:', url);
+            return Promise.reject(new Error("No authentication token"));
           }
 
           // Add auth token
           config.headers.Authorization = `Bearer ${token}`;
-          // Remove prefix for backend
-          config.url = url.replace('/secured', '');
+          // Replace with correct backend prefix
+          config.url = url.replace("/secured", "/api/v1/secured");
         }
 
-        // Handle /opened routes - remove prefix
-        if (url.startsWith('/opened')) {
-          config.url = url.replace('/opened', '');
+        // Handle /opened routes - add correct prefix and session ID
+        if (url.startsWith("/opened")) {
+          config.url = url.replace("/opened", "/api/v1/opened");
+          
+          // Add session ID for cart functionality
+          const sessionId = typeof window !== "undefined" 
+            ? localStorage.getItem("cart-session-id") 
+            : null;
+          
+          if (sessionId) {
+            config.headers["x-session-id"] = sessionId;
+          }
         }
 
         // Add request timestamp for logging
@@ -149,16 +156,11 @@ export class ApiClient {
           error.response?.data
         );
 
-        // Handle token refresh for 401 errors
-        if (error.response?.status === 401 && !error.config?._retry) {
-          try {
-            await this.refreshToken();
-            error.config._retry = true;
-            return this.instance(error.config);
-          } catch (refreshError) {
-            console.error("Token refresh failed:", refreshError);
-            this.handleAuthError();
-          }
+        // Handle 401 errors - pas de refresh token dans notre système
+        if (error.response?.status === 401) {
+          console.warn("🚫 401 Unauthorized - token invalide ou expiré");
+          // Ne pas rediriger automatiquement, laisser le composant gérer
+          // this.handleAuthError(); ← Commenté pour éviter redirection automatique
         }
 
         return Promise.reject(this.transformError(error));
@@ -168,38 +170,18 @@ export class ApiClient {
 
   private getAuthToken(): string | null {
     return typeof window !== "undefined"
-      ? localStorage.getItem("auth_token")
+      ? localStorage.getItem("rexel_access_token")
       : null;
   }
 
-  private async refreshToken(): Promise<void> {
-    const refreshToken =
-      typeof window !== "undefined"
-        ? localStorage.getItem("refresh_token")
-        : null;
-
-    if (!refreshToken) {
-      throw new Error("No refresh token available");
-    }
-
-    const response = await this.instance.post("/auth/refresh", {
-      refreshToken,
-    });
-
-    const { accessToken, refreshToken: newRefreshToken } = response.data;
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem("auth_token", accessToken);
-      localStorage.setItem("refresh_token", newRefreshToken);
-    }
-  }
+  // Méthode refreshToken supprimée - nous utilisons un système plus simple avec seulement l'access token
 
   private handleAuthError(): void {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("rexel_access_token");
+      localStorage.removeItem("rexel_user");
       // Redirect to login page
-      window.location.href = "/login";
+      window.location.href = "/auth/login";
     }
   }
 
@@ -212,7 +194,9 @@ export class ApiClient {
 
     if (error.response) {
       // Server responded with error status
-      const data = error.response.data as { message?: string; code?: string; details?: unknown } | undefined;
+      const data = error.response.data as
+        | { message?: string; code?: string; details?: unknown }
+        | undefined;
       apiError.status = error.response.status;
       apiError.message = data?.message || error.message;
       apiError.code = data?.code || "SERVER_ERROR";
@@ -327,12 +311,12 @@ export class ApiClient {
 
   private normalizeResponse<T>(response: AxiosResponse): ApiResponse<T> {
     const respData = response.data ?? {};
-    
+
     // Si la réponse est déjà au format ApiResponse
     if (respData && typeof respData === "object" && "data" in respData) {
-      return this.validateResponse(respData, ApiResponseSchema) as ApiResponse<T>;
+      return respData as ApiResponse<T>;
     }
-    
+
     // Sinon, normaliser au format ApiResponse
     return {
       data: respData as T,
@@ -384,16 +368,13 @@ export class ApiClient {
     url: string,
     data?: D,
     config: RequestConfig = {}
-  ): Promise<ApiResponse<T>> {
+  ): Promise<AxiosResponse<T, unknown>> {
     const { retries, retryDelay, ...axiosConfig } = config;
 
     const operation = async () => {
-      const response: AxiosResponse<T | ApiResponse<T>> = await this.instance.post(
-        url,
-        data,
-        axiosConfig
-      );
-      return this.normalizeResponse<T>(response);
+      const response: AxiosResponse<T, unknown> =
+        await this.instance.post(url, data, axiosConfig);
+      return response;
     };
 
     if (retries) {
@@ -414,11 +395,8 @@ export class ApiClient {
     const { retries, retryDelay, ...axiosConfig } = config;
 
     const operation = async () => {
-      const response: AxiosResponse<T | ApiResponse<T>> = await this.instance.put(
-        url,
-        data,
-        axiosConfig
-      );
+      const response: AxiosResponse<T | ApiResponse<T>> =
+        await this.instance.put(url, data, axiosConfig);
       return this.normalizeResponse<T>(response);
     };
 
@@ -440,11 +418,8 @@ export class ApiClient {
     const { retries, retryDelay, ...axiosConfig } = config;
 
     const operation = async () => {
-      const response: AxiosResponse<T | ApiResponse<T>> = await this.instance.patch(
-        url,
-        data,
-        axiosConfig
-      );
+      const response: AxiosResponse<T | ApiResponse<T>> =
+        await this.instance.patch(url, data, axiosConfig);
       return this.normalizeResponse<T>(response);
     };
 
@@ -584,10 +559,10 @@ export const api = {
     post: <T, D = unknown>(url: string, data?: D, config?: RequestConfig) =>
       apiClient.post<T, D>(url, data, config),
   },
-}
+};
 
 // Export de l'instance pour usage direct si nécessaire
-export default apiClient
+export default apiClient;
 
 // Exemples d'utilisation :
 // api.public.get<Product[]>('/products') // -> GET /products

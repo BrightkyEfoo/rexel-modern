@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient } from "./client";
 import type {
   Product,
   Category,
@@ -17,13 +17,15 @@ import type {
   UpdateCategoryRequest,
   CreateBrandRequest,
   UpdateBrandRequest,
-} from './types';
+} from "./types";
 
 // Products Service
 export class ProductsService {
-  async getProducts(filters?: SearchFilters): Promise<PaginatedResponse<Product>> {
+  async getProducts(
+    filters?: SearchFilters
+  ): Promise<PaginatedResponse<Product>> {
     const params = this.buildSearchParams(filters);
-    return apiClient.getPaginated<Product>('/opened/products', { params });
+    return apiClient.getPaginated<Product>("/opened/products", { params });
   }
 
   async getProduct(slugOrId: string | number): Promise<ApiResponse<Product>> {
@@ -31,16 +33,29 @@ export class ProductsService {
   }
 
   async getFeaturedProducts(): Promise<ApiResponse<Product[]>> {
-    return apiClient.get<Product[]>('/opened/products/featured', { cacheTime: 10 * 60 * 1000 });
+    return apiClient.get<Product[]>("/opened/products/featured", {
+      cacheTime: 10 * 60 * 1000,
+    });
   }
 
-  async getProductsByCategory(categoryId: number): Promise<ApiResponse<Product[]>> {
+  async getProductsByCategory(
+    categoryId: number
+  ): Promise<ApiResponse<Product[]>> {
     return apiClient.get<Product[]>(`/opened/products/category/${categoryId}`);
   }
 
-  async getProductsByCategorySlug(categorySlug: string, filters?: SearchFilters): Promise<PaginatedResponse<Product>> {
+  async getProductsByCategorySlug(
+    categorySlug: string,
+    filters?: SearchFilters
+  ): Promise<PaginatedResponse<Product>> {
+    console.log("categorySlug", categorySlug);
+    console.log("filters", filters);
     const params = this.buildCategorySearchParams(filters);
-    const response = await apiClient.get<{
+    const response = await apiClient.get(`/opened/products/category/${categorySlug}`, {
+      params,
+    });
+
+    const resp = response as {
       data: Product[];
       meta: {
         total: number;
@@ -58,12 +73,13 @@ export class ProductsService {
       message: string;
       status: number;
       timestamp: string;
-    }>(`/opened/products/category/${categorySlug}`, { params });
-    
+    }
+
     // Retourner la structure PaginatedResponse standard
+    console.log("response", response);
     return {
-      data: response.data.data,
-      meta: response.data.meta
+      data: resp.data,
+      meta: resp.meta,
     };
   }
 
@@ -71,18 +87,27 @@ export class ProductsService {
     return apiClient.get<Product[]>(`/opened/products/brand/${brandId}`);
   }
 
-  async searchProducts(query: string, page = 1, perPage = 20): Promise<PaginatedResponse<Product>> {
-    return apiClient.getPaginated<Product>('/opened/products', {
+  async searchProducts(
+    query: string,
+    page = 1,
+    perPage = 20
+  ): Promise<PaginatedResponse<Product>> {
+    return apiClient.getPaginated<Product>("/opened/products", {
       params: { search: query, page, per_page: perPage },
     });
   }
 
   // Admin endpoints (secured)
-  async createProduct(data: CreateProductRequest): Promise<ApiResponse<Product>> {
-    return apiClient.post<Product>('/secured/products', data);
+  async createProduct(
+    data: CreateProductRequest
+  ): Promise<ApiResponse<Product>> {
+    return apiClient.post<Product>("/secured/products", data);
   }
 
-  async updateProduct(id: number, data: UpdateProductRequest): Promise<ApiResponse<Product>> {
+  async updateProduct(
+    id: number,
+    data: UpdateProductRequest
+  ): Promise<ApiResponse<Product>> {
     return apiClient.put<Product>(`/secured/products/${id}`, data);
   }
 
@@ -114,7 +139,9 @@ export class ProductsService {
     return params;
   }
 
-  private buildCategorySearchParams(filters?: SearchFilters): Record<string, unknown> {
+  private buildCategorySearchParams(
+    filters?: SearchFilters
+  ): Record<string, unknown> {
     if (!filters) return {};
 
     const params: Record<string, unknown> = {};
@@ -135,13 +162,15 @@ export class ProductsService {
     // Gestion de la disponibilité
     if (filters.availability?.length) {
       const availabilityMap = {
-        'in_stock': 'true',
-        'out_of_stock': 'false',
-        'limited': 'limited'
+        in_stock: "true",
+        out_of_stock: "false",
+        limited: "limited",
       };
-      const availabilityValues = filters.availability.map(av => availabilityMap[av]).filter(Boolean);
+      const availabilityValues = filters.availability
+        .map((av) => availabilityMap[av])
+        .filter(Boolean);
       if (availabilityValues.length > 0) {
-        params.in_stock = availabilityValues.join(',');
+        params.in_stock = availabilityValues.join(",");
       }
     }
 
@@ -152,7 +181,9 @@ export class ProductsService {
 // Categories Service
 export class CategoriesService {
   async getCategories(): Promise<ApiResponse<Category[]>> {
-    return apiClient.get<Category[]>('/opened/categories', { cacheTime: 15 * 60 * 1000 });
+    return apiClient.get<Category[]>("/opened/categories", {
+      cacheTime: 15 * 60 * 1000,
+    });
   }
 
   async getCategory(slugOrId: string | number): Promise<ApiResponse<Category>> {
@@ -164,7 +195,9 @@ export class CategoriesService {
   }
 
   async getMainCategories(): Promise<ApiResponse<Category[]>> {
-    return apiClient.get<Category[]>('/opened/categories/main', { cacheTime: 15 * 60 * 1000 });
+    return apiClient.get<Category[]>("/opened/categories/main", {
+      cacheTime: 15 * 60 * 1000,
+    });
   }
 
   async getSubCategories(parentId: number): Promise<ApiResponse<Category[]>> {
@@ -172,11 +205,16 @@ export class CategoriesService {
   }
 
   // Admin endpoints (secured)
-  async createCategory(data: CreateCategoryRequest): Promise<ApiResponse<Category>> {
-    return apiClient.post<Category>('/secured/categories', data);
+  async createCategory(
+    data: CreateCategoryRequest
+  ): Promise<ApiResponse<Category>> {
+    return apiClient.post<Category>("/secured/categories", data);
   }
 
-  async updateCategory(id: number, data: UpdateCategoryRequest): Promise<ApiResponse<Category>> {
+  async updateCategory(
+    id: number,
+    data: UpdateCategoryRequest
+  ): Promise<ApiResponse<Category>> {
     return apiClient.put<Category>(`/secured/categories/${id}`, data);
   }
 
@@ -188,7 +226,9 @@ export class CategoriesService {
 // Brands Service
 export class BrandsService {
   async getBrands(): Promise<ApiResponse<Brand[]>> {
-    return apiClient.get<Brand[]>('/opened/brands', { cacheTime: 15 * 60 * 1000 });
+    return apiClient.get<Brand[]>("/opened/brands", {
+      cacheTime: 15 * 60 * 1000,
+    });
   }
 
   async getBrand(slugOrId: string | number): Promise<ApiResponse<Brand>> {
@@ -196,15 +236,20 @@ export class BrandsService {
   }
 
   async getFeaturedBrands(): Promise<ApiResponse<Brand[]>> {
-    return apiClient.get<Brand[]>('/opened/brands/featured', { cacheTime: 15 * 60 * 1000 });
+    return apiClient.get<Brand[]>("/opened/brands/featured", {
+      cacheTime: 15 * 60 * 1000,
+    });
   }
 
   // Admin endpoints (secured)
   async createBrand(data: CreateBrandRequest): Promise<ApiResponse<Brand>> {
-    return apiClient.post<Brand>('/secured/brands', data);
+    return apiClient.post<Brand>("/secured/brands", data);
   }
 
-  async updateBrand(id: number, data: UpdateBrandRequest): Promise<ApiResponse<Brand>> {
+  async updateBrand(
+    id: number,
+    data: UpdateBrandRequest
+  ): Promise<ApiResponse<Brand>> {
     return apiClient.put<Brand>(`/secured/brands/${id}`, data);
   }
 
@@ -216,22 +261,35 @@ export class BrandsService {
 // Users Service
 export class UsersService {
   async getCurrentUser(): Promise<ApiResponse<User>> {
-    return apiClient.get<User>('/secured/users/me', { cache: false });
+    return apiClient.get<User>("/secured/users/me", { cache: false });
   }
 
-  async updateUser(id: number, data: Partial<User>): Promise<ApiResponse<User>> {
+  async updateUser(
+    id: number,
+    data: Partial<User>
+  ): Promise<ApiResponse<User>> {
     return apiClient.put<User>(`/secured/users/${id}`, data);
   }
 
-  async updatePreferences(preferences: User['preferences']): Promise<ApiResponse<User>> {
-    return apiClient.patch<User>('/secured/users/me/preferences', { preferences });
+  async updatePreferences(
+    preferences: User["preferences"]
+  ): Promise<ApiResponse<User>> {
+    return apiClient.patch<User>("/secured/users/me/preferences", {
+      preferences,
+    });
   }
 
-  async login(email: string, password: string): Promise<ApiResponse<{ user: User; token: string; refreshToken: string }>> {
-    return apiClient.post<{ user: User; token: string; refreshToken: string }>('/opened/auth/login', {
-      email,
-      password,
-    });
+  async login(
+    email: string,
+    password: string
+  ): Promise<ApiResponse<{ user: User; token: string; refreshToken: string }>> {
+    return apiClient.post<{ user: User; token: string; refreshToken: string }>(
+      "/opened/auth/login",
+      {
+        email,
+        password,
+      }
+    );
   }
 
   async register(userData: {
@@ -240,22 +298,30 @@ export class UsersService {
     firstName: string;
     lastName: string;
     company?: string;
-  }): Promise<ApiResponse<{ user: User; token: string; refreshToken: string }>> {
-    return apiClient.post<{ user: User; token: string; refreshToken: string }>('/opened/auth/register', userData);
+  }): Promise<
+    ApiResponse<{ user: User; token: string; refreshToken: string }>
+  > {
+    return apiClient.post<{ user: User; token: string; refreshToken: string }>(
+      "/opened/auth/register",
+      userData
+    );
   }
 
   async logout(): Promise<ApiResponse<void>> {
-    const response = await apiClient.post<void>('/secured/auth/logout');
+    const response = await apiClient.post<void>("/secured/auth/logout");
     apiClient.removeAuthToken();
     return response;
   }
 
   async requestPasswordReset(email: string): Promise<ApiResponse<void>> {
-    return apiClient.post<void>('/opened/auth/password-reset', { email });
+    return apiClient.post<void>("/opened/auth/password-reset", { email });
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<ApiResponse<void>> {
-    return apiClient.post<void>('/opened/auth/password-reset/confirm', {
+  async resetPassword(
+    token: string,
+    newPassword: string
+  ): Promise<ApiResponse<void>> {
+    return apiClient.post<void>("/opened/auth/password-reset/confirm", {
       token,
       password: newPassword,
     });
@@ -265,28 +331,38 @@ export class UsersService {
 // Cart Service
 export class CartService {
   async getCart(): Promise<ApiResponse<Cart>> {
-    return apiClient.get<Cart>('/secured/cart', { cache: false });
+    return apiClient.get<Cart>("/opened/cart", { cache: false });
   }
 
-  async addToCart(productId: number, quantity: number = 1): Promise<ApiResponse<Cart>> {
-    return apiClient.post<Cart>('/secured/cart/items', {
+  async addToCart(
+    productId: number,
+    quantity: number = 1
+  ): Promise<ApiResponse<Cart>> {
+    return apiClient.post<Cart>("/opened/cart/items", {
       productId,
       quantity,
     });
   }
 
-  async updateCartItem(itemId: string, quantity: number): Promise<ApiResponse<Cart>> {
-    return apiClient.put<Cart>(`/secured/cart/items/${itemId}`, {
+  async updateCartItem(
+    itemId: number,
+    quantity: number
+  ): Promise<ApiResponse<Cart>> {
+    return apiClient.put<Cart>(`/opened/cart/items/${itemId}`, {
       quantity,
     });
   }
 
-  async removeFromCart(itemId: string): Promise<ApiResponse<Cart>> {
-    return apiClient.delete<Cart>(`/secured/cart/items/${itemId}`);
+  async removeFromCart(itemId: number): Promise<ApiResponse<Cart>> {
+    return apiClient.delete<Cart>(`/opened/cart/items/${itemId}`);
   }
 
-  async clearCart(): Promise<ApiResponse<void>> {
-    return apiClient.delete<void>('/secured/cart');
+  async clearCart(): Promise<ApiResponse<Cart>> {
+    return apiClient.delete<Cart>("/opened/cart");
+  }
+
+  async mergeCart(): Promise<ApiResponse<Cart>> {
+    return apiClient.post<Cart>("/secured/cart/merge");
   }
 
   async getCartItemCount(): Promise<number> {
@@ -302,11 +378,11 @@ export class CartService {
 // Favorites Service
 export class FavoritesService {
   async getFavorites(): Promise<ApiResponse<Product[]>> {
-    return apiClient.get<Product[]>('/secured/favorites');
+    return apiClient.get<Product[]>("/secured/favorites");
   }
 
   async addToFavorites(productId: number): Promise<ApiResponse<void>> {
-    return apiClient.post<void>('/secured/favorites', { productId });
+    return apiClient.post<void>("/secured/favorites", { productId });
   }
 
   async removeFromFavorites(productId: number): Promise<ApiResponse<void>> {
@@ -316,7 +392,7 @@ export class FavoritesService {
   async isFavorite(productId: number): Promise<boolean> {
     try {
       const response = await this.getFavorites();
-      return response.data.some(product => product.id === productId);
+      return response.data.some((product) => product.id === productId);
     } catch {
       return false;
     }
@@ -325,35 +401,48 @@ export class FavoritesService {
 
 // Files Service
 export class FilesService {
-  async uploadFile(file: globalThis.File, bucket = 'products', fileableType?: string, fileableId?: number): Promise<ApiResponse<File>> {
+  async uploadFile(
+    file: globalThis.File,
+    bucket = "products",
+    fileableType?: string,
+    fileableId?: number
+  ): Promise<ApiResponse<File>> {
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('bucket', bucket);
-    if (fileableType) formData.append('fileable_type', fileableType);
-    if (fileableId) formData.append('fileable_id', fileableId.toString());
+    formData.append("file", file);
+    formData.append("bucket", bucket);
+    if (fileableType) formData.append("fileable_type", fileableType);
+    if (fileableId) formData.append("fileable_id", fileableId.toString());
 
-    return apiClient.post<File>('/secured/files/upload', formData, {
+    return apiClient.post<File>("/secured/files/upload", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
   }
 
-  async uploadFiles(files: globalThis.File[], bucket = 'products', fileableType?: string, fileableId?: number): Promise<ApiResponse<File[]>> {
+  async uploadFiles(
+    files: globalThis.File[],
+    bucket = "products",
+    fileableType?: string,
+    fileableId?: number
+  ): Promise<ApiResponse<File[]>> {
     const formData = new FormData();
-    files.forEach(file => formData.append('files', file));
-    formData.append('bucket', bucket);
-    if (fileableType) formData.append('fileable_type', fileableType);
-    if (fileableId) formData.append('fileable_id', fileableId.toString());
+    files.forEach((file) => formData.append("files", file));
+    formData.append("bucket", bucket);
+    if (fileableType) formData.append("fileable_type", fileableType);
+    if (fileableId) formData.append("fileable_id", fileableId.toString());
 
-    return apiClient.post<File[]>('/secured/files/upload', formData, {
+    return apiClient.post<File[]>("/secured/files/upload", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
   }
 
-  async getEntityFiles(fileableType: string, fileableId: number): Promise<ApiResponse<File[]>> {
+  async getEntityFiles(
+    fileableType: string,
+    fileableId: number
+  ): Promise<ApiResponse<File[]>> {
     return apiClient.get<File[]>(`/opened/files/${fileableType}/${fileableId}`);
   }
 
@@ -364,75 +453,93 @@ export class FilesService {
 
 // Content Service (mock data for now)
 export class ContentService {
-  async getTestimonials(): Promise<ApiResponse<Array<{
-    id: string;
-    author: string;
-    content: string;
-    rating: number;
-    date: string;
-  }>>> {
+  async getTestimonials(): Promise<
+    ApiResponse<
+      Array<{
+        id: string;
+        author: string;
+        content: string;
+        rating: number;
+        date: string;
+      }>
+    >
+  > {
     // Mock data - replace with actual API call when backend is ready
     return Promise.resolve({
       data: [],
-      message: 'Testimonials not implemented in backend yet',
+      message: "Testimonials not implemented in backend yet",
     });
   }
 
-  async getServices(): Promise<ApiResponse<Array<{
-    id: string;
-    name: string;
-    description: string;
-    imageUrl: string;
-    link: string;
-    features: string[];
-  }>>> {
+  async getServices(): Promise<
+    ApiResponse<
+      Array<{
+        id: string;
+        name: string;
+        description: string;
+        imageUrl: string;
+        link: string;
+        features: string[];
+      }>
+    >
+  > {
     // Mock data - replace with actual API call when backend is ready
     return Promise.resolve({
       data: [],
-      message: 'Services not implemented in backend yet',
+      message: "Services not implemented in backend yet",
     });
   }
 
-  async getTools(): Promise<ApiResponse<Array<{
-    id: string;
-    name: string;
-    description: string;
-    imageUrl: string;
-    link: string;
-  }>>> {
+  async getTools(): Promise<
+    ApiResponse<
+      Array<{
+        id: string;
+        name: string;
+        description: string;
+        imageUrl: string;
+        link: string;
+      }>
+    >
+  > {
     // Mock data - replace with actual API call when backend is ready
     return Promise.resolve({
       data: [],
-      message: 'Tools not implemented in backend yet',
+      message: "Tools not implemented in backend yet",
     });
   }
 
-  async getPromotions(): Promise<ApiResponse<Array<{
-    id: string;
-    title: string;
-    description: string;
-    imageUrl: string;
-    link: string;
-    validUntil: string;
-  }>>> {
+  async getPromotions(): Promise<
+    ApiResponse<
+      Array<{
+        id: string;
+        title: string;
+        description: string;
+        imageUrl: string;
+        link: string;
+        validUntil: string;
+      }>
+    >
+  > {
     // Mock data - replace with actual API call when backend is ready
     return Promise.resolve({
       data: [],
-      message: 'Promotions not implemented in backend yet',
+      message: "Promotions not implemented in backend yet",
     });
   }
 }
 
 // Stats Service (mock data for now)
 export class StatsService {
-  async getDashboardStats(): Promise<ApiResponse<{
-    totalProducts: number;
-    totalCategories: number;
-    totalBrands: number;
-    totalAgencies: number;
-    deliveryReferences: number;
-    expertCount: number;
-  }>> {
+  async getDashboardStats(): Promise<
+    ApiResponse<{
+      totalProducts: number;
+      totalCategories: number;
+      totalBrands: number;
+      totalAgencies: number;
+      deliveryReferences: number;
+      expertCount: number;
+    }>
+  > {
     // Mock data - replace with actual API call when backend is ready
     return Promise.resolve({
       data: {
@@ -443,7 +550,7 @@ export class StatsService {
         deliveryReferences: 0,
         expertCount: 0,
       },
-      message: 'Stats not implemented in backend yet',
+      message: "Stats not implemented in backend yet",
     });
   }
 }

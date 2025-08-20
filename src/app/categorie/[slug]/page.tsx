@@ -1,113 +1,95 @@
-'use client';
+"use client";
 
-import { FilterContent } from '@/components/category/FilterContent';
-import { ProductGrid } from '@/components/category/ProductGrid';
-import { Footer } from '@/components/layout/Footer';
-import { Header } from '@/components/layout/Header';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import type { SearchFilters } from '@/lib/api/types';
-import { useAuthUser } from '@/lib/auth/auth-hooks';
-import { useAddToCart, useCategoryBySlug, useProductsByCategorySlug } from '@/lib/query/hooks';
+import { FilterContent } from "@/components/category/FilterContent";
+import { ProductGrid } from "@/components/category/ProductGrid";
+import { ProductPagination } from "@/components/category/ProductPagination";
+import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
+import { Button } from "@/components/ui/button";
 import {
-  Filter,
-  Grid3X3,
-  List
-} from 'lucide-react';
-import Link from 'next/link';
-import { useParams, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import type { CategoryDetail } from '@/lib/api/types';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import type { SearchFilters } from "@/lib/api/types";
+import { useAuthUser } from "@/lib/auth/auth-hooks";
+import {
+  useCategoryBySlug,
+  useProductsByCategorySlug,
+} from "@/lib/query/hooks";
+import { useCategoryFilters } from "@/lib/hooks/useCategoryFilters";
+import { Filter, Grid3X3, List } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import type { CategoryDetail } from "@/lib/api/types";
 
-type SortOption = 'popularity' | 'price' | 'name' | 'newest';
-type AvailabilityOption = 'in_stock' | 'out_of_stock' | 'limited';
+type SortOption = "popularity" | "price" | "name" | "newest";
+type AvailabilityOption = "in_stock" | "out_of_stock" | "limited";
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: 'popularity', label: 'Popularité' },
-  { value: 'price', label: 'Prix' },
-  { value: 'name', label: 'Nom' },
-  { value: 'newest', label: 'Plus récent' }
+  { value: "popularity", label: "Popularité" },
+  { value: "price", label: "Prix" },
+  { value: "name", label: "Nom" },
+  { value: "newest", label: "Plus récent" },
 ];
 
 const AVAILABILITY_OPTIONS: { value: AvailabilityOption; label: string }[] = [
-  { value: 'in_stock', label: 'En stock' },
-  { value: 'limited', label: 'Stock limité' },
-  { value: 'out_of_stock', label: 'Rupture de stock' }
+  { value: "in_stock", label: "En stock" },
+  { value: "limited", label: "Stock limité" },
+  { value: "out_of_stock", label: "Rupture de stock" },
 ];
-
-interface ExtendedSearchFilters extends SearchFilters {
-  availability?: AvailabilityOption[];
-}
 
 export default function CategoryPage() {
   const params = useParams();
-  const searchParams = useSearchParams();
   const categorySlug = params.slug as string;
   const { user, isAuthenticated } = useAuthUser();
 
-  const [filters, setFilters] = useState<ExtendedSearchFilters>({
-    sortBy: 'popularity',
-    sortOrder: 'desc',
-    page: 1,
-    limit: 20
-  });
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
 
+  // Utiliser le hook personnalisé pour gérer les filtres avec URL et debounce
+  const { filters, updateFilters, clearFilters } = useCategoryFilters({
+    categorySlug,
+    priceRange,
+  });
+
   // Get data
-  const { data: categoryResponse, isLoading: categoryLoading } = useCategoryBySlug(categorySlug);
-  const { data: productsResponse, isLoading: productsLoading } = useProductsByCategorySlug(categorySlug, filters);
-  const addToCartMutation = useAddToCart();
+  const { data: categoryResponse, isLoading: categoryLoading } =
+    useCategoryBySlug(categorySlug);
+  const { data: productsResponse, isLoading: productsLoading } =
+    useProductsByCategorySlug(categorySlug, filters);
 
-  // Update filters based on URL params
+  // Initialize price range when category data is loaded
   useEffect(() => {
-    const urlFilters: ExtendedSearchFilters = {
-      sortBy: (searchParams.get('sort') as SortOption) || 'popularity',
-      sortOrder: (searchParams.get('order') as 'asc' | 'desc') || 'desc',
-      page: Number(searchParams.get('page')) || 1,
-      limit: 20
-    };
-
-    if (searchParams.get('brands')) {
-      urlFilters.brands = searchParams.get('brands')?.split(',').map(Number);
+    const category = categoryResponse?.data as CategoryDetail;
+    if (category?.filters?.priceRange) {
+      const { min, max } = category.filters.priceRange;
+      setPriceRange([min || 0, max || 1000]);
     }
+  }, [categoryResponse]);
 
-    if (searchParams.get('minPrice') || searchParams.get('maxPrice')) {
-      urlFilters.priceRange = {
-        min: Number(searchParams.get('minPrice')) || 0,
-        max: Number(searchParams.get('maxPrice')) || 1000
-      };
-    }
-
-    setFilters(urlFilters);
-  }, [categorySlug, searchParams]);
-
-  const handleFilterChange = (newFilters: Partial<ExtendedSearchFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
+  // Handle price range changes avec debounce automatique
+  const handlePriceRangeChange = (newRange: [number, number]) => {
+    setPriceRange(newRange);
+    // Le debounce est géré automatiquement dans useCategoryFilters
   };
 
-  const handleAddToCart = async (productId: string) => {
-    if (!isAuthenticated) {
-      window.location.href = '/auth/login';
-      return;
-    }
+  const hasProducts =
+    productsResponse?.data && productsResponse.data.length > 0;
 
-    try {
-      await addToCartMutation.mutateAsync({ productId, quantity: 1 });
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-    }
-  };
-
-  const clearFilters = () => {
-    setFilters({
-      sortBy: 'popularity',
-      sortOrder: 'desc',
-      page: 1,
-      limit: 20
-    });
+  const handleClearFilters = () => {
+    clearFilters();
     setPriceRange([0, 1000]);
   };
 
@@ -137,9 +119,13 @@ export default function CategoryPage() {
         <Header />
         <main className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Catégorie non trouvée</h1>
-            <p className="text-gray-600 mb-8">La catégorie que vous recherchez n'existe pas ou a été supprimée.</p>
-            <Link href="/" className="text-[#162e77] hover:underline">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">
+              Catégorie non trouvée
+            </h1>
+            <p className="text-gray-600 mb-8">
+              La catégorie que vous recherchez n'existe pas ou a été supprimée.
+            </p>
+            <Link href="/" className="text-primary-dark hover:underline">
               Retour à l'accueil
             </Link>
           </div>
@@ -150,7 +136,6 @@ export default function CategoryPage() {
   }
 
   const category = categoryResponse.data as CategoryDetail;
-  const hasProducts = productsResponse?.data && productsResponse.data.length > 0;
 
   console.log("hasProducts", productsResponse);
 
@@ -161,7 +146,9 @@ export default function CategoryPage() {
       <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
-          <Link href="/" className="hover:text-[#162e77]">Accueil</Link>
+          <Link href="/" className="hover:text-primary-dark">
+            Accueil
+          </Link>
           <span>/</span>
           <span className="text-gray-900">{category.name}</span>
         </nav>
@@ -171,58 +158,73 @@ export default function CategoryPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             {category.name}
           </h1>
-          <p className="text-gray-600 mb-6">
-            {category.description}
-          </p>
-          
+          <p className="text-gray-600 mb-6">{category.description}</p>
+
           {/* Sous-catégories directement après la description */}
           {category.subcategories && category.subcategories.length > 0 && (
             <div className="mt-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Explorez nos sous-catégories</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                Explorez nos sous-catégories
+              </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {category.subcategories.map((subcat: CategoryDetail['subcategories'][number]) => (
-                  <Link
-                    key={subcat.id}
-                    href={`/categorie/${subcat.slug}`}
-                    className="group relative bg-white border border-gray-200 rounded-xl p-6 hover:border-[#162e77] hover:shadow-lg transition-all duration-200 overflow-hidden"
-                  >
-                    {/* Icône de catégorie */}
-                    <div className="w-12 h-12 bg-[#162e77] bg-opacity-10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
-                      <div className="w-6 h-6 bg-[#162e77] rounded opacity-80"></div>
-                    </div>
-                    
-                    {/* Contenu */}
-                    <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-[#162e77] transition-colors">
-                      {subcat.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-3 overflow-hidden text-ellipsis" style={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical'
-                    }}>
-                      {subcat.description}
-                    </p>
-                    
-                    {/* Badge produits */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-gray-500">
-                        {subcat.productCount} produits
-                      </span>
-                      <div className="w-5 h-5 text-[#162e77] opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+                {category.subcategories.map(
+                  (subcat: CategoryDetail["subcategories"][number]) => (
+                    <Link
+                      key={subcat.id}
+                      href={`/categorie/${subcat.slug}`}
+                      className="group relative bg-white border border-gray-200 rounded-xl p-6 hover:border-primary-dark hover:shadow-lg transition-all duration-200 overflow-hidden"
+                    >
+                      {/* Icône de catégorie */}
+                      <div className="w-12 h-12 bg-primary-dark bg-opacity-10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-opacity-20 transition-colors">
+                        <div className="w-6 h-6 bg-primary-dark rounded opacity-80"></div>
                       </div>
-                    </div>
-                    
-                    {/* Effet de hover */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#162e77] to-blue-600 opacity-0 group-hover:opacity-5 transition-opacity"></div>
-                  </Link>
-                ))}
+
+                      {/* Contenu */}
+                      <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-primary-dark transition-colors">
+                        {subcat.name}
+                      </h3>
+                      <p
+                        className="text-sm text-gray-600 mb-3 overflow-hidden text-ellipsis"
+                        style={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                        }}
+                      >
+                        {subcat.description}
+                      </p>
+
+                      {/* Badge produits */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-gray-500">
+                          {subcat.productCount} produits
+                        </span>
+                        <div className="w-5 h-5 text-primary-dark opacity-0 group-hover:opacity-100 transition-opacity">
+                          <svg
+                            className="w-full h-full"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Effet de hover */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary-dark to-blue-600 opacity-0 group-hover:opacity-5 transition-opacity"></div>
+                    </Link>
+                  )
+                )}
               </div>
             </div>
           )}
-          
+
           {/* Compteur de produits seulement s'il y en a */}
           {hasProducts && (
             <div className="text-sm text-gray-500 mt-6">
@@ -253,9 +255,9 @@ export default function CategoryPage() {
                       categoryData={category}
                       filters={filters}
                       priceRange={priceRange}
-                      onFilterChange={handleFilterChange}
-                      onPriceChange={setPriceRange}
-                      onClearFilters={clearFilters}
+                      onFilterChange={updateFilters}
+                      onPriceChange={handlePriceRangeChange}
+                      onClearFilters={handleClearFilters}
                     />
                   </SheetContent>
                 </Sheet>
@@ -267,9 +269,9 @@ export default function CategoryPage() {
                   categoryData={category}
                   filters={filters}
                   priceRange={priceRange}
-                  onFilterChange={handleFilterChange}
-                  onPriceChange={setPriceRange}
-                  onClearFilters={clearFilters}
+                  onFilterChange={updateFilters}
+                  onPriceChange={handlePriceRangeChange}
+                  onClearFilters={handleClearFilters}
                 />
               </div>
             </div>
@@ -278,24 +280,28 @@ export default function CategoryPage() {
             <div className="lg:w-3/4">
               {/* Titre de section produits */}
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">Produits disponibles</h2>
-                <p className="text-gray-600">Découvrez notre sélection de produits dans cette catégorie</p>
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  Produits disponibles
+                </h2>
+                <p className="text-gray-600">
+                  Découvrez notre sélection de produits dans cette catégorie
+                </p>
               </div>
 
               {/* View Controls */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-4">
                   <Button
-                    variant={viewMode === 'grid' ? 'default' : 'outline'}
+                    variant={viewMode === "grid" ? "default" : "outline"}
                     size="icon"
-                    onClick={() => setViewMode('grid')}
+                    onClick={() => setViewMode("grid")}
                   >
                     <Grid3X3 className="w-4 h-4" />
                   </Button>
                   <Button
-                    variant={viewMode === 'list' ? 'default' : 'outline'}
+                    variant={viewMode === "list" ? "default" : "outline"}
                     size="icon"
-                    onClick={() => setViewMode('list')}
+                    onClick={() => setViewMode("list")}
                   >
                     <List className="w-4 h-4" />
                   </Button>
@@ -303,7 +309,9 @@ export default function CategoryPage() {
 
                 <Select
                   value={filters.sortBy}
-                  onValueChange={(value: SortOption) => handleFilterChange({ sortBy: value })}
+                  onValueChange={(value: SortOption) =>
+                    updateFilters({ sortBy: value })
+                  }
                 >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Trier par" />
@@ -319,27 +327,27 @@ export default function CategoryPage() {
               </div>
 
               {/* Products Grid */}
-              {productsLoading ? (
-                <div className="animate-pulse">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[...Array(6)].map((_, i) => (
-                      <div key={i} className="h-64 bg-gray-200 rounded"></div>
-                    ))}
-                  </div>
+              <ProductGrid
+                products={productsResponse?.data || []}
+                viewMode={viewMode}
+                isAuthenticated={isAuthenticated}
+                isLoading={productsLoading}
+              />
+
+              {/* Pagination */}
+              {productsResponse?.meta && (
+                <div className="mt-8">
+                  <ProductPagination
+                    currentPage={productsResponse.meta.current_page}
+                    totalPages={productsResponse.meta.last_page}
+                    onPageChange={(page) => updateFilters({ page })}
+                    className="justify-center"
+                  />
                 </div>
-              ) : (
-                <ProductGrid
-                  products={productsResponse.data}
-                  viewMode={viewMode}
-                  onAddToCart={(productId) => addToCartMutation.mutate({ productId, quantity: 1 })}
-                  isAuthenticated={isAuthenticated}
-                />
               )}
             </div>
           </div>
         )}
-
-
       </main>
 
       <Footer />

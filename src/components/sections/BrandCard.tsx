@@ -22,8 +22,8 @@ export function BrandCard({ brand }: BrandCardProps) {
               const target = e.target as HTMLImageElement;
               target.src = `data:image/svg+xml;base64,${btoa(`
                 <svg width="120" height="60" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="120" height="60" rx="8" fill="#f3f4f6"/>
-                  <text x="60" y="35" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="12">${brand.name}</text>
+                  <rect width="120" height="60" rx="8" fill="hsl(var(--muted))"/>
+                  <text x="60" y="35" text-anchor="middle" fill="hsl(var(--muted-foreground))" font-family="Arial, sans-serif" font-size="12">${brand.name}</text>
                 </svg>
               `)}`;
             }}
@@ -44,7 +44,7 @@ export function BrandCard({ brand }: BrandCardProps) {
 
         {/* Hover indicator */}
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-3 flex items-center justify-center">
-          <span className="text-xs text-[#162e77] font-medium flex items-center">
+                          <span className="text-xs text-primary-dark font-medium flex items-center">
             Voir les produits
             <ArrowRight className="w-3 h-3 ml-1" />
           </span>
@@ -58,7 +58,7 @@ export function BrandCard({ brand }: BrandCardProps) {
             href={brand.websiteUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-gray-500 hover:text-[#162e77] flex items-center justify-center group/link"
+            className="text-xs text-gray-500 hover:text-primary-dark flex items-center justify-center group/link"
             onClick={(e) => e.stopPropagation()}
           >
             Site officiel

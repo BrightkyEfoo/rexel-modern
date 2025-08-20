@@ -239,11 +239,12 @@ export function useUpdateUser() {
 }
 
 // Cart Hooks
-export function useCart() {
+export function useCart(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKeys.cart,
     queryFn: () => cartService.getCart(),
     retry: false,
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -277,7 +278,7 @@ export function useUpdateCartItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) =>
+    mutationFn: ({ itemId, quantity }: { itemId: number; quantity: number }) =>
       cartService.updateCartItem(itemId, quantity),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
@@ -290,7 +291,7 @@ export function useRemoveFromCart() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (itemId: string) => cartService.removeFromCart(itemId),
+    mutationFn: (itemId: number) => cartService.removeFromCart(itemId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
       queryClient.invalidateQueries({ queryKey: queryKeys.cartCount });
@@ -306,6 +307,37 @@ export function useClearCart() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
       queryClient.invalidateQueries({ queryKey: queryKeys.cartCount });
+    },
+  });
+}
+
+export function useMergeCart() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => {
+      console.log('🔄 Executing cart merge...');
+      
+      // Vérifier qu'on a un token avant d'appeler
+      const token = typeof window !== 'undefined' 
+        ? localStorage.getItem('rexel_access_token') 
+        : null;
+      
+      if (!token) {
+        console.log('🚫 No auth token, skipping merge');
+        throw new Error('User not authenticated');
+      }
+      
+      return cartService.mergeCart();
+    },
+    onSuccess: (data) => {
+      console.log('✅ Cart merge successful:', data);
+      queryClient.invalidateQueries({ queryKey: queryKeys.cart });
+      queryClient.invalidateQueries({ queryKey: queryKeys.cartCount });
+    },
+    onError: (error) => {
+      console.error('❌ Cart merge failed:', error);
+      // Ne pas rediriger ici, laisser l'interceptor gérer
     },
   });
 }

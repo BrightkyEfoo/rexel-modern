@@ -68,7 +68,7 @@ export function BrandsSection() {
         <div className="text-center">
           <Link
             href="/marques"
-            className="inline-flex items-center space-x-2 text-[#162e77] hover:text-[#1e40af] font-semibold text-lg group"
+            className="inline-flex items-center space-x-2 text-primary-dark hover:text-primary-hover font-semibold text-lg group"
           >
             <span>Voir tous nos partenaires</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />

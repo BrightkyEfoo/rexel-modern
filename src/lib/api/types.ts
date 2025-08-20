@@ -55,9 +55,9 @@ export interface Product {
   description?: string;
   shortDescription?: string;
   sku?: string;
-  price: number;
-  salePrice?: number;
-  stockQuantity: number;
+  price: number | string;
+  salePrice?: number | string;
+  stockQuantity: number ;
   manageStock: boolean;
   inStock: boolean;
   isFeatured: boolean;
@@ -123,9 +123,15 @@ export interface Brand {
 
 export interface User {
   id: number;
-  email: string;
+  firstName?: string;
+  lastName?: string;
   fullName?: string;
+  email: string;
+  company?: string;
+  phone?: string;
   type: UserType;
+  isVerified?: boolean;
+  emailVerifiedAt?: string;
   createdAt: string;
   updatedAt: string;
   
@@ -290,6 +296,32 @@ export interface RegisterData {
   lastName: string;
   company?: string;
   phone?: string;
+}
+
+// Cart Types
+export interface CartItem {
+  id: number;
+  cartId: number;
+  product: Product;
+  quantity: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Cart {
+  id: number | null;
+  items: CartItem[];
+  totalItems: number;
+  totalPrice: number;
+}
+
+export interface CreateCartItemRequest {
+  productId: number;
+  quantity: number;
+}
+
+export interface UpdateCartItemRequest {
+  quantity: number;
 }
 
 export interface AuthResponse {
