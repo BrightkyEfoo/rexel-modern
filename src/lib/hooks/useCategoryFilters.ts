@@ -26,6 +26,9 @@ export function useCategoryFilters({ categorySlug, priceRange }: UseCategoryFilt
       sortOrder: (searchParams.get('order') as 'asc' | 'desc') || 'desc',
       page: Number(searchParams.get('page')) || 1,
       limit: Number(searchParams.get('limit')) || 20,
+      query: searchParams.get('search') || '',
+      inStock: searchParams.get('inStock') === 'true',
+      search: searchParams.get('search') || '',
     };
 
     // Marques

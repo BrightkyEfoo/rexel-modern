@@ -125,7 +125,7 @@ export default function FavoritesPage() {
         case 'name':
           return a.product.name.localeCompare(b.product.name);
         case 'price':
-          return a.product.price - b.product.price;
+          return Number(a.product.price) - Number(b.product.price);
         case 'added_date':
           return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
         default:
@@ -397,7 +397,7 @@ function FavoritesGrid({
                     </div>
                     <div className="text-right">
                       <div className="text-xl font-bold text-[#162e77]">
-                        {favorite.product.price.toFixed(2)} €
+                        {Number(favorite.product.price).toFixed(2)} €
                       </div>
                     </div>
                   </div>
@@ -496,7 +496,7 @@ function FavoritesGrid({
 
             <div className="flex items-center justify-between mb-3">
               <div className="text-lg font-bold text-[#162e77]">
-                {favorite.product.price.toFixed(2)} €
+                {Number(favorite.product.price).toFixed(2)} €
               </div>
               <div className="text-xs text-gray-500">
                 Ajouté le {new Date(favorite.addedAt).toLocaleDateString('fr-FR')}

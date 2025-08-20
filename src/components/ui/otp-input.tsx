@@ -113,7 +113,11 @@ export function OTPInput({
       {digits.map((digit, index) => (
         <Input
           key={index}
-          ref={(el) => (inputRefs.current[index] = el)}
+          ref={(el: HTMLInputElement | null) => {
+            if (el) {
+              inputRefs.current[index] = el;
+            }
+          }}
           type="text"
           inputMode="numeric"
           maxLength={1}

@@ -59,7 +59,7 @@ export function useCartSync() {
         
         if (backendItem) {
           await updateCartMutation.mutateAsync({
-            itemId: backendItem.id,
+            itemId: Number(backendItem.id),
             quantity,
           });
           refetchCart();
@@ -83,7 +83,7 @@ export function useCartSync() {
         );
         
         if (backendItem) {
-          await removeCartMutation.mutateAsync(backendItem.id);
+          await removeCartMutation.mutateAsync(Number(backendItem.id));
           refetchCart();
         }
       } catch (error) {
@@ -115,7 +115,7 @@ export function useCartSync() {
     items: localItems,
     totalItems: localItems.reduce((sum, item) => sum + item.quantity, 0),
     totalPrice: localItems.reduce((sum, item) => {
-      const price = parseFloat(item.product.salePrice || item.product.price);
+      const price = Number(item.product.salePrice || item.product.price);
       return sum + (price * item.quantity);
     }, 0),
     

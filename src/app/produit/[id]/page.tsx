@@ -259,10 +259,10 @@ export default function ProductDetailPage() {
             {/* Price */}
             <div className="space-y-2">
               <div className="text-3xl font-bold text-[#162e77]">
-                {currentPrice.toFixed(2)} € HT
+                {Number(currentPrice).toFixed(2)} € HT
               </div>
               <div className="text-lg text-gray-600">
-                {(currentPrice * 1.2).toFixed(2)} € TTC
+                {(Number(currentPrice) * 1.2).toFixed(2)} € TTC
               </div>
               <p className="text-sm text-gray-500">
                 Prix dégressifs disponibles selon quantité

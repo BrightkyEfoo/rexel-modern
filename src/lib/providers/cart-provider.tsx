@@ -38,7 +38,7 @@ export function CartProvider({ children }: CartProviderProps) {
       
       // Convertir les items backend au format du store Zustand
       const zustandItems = backendItems.map(item => ({
-        id: item.id.toString(),
+        id: item.id?.toString() || '0',
         product: item.product,
         quantity: item.quantity,
         addedAt: item.createdAt || new Date().toISOString(),

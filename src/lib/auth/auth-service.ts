@@ -32,6 +32,11 @@ export class AuthService {
         localStorage.setItem(this.USER_KEY, JSON.stringify(response.data.data.user));
 
         return {
+          data: {
+            userId: response.data.data.user.id,
+            email: response.data.data.user.email,
+            requiresVerification: false,
+          },
           accessToken: response.data.data.token,
           refreshToken: '', // Pas utilisé dans notre implémentation
           expiresIn: 86400, // 24h par défaut

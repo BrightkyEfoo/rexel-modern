@@ -105,7 +105,7 @@ export const useCartStore = create<CartStore>()(
 
       getTotalPrice: () => {
         return get().items.reduce((total, item) => {
-          const price = parseFloat(item.product.salePrice || item.product.price);
+          const price = Number(item.product.salePrice || item.product.price);
           return total + (price * item.quantity);
         }, 0);
       },

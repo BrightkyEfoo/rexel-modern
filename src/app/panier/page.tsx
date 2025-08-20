@@ -1,17 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
+"use client";
 
-import { Footer } from '@/components/layout/Footer';
-import { Header } from '@/components/layout/Header';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { useAuthUser } from '@/lib/auth/auth-hooks';
-import { useCart, useRemoveFromCart, useUpdateCartItem } from '@/lib/query/hooks';
+import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { useAuthUser } from "@/lib/auth/auth-hooks";
+import {
+  useCart,
+  useRemoveFromCart,
+  useUpdateCartItem,
+} from "@/lib/query/hooks";
 import {
   AlertCircle,
   ArrowLeft,
@@ -26,13 +30,13 @@ import {
   Shield,
   ShoppingCart,
   Trash2,
-  Truck
-} from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+  Truck,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
-type CheckoutStep = 'cart' | 'shipping' | 'payment' | 'confirmation';
+type CheckoutStep = "cart" | "shipping" | "payment" | "confirmation";
 
 export default function CartPage() {
   const { user, isAuthenticated } = useAuthUser();
@@ -40,26 +44,32 @@ export default function CartPage() {
   const updateCartItemMutation = useUpdateCartItem();
   const removeFromCartMutation = useRemoveFromCart();
 
-  const [currentStep, setCurrentStep] = useState<CheckoutStep>('cart');
-  const [promoCode, setPromoCode] = useState('');
+  const [currentStep, setCurrentStep] = useState<CheckoutStep>("cart");
+  const [promoCode, setPromoCode] = useState("");
   const [promoDiscount, setPromoDiscount] = useState(0);
-  const [selectedShippingAddress, setSelectedShippingAddress] = useState<string>('');
-  const [selectedBillingAddress, setSelectedBillingAddress] = useState<string>('');
-  const [paymentMethod, setPaymentMethod] = useState<string>('');
-  const [orderNotes, setOrderNotes] = useState('');
+  const [selectedShippingAddress, setSelectedShippingAddress] =
+    useState<string>("");
+  const [selectedBillingAddress, setSelectedBillingAddress] =
+    useState<string>("");
+  const [paymentMethod, setPaymentMethod] = useState<string>("");
+  const [orderNotes, setOrderNotes] = useState("");
 
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
-      window.location.href = '/auth/login';
+      window.location.href = "/auth/login";
     }
   }, [isAuthenticated]);
 
   // Set default addresses
   useEffect(() => {
     if (user?.addresses) {
-      const defaultShipping = user.addresses.find(addr => addr.type === 'shipping' && addr.isDefault);
-      const defaultBilling = user.addresses.find(addr => addr.type === 'billing' && addr.isDefault);
+      const defaultShipping = user.addresses.find(
+        (addr) => addr.type === "shipping" && addr.isDefault
+      );
+      const defaultBilling = user.addresses.find(
+        (addr) => addr.type === "billing" && addr.isDefault
+      );
 
       if (defaultShipping) setSelectedShippingAddress(defaultShipping.id);
       if (defaultBilling) setSelectedBillingAddress(defaultBilling.id);
@@ -71,27 +81,27 @@ export default function CartPage() {
 
     try {
       await updateCartItemMutation.mutateAsync({
-        itemId,
-        quantity: newQuantity
+        itemId: Number(itemId),
+        quantity: newQuantity,
       });
     } catch (error) {
-      console.error('Error updating quantity:', error);
+      console.error("Error updating quantity:", error);
     }
   };
 
   const handleRemoveItem = async (itemId: string) => {
     try {
-      await removeFromCartMutation.mutateAsync(itemId);
+      await removeFromCartMutation.mutateAsync(Number(itemId));
     } catch (error) {
-      console.error('Error removing item:', error);
+      console.error("Error removing item:", error);
     }
   };
 
   const handleApplyPromoCode = () => {
     // Mock promo code validation
-    if (promoCode.toLowerCase() === 'bienv202') {
+    if (promoCode.toLowerCase() === "bienv202") {
       setPromoDiscount(20);
-    } else if (promoCode.toLowerCase() === 'fidele10') {
+    } else if (promoCode.toLowerCase() === "fidele10") {
       setPromoDiscount(10);
     } else {
       setPromoDiscount(0);
@@ -99,7 +109,8 @@ export default function CartPage() {
   };
 
   const calculateTotals = () => {
-    if (!cart?.data) return { subtotal: 0, shipping: 0, tax: 0, discount: 0, total: 0 };
+    if (!cart?.data)
+      return { subtotal: 0, shipping: 0, tax: 0, discount: 0, total: 0 };
 
     const subtotal = cart.data.subtotal || 0;
     const shipping = cart.data.shippingAmount || 0;
@@ -171,9 +182,7 @@ export default function CartPage() {
               Découvrez nos produits et ajoutez-les à votre panier
             </p>
             <Button asChild>
-              <Link href="/categories">
-                Découvrir nos produits
-              </Link>
+              <Link href="/categories">Découvrir nos produits</Link>
             </Button>
           </div>
         </div>
@@ -189,7 +198,9 @@ export default function CartPage() {
       <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
-          <Link href="/" className="hover:text-[#162e77]">Accueil</Link>
+          <Link href="/" className="hover:text-[#162e77]">
+            Accueil
+          </Link>
           <span>/</span>
           <span className="text-gray-900">Panier</span>
         </nav>
@@ -198,26 +209,29 @@ export default function CartPage() {
         <div className="mb-8">
           <div className="flex items-center justify-center space-x-4">
             {[
-              { step: 'cart', label: 'Panier', icon: ShoppingCart },
-              { step: 'shipping', label: 'Livraison', icon: Truck },
-              { step: 'payment', label: 'Paiement', icon: CreditCard },
-              { step: 'confirmation', label: 'Confirmation', icon: Check }
+              { step: "cart", label: "Panier", icon: ShoppingCart },
+              { step: "shipping", label: "Livraison", icon: Truck },
+              { step: "payment", label: "Paiement", icon: CreditCard },
+              { step: "confirmation", label: "Confirmation", icon: Check },
             ].map(({ step, label, icon: Icon }, index) => (
               <div key={step} className="flex items-center">
                 <div
                   className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
                     step === currentStep
-                      ? 'border-[#162e77] bg-[#162e77] text-white'
-                      : index < ['cart', 'shipping', 'payment', 'confirmation'].indexOf(currentStep)
-                      ? 'border-green-500 bg-green-500 text-white'
-                      : 'border-gray-300 text-gray-400'
+                      ? "border-[#162e77] bg-[#162e77] text-white"
+                      : index <
+                        ["cart", "shipping", "payment", "confirmation"].indexOf(
+                          currentStep
+                        )
+                      ? "border-green-500 bg-green-500 text-white"
+                      : "border-gray-300 text-gray-400"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
                 </div>
                 <span
                   className={`ml-2 text-sm font-medium ${
-                    step === currentStep ? 'text-[#162e77]' : 'text-gray-500'
+                    step === currentStep ? "text-[#162e77]" : "text-gray-500"
                   }`}
                 >
                   {label}
@@ -231,7 +245,7 @@ export default function CartPage() {
         </div>
 
         {/* Cart Step */}
-        {currentStep === 'cart' && (
+        {currentStep === "cart" && (
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-6">
@@ -247,7 +261,7 @@ export default function CartPage() {
                         {/* Product Image */}
                         <div className="w-24 h-24 bg-gray-50 rounded-lg flex-shrink-0">
                           <Image
-                            src={item.product.imageUrl || '/placeholder.png'}
+                            src={item.product.imageUrl || "/placeholder.png"}
                             alt={item.product.name}
                             width={96}
                             height={96}
@@ -266,8 +280,12 @@ export default function CartPage() {
                                 {item.product.name}
                               </Link>
                               <div className="text-sm text-gray-600 mt-1">
-                                <Badge variant="secondary">{item.product.brand?.name}</Badge>
-                                <span className="ml-2">SKU: {item.product.sku}</span>
+                                <Badge variant="secondary">
+                                  {item.product.brand?.name}
+                                </Badge>
+                                <span className="ml-2">
+                                  SKU: {item.product.sku}
+                                </span>
                               </div>
                               {item.variant && (
                                 <div className="text-sm text-gray-600 mt-1">
@@ -277,15 +295,15 @@ export default function CartPage() {
                               <div className="flex items-center mt-2">
                                 <div
                                   className={`w-2 h-2 rounded-full mr-2 ${
-                                    item.product.availability === 'in_stock'
-                                      ? 'bg-green-500'
-                                      : 'bg-red-500'
+                                    item.product.availability === "in_stock"
+                                      ? "bg-green-500"
+                                      : "bg-red-500"
                                   }`}
                                 />
                                 <span className="text-sm text-gray-600">
-                                  {item.product.availability === 'in_stock'
-                                    ? 'En stock'
-                                    : 'Rupture de stock'}
+                                  {item.product.availability === "in_stock"
+                                    ? "En stock"
+                                    : "Rupture de stock"}
                                 </span>
                               </div>
                             </div>
@@ -306,16 +324,31 @@ export default function CartPage() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                                  disabled={item.quantity <= 1 || updateCartItemMutation.isPending}
+                                  onClick={() =>
+                                    handleQuantityChange(
+                                      item.id?.toString() || "",
+                                      item.quantity - 1
+                                    )
+                                  }
+                                  disabled={
+                                    item.quantity <= 1 ||
+                                    updateCartItemMutation.isPending
+                                  }
                                 >
                                   <Minus className="h-4 w-4" />
                                 </Button>
-                                <span className="px-4 py-2 font-medium">{item.quantity}</span>
+                                <span className="px-4 py-2 font-medium">
+                                  {item.quantity}
+                                </span>
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                  onClick={() =>
+                                    handleQuantityChange(
+                                      item.id?.toString() || "",
+                                      item.quantity + 1
+                                    )
+                                  }
                                   disabled={updateCartItemMutation.isPending}
                                 >
                                   <Plus className="h-4 w-4" />
@@ -330,7 +363,7 @@ export default function CartPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleRemoveItem(item.id)}
+                                onClick={() => handleRemoveItem(item.id?.toString() || "")}
                                 disabled={removeFromCartMutation.isPending}
                                 className="text-red-600 hover:text-red-700"
                               >
@@ -416,7 +449,7 @@ export default function CartPage() {
                   {/* Checkout Button */}
                   <Button
                     className="w-full bg-[#162e77] hover:bg-[#1e40af] text-white font-semibold"
-                    onClick={() => setCurrentStep('shipping')}
+                    onClick={() => setCurrentStep("shipping")}
                   >
                     Passer la commande
                     <ArrowRight className="w-4 h-4 ml-2" />
@@ -453,15 +486,20 @@ export default function CartPage() {
                   <div className="space-y-4">
                     {/* Mock recommended products */}
                     {[
-                      { name: 'Interrupteur va-et-vient', price: 8.90 },
-                      { name: 'Boîte de dérivation', price: 3.50 }
+                      { name: "Interrupteur va-et-vient", price: 8.9 },
+                      { name: "Boîte de dérivation", price: 3.5 },
                     ].map((product, index) => (
-                      <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg">
+                      <div
+                        key={index}
+                        className="flex items-center space-x-3 p-3 border rounded-lg"
+                      >
                         <div className="w-12 h-12 bg-gray-100 rounded" />
                         <div className="flex-1">
-                          <div className="font-medium text-sm">{product.name}</div>
+                          <div className="font-medium text-sm">
+                            {product.name}
+                          </div>
                           <div className="text-sm text-[#162e77] font-semibold">
-                            {product.price.toFixed(2)} €
+                            {Number(product.price).toFixed(2)} €
                           </div>
                         </div>
                         <Button size="sm" variant="outline">
@@ -477,34 +515,34 @@ export default function CartPage() {
         )}
 
         {/* Shipping Step */}
-        {currentStep === 'shipping' && (
+        {currentStep === "shipping" && (
           <ShippingStep
             user={user}
             selectedShippingAddress={selectedShippingAddress}
             setSelectedShippingAddress={setSelectedShippingAddress}
             selectedBillingAddress={selectedBillingAddress}
             setSelectedBillingAddress={setSelectedBillingAddress}
-            onNext={() => setCurrentStep('payment')}
-            onBack={() => setCurrentStep('cart')}
+            onNext={() => setCurrentStep("payment")}
+            onBack={() => setCurrentStep("cart")}
             totals={totals}
           />
         )}
 
         {/* Payment Step */}
-        {currentStep === 'payment' && (
+        {currentStep === "payment" && (
           <PaymentStep
             paymentMethod={paymentMethod}
             setPaymentMethod={setPaymentMethod}
             orderNotes={orderNotes}
             setOrderNotes={setOrderNotes}
-            onNext={() => setCurrentStep('confirmation')}
-            onBack={() => setCurrentStep('shipping')}
+            onNext={() => setCurrentStep("confirmation")}
+            onBack={() => setCurrentStep("shipping")}
             totals={totals}
           />
         )}
 
         {/* Confirmation Step */}
-        {currentStep === 'confirmation' && (
+        {currentStep === "confirmation" && (
           <ConfirmationStep
             cart={cartData}
             totals={totals}
@@ -542,12 +580,14 @@ function ShippingStep({
   setSelectedBillingAddress,
   onNext,
   onBack,
-  totals
+  totals,
 }: ShippingStepProps) {
   return (
     <div className="grid lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-6">
-        <h2 className="text-3xl font-bold text-gray-900">Informations de livraison</h2>
+        <h2 className="text-3xl font-bold text-gray-900">
+          Informations de livraison
+        </h2>
 
         {/* Shipping Address */}
         <Card>
@@ -555,38 +595,48 @@ function ShippingStep({
             <CardTitle>Adresse de livraison</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {user?.addresses?.filter((addr: any) => addr.type === 'shipping').map((address: any) => (
-              <div
-                key={address.id}
-                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                  selectedShippingAddress === address.id
-                    ? 'border-[#162e77] bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-                onClick={() => setSelectedShippingAddress(address.id)}
-              >
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="radio"
-                    checked={selectedShippingAddress === address.id}
-                    onChange={() => setSelectedShippingAddress(address.id)}
-                    className="text-[#162e77]"
-                  />
-                  <div className="flex-1">
-                    <div className="font-semibold">{address.name}</div>
-                    {address.company && <div className="text-sm text-gray-600">{address.company}</div>}
-                    <div className="text-sm text-gray-600">
-                      {address.street}<br />
-                      {address.postalCode} {address.city}<br />
-                      {address.country}
+            {user?.addresses
+              ?.filter((addr: any) => addr.type === "shipping")
+              .map((address: any) => (
+                <div
+                  key={address.id}
+                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                    selectedShippingAddress === address.id
+                      ? "border-[#162e77] bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => setSelectedShippingAddress(address.id)}
+                >
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      checked={selectedShippingAddress === address.id}
+                      onChange={() => setSelectedShippingAddress(address.id)}
+                      className="text-[#162e77]"
+                    />
+                    <div className="flex-1">
+                      <div className="font-semibold">{address.name}</div>
+                      {address.company && (
+                        <div className="text-sm text-gray-600">
+                          {address.company}
+                        </div>
+                      )}
+                      <div className="text-sm text-gray-600">
+                        {address.street}
+                        <br />
+                        {address.postalCode} {address.city}
+                        <br />
+                        {address.country}
+                      </div>
+                      {address.isDefault && (
+                        <Badge variant="secondary" className="mt-2">
+                          Par défaut
+                        </Badge>
+                      )}
                     </div>
-                    {address.isDefault && (
-                      <Badge variant="secondary" className="mt-2">Par défaut</Badge>
-                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
             <Button variant="outline" className="w-full">
               <Plus className="w-4 h-4 mr-2" />
               Ajouter une nouvelle adresse
@@ -609,7 +659,7 @@ function ShippingStep({
                   if (e.target.checked) {
                     setSelectedBillingAddress(selectedShippingAddress);
                   } else {
-                    setSelectedBillingAddress('');
+                    setSelectedBillingAddress("");
                   }
                 }}
                 className="text-[#162e77]"
@@ -621,38 +671,48 @@ function ShippingStep({
 
             {selectedBillingAddress !== selectedShippingAddress && (
               <>
-                {user?.addresses?.filter((addr: any) => addr.type === 'billing').map((address: any) => (
-                  <div
-                    key={address.id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                      selectedBillingAddress === address.id
-                        ? 'border-[#162e77] bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() => setSelectedBillingAddress(address.id)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="radio"
-                        checked={selectedBillingAddress === address.id}
-                        onChange={() => setSelectedBillingAddress(address.id)}
-                        className="text-[#162e77]"
-                      />
-                      <div className="flex-1">
-                        <div className="font-semibold">{address.name}</div>
-                        {address.company && <div className="text-sm text-gray-600">{address.company}</div>}
-                        <div className="text-sm text-gray-600">
-                          {address.street}<br />
-                          {address.postalCode} {address.city}<br />
-                          {address.country}
+                {user?.addresses
+                  ?.filter((addr: any) => addr.type === "billing")
+                  .map((address: any) => (
+                    <div
+                      key={address.id}
+                      className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                        selectedBillingAddress === address.id
+                          ? "border-[#162e77] bg-blue-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                      onClick={() => setSelectedBillingAddress(address.id)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <input
+                          type="radio"
+                          checked={selectedBillingAddress === address.id}
+                          onChange={() => setSelectedBillingAddress(address.id)}
+                          className="text-[#162e77]"
+                        />
+                        <div className="flex-1">
+                          <div className="font-semibold">{address.name}</div>
+                          {address.company && (
+                            <div className="text-sm text-gray-600">
+                              {address.company}
+                            </div>
+                          )}
+                          <div className="text-sm text-gray-600">
+                            {address.street}
+                            <br />
+                            {address.postalCode} {address.city}
+                            <br />
+                            {address.country}
+                          </div>
+                          {address.isDefault && (
+                            <Badge variant="secondary" className="mt-2">
+                              Par défaut
+                            </Badge>
+                          )}
                         </div>
-                        {address.isDefault && (
-                          <Badge variant="secondary" className="mt-2">Par défaut</Badge>
-                        )}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </>
             )}
           </CardContent>
@@ -667,10 +727,17 @@ function ShippingStep({
             <div className="space-y-3">
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <input type="radio" name="shipping" defaultChecked className="text-[#162e77]" />
+                  <input
+                    type="radio"
+                    name="shipping"
+                    defaultChecked
+                    className="text-[#162e77]"
+                  />
                   <div>
                     <div className="font-semibold">Livraison standard</div>
-                    <div className="text-sm text-gray-600">3-5 jours ouvrés</div>
+                    <div className="text-sm text-gray-600">
+                      3-5 jours ouvrés
+                    </div>
                   </div>
                 </div>
                 <div className="text-right">
@@ -679,7 +746,11 @@ function ShippingStep({
               </div>
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <input type="radio" name="shipping" className="text-[#162e77]" />
+                  <input
+                    type="radio"
+                    name="shipping"
+                    className="text-[#162e77]"
+                  />
                   <div>
                     <div className="font-semibold">Livraison express</div>
                     <div className="text-sm text-gray-600">24-48h</div>
@@ -691,10 +762,16 @@ function ShippingStep({
               </div>
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <input type="radio" name="shipping" className="text-[#162e77]" />
+                  <input
+                    type="radio"
+                    name="shipping"
+                    className="text-[#162e77]"
+                  />
                   <div>
                     <div className="font-semibold">Retrait en agence</div>
-                    <div className="text-sm text-gray-600">Disponible sous 2h</div>
+                    <div className="text-sm text-gray-600">
+                      Disponible sous 2h
+                    </div>
                   </div>
                 </div>
                 <div className="text-right">
@@ -779,7 +856,7 @@ function PaymentStep({
   setOrderNotes,
   onNext,
   onBack,
-  totals
+  totals,
 }: PaymentStepProps) {
   return (
     <div className="grid lg:grid-cols-3 gap-8">
@@ -795,65 +872,71 @@ function PaymentStep({
             <div className="space-y-3">
               <div
                 className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                  paymentMethod === 'credit_card'
-                    ? 'border-[#162e77] bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                  paymentMethod === "credit_card"
+                    ? "border-[#162e77] bg-blue-50"
+                    : "border-gray-200 hover:border-gray-300"
                 }`}
-                onClick={() => setPaymentMethod('credit_card')}
+                onClick={() => setPaymentMethod("credit_card")}
               >
                 <div className="flex items-center space-x-3">
                   <input
                     type="radio"
-                    checked={paymentMethod === 'credit_card'}
-                    onChange={() => setPaymentMethod('credit_card')}
+                    checked={paymentMethod === "credit_card"}
+                    onChange={() => setPaymentMethod("credit_card")}
                     className="text-[#162e77]"
                   />
                   <CreditCard className="w-5 h-5 text-gray-600" />
                   <div>
                     <div className="font-semibold">Carte bancaire</div>
-                    <div className="text-sm text-gray-600">Visa, MasterCard, American Express</div>
+                    <div className="text-sm text-gray-600">
+                      Visa, MasterCard, American Express
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div
                 className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                  paymentMethod === 'bank_transfer'
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-border/80'
+                  paymentMethod === "bank_transfer"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-border/80"
                 }`}
-                onClick={() => setPaymentMethod('bank_transfer')}
+                onClick={() => setPaymentMethod("bank_transfer")}
               >
                 <div className="flex items-center space-x-3">
                   <input
                     type="radio"
-                    checked={paymentMethod === 'bank_transfer'}
-                    onChange={() => setPaymentMethod('bank_transfer')}
+                    checked={paymentMethod === "bank_transfer"}
+                    onChange={() => setPaymentMethod("bank_transfer")}
                     className="text-primary"
                   />
                   <div className="w-5 h-5 bg-primary/10 rounded flex items-center justify-center">
-                    <span className="text-xs font-semibold text-primary">€</span>
+                    <span className="text-xs font-semibold text-primary">
+                      €
+                    </span>
                   </div>
                   <div>
                     <div className="font-semibold">Virement bancaire</div>
-                    <div className="text-sm text-muted-foreground">Paiement à 30 jours</div>
+                    <div className="text-sm text-muted-foreground">
+                      Paiement à 30 jours
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div
                 className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                  paymentMethod === 'check'
-                    ? 'border-[#162e77] bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                  paymentMethod === "check"
+                    ? "border-[#162e77] bg-blue-50"
+                    : "border-gray-200 hover:border-gray-300"
                 }`}
-                onClick={() => setPaymentMethod('check')}
+                onClick={() => setPaymentMethod("check")}
               >
                 <div className="flex items-center space-x-3">
                   <input
                     type="radio"
-                    checked={paymentMethod === 'check'}
-                    onChange={() => setPaymentMethod('check')}
+                    checked={paymentMethod === "check"}
+                    onChange={() => setPaymentMethod("check")}
                     className="text-[#162e77]"
                   />
                   <div className="w-5 h-5 bg-green-100 rounded flex items-center justify-center">
@@ -861,7 +944,9 @@ function PaymentStep({
                   </div>
                   <div>
                     <div className="font-semibold">Chèque</div>
-                    <div className="text-sm text-gray-600">À l'ordre de KesiMarket</div>
+                    <div className="text-sm text-gray-600">
+                      À l'ordre de KesiMarket
+                    </div>
                   </div>
                 </div>
               </div>
@@ -870,7 +955,7 @@ function PaymentStep({
         </Card>
 
         {/* Credit Card Form */}
-        {paymentMethod === 'credit_card' && (
+        {paymentMethod === "credit_card" && (
           <Card>
             <CardHeader>
               <CardTitle>Informations de carte</CardTitle>
@@ -887,19 +972,11 @@ function PaymentStep({
                 </div>
                 <div>
                   <Label htmlFor="expiry">Date d'expiration</Label>
-                  <Input
-                    id="expiry"
-                    placeholder="MM/YY"
-                    className="mt-1"
-                  />
+                  <Input id="expiry" placeholder="MM/YY" className="mt-1" />
                 </div>
                 <div>
                   <Label htmlFor="cvv">CVV</Label>
-                  <Input
-                    id="cvv"
-                    placeholder="123"
-                    className="mt-1"
-                  />
+                  <Input id="cvv" placeholder="123" className="mt-1" />
                 </div>
                 <div className="col-span-2">
                   <Label htmlFor="card-name">Nom sur la carte</Label>
@@ -940,12 +1017,18 @@ function PaymentStep({
                 required
               />
               <label htmlFor="terms" className="text-sm text-gray-700">
-                J'accepte les{' '}
-                <Link href="/conditions-generales" className="text-[#162e77] hover:underline">
+                J'accepte les{" "}
+                <Link
+                  href="/conditions-generales"
+                  className="text-[#162e77] hover:underline"
+                >
                   conditions générales de vente
-                </Link>{' '}
-                et la{' '}
-                <Link href="/politique-confidentialite" className="text-[#162e77] hover:underline">
+                </Link>{" "}
+                et la{" "}
+                <Link
+                  href="/politique-confidentialite"
+                  className="text-[#162e77] hover:underline"
+                >
                   politique de confidentialité
                 </Link>
               </label>
@@ -1039,9 +1122,12 @@ function ConfirmationStep({
   selectedShippingAddress,
   selectedBillingAddress,
   paymentMethod,
-  orderNotes
+  orderNotes,
 }: ConfirmationStepProps) {
-  const orderNumber = `REX-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+  const orderNumber = `REX-${new Date().getFullYear()}-${Math.random()
+    .toString(36)
+    .substr(2, 9)
+    .toUpperCase()}`;
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -1053,7 +1139,8 @@ function ConfirmationStep({
           Commande confirmée !
         </h2>
         <p className="text-gray-600">
-          Merci pour votre commande. Vous recevrez un email de confirmation sous peu.
+          Merci pour votre commande. Vous recevrez un email de confirmation sous
+          peu.
         </p>
       </div>
 
@@ -1070,27 +1157,33 @@ function ConfirmationStep({
             </div>
             <div>
               <div className="font-semibold">Date de commande</div>
-              <div>{new Date().toLocaleDateString('fr-FR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}</div>
+              <div>
+                {new Date().toLocaleDateString("fr-FR", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </div>
             </div>
             <div>
               <div className="font-semibold">Mode de paiement</div>
               <div>
-                {paymentMethod === 'credit_card' && 'Carte bancaire'}
-                {paymentMethod === 'bank_transfer' && 'Virement bancaire'}
-                {paymentMethod === 'check' && 'Chèque'}
+                {paymentMethod === "credit_card" && "Carte bancaire"}
+                {paymentMethod === "bank_transfer" && "Virement bancaire"}
+                {paymentMethod === "check" && "Chèque"}
               </div>
             </div>
             <div>
               <div className="font-semibold">Livraison prévue</div>
-              <div>{new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}</div>
+              <div>
+                {new Date(
+                  Date.now() + 3 * 24 * 60 * 60 * 1000
+                ).toLocaleDateString("fr-FR", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -1138,10 +1231,13 @@ function ConfirmationStep({
         <CardContent>
           <div className="space-y-4">
             {cart.items.map((item: any) => (
-              <div key={item.id} className="flex items-center space-x-4 py-4 border-b border-gray-100 last:border-b-0">
+              <div
+                key={item.id}
+                className="flex items-center space-x-4 py-4 border-b border-gray-100 last:border-b-0"
+              >
                 <div className="w-16 h-16 bg-gray-50 rounded-lg">
                   <Image
-                    src={item.product.imageUrl || '/placeholder.png'}
+                    src={item.product.imageUrl || "/placeholder.png"}
                     alt={item.product.name}
                     width={64}
                     height={64}
@@ -1151,7 +1247,8 @@ function ConfirmationStep({
                 <div className="flex-1">
                   <div className="font-semibold">{item.product.name}</div>
                   <div className="text-sm text-gray-600">
-                    Quantité: {item.quantity} • {item.price.toFixed(2)} € / unité
+                    Quantité: {item.quantity} • {item.price.toFixed(2)} € /
+                    unité
                   </div>
                 </div>
                 <div className="font-semibold">
@@ -1172,9 +1269,7 @@ function ConfirmationStep({
           </Link>
         </Button>
         <Button asChild>
-          <Link href="/commandes">
-            Voir mes commandes
-          </Link>
+          <Link href="/commandes">Voir mes commandes</Link>
         </Button>
       </div>
     </div>

@@ -310,7 +310,7 @@ export default function AdminDashboardPage() {
                           <div className="text-xs text-gray-600">{product.brand?.name}</div>
                         </div>
                         <div className="text-sm font-semibold text-[#162e77]">
-                          {product.price.toFixed(2)} €
+                          {Number(product.price).toFixed(2)} €
                         </div>
                       </div>
                     )) || []}
@@ -428,7 +428,7 @@ export default function AdminDashboardPage() {
                             <Badge variant="secondary">{product.category?.name}</Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {product.price.toFixed(2)} €
+                            {Number(product.price).toFixed(2)} €
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <Badge

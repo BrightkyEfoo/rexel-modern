@@ -103,15 +103,15 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
                         {item.product.salePrice ? (
                           <>
                             <span className="font-semibold text-sm">
-                              {parseFloat(item.product.salePrice).toFixed(2)} €
+                              {Number(item.product.salePrice).toFixed(2)} €
                             </span>
                             <span className="text-xs text-muted-foreground line-through">
-                              {parseFloat(item.product.price).toFixed(2)} €
+                              {Number(item.product.price).toFixed(2)} €
                             </span>
                           </>
                         ) : (
                           <span className="font-semibold text-sm">
-                            {parseFloat(item.product.price).toFixed(2)} €
+                            {Number(item.product.price).toFixed(2)} €
                           </span>
                         )}
                       </div>

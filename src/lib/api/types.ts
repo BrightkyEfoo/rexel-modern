@@ -158,7 +158,7 @@ export interface Address {
 }
 
 export interface CartItem {
-  id: string;
+  id: string | number | null;
   productId: number;
   product: Product;
   variantId?: string;
@@ -170,7 +170,7 @@ export interface CartItem {
 }
 
 export interface Cart {
-  id: string;
+  id: string | number | null;
   userId: number;
   items: CartItem[];
   totalItems: number;
@@ -274,6 +274,8 @@ export interface SearchFilters {
   sortOrder?: 'asc' | 'desc';
   page?: number;
   limit?: number;
+  inStock?: boolean;
+  search?: string;
 }
 
 export interface SearchSuggestion {
@@ -300,7 +302,7 @@ export interface RegisterData {
 
 // Cart Types
 export interface CartItem {
-  id: number;
+  id: number | string | null;
   cartId: number;
   product: Product;
   quantity: number;
@@ -309,7 +311,7 @@ export interface CartItem {
 }
 
 export interface Cart {
-  id: number | null;
+  id: number | string | null;
   items: CartItem[];
   totalItems: number;
   totalPrice: number;
@@ -325,6 +327,11 @@ export interface UpdateCartItemRequest {
 }
 
 export interface AuthResponse {
+  data: {
+    userId: number;
+    email: string;
+    requiresVerification: boolean;
+  };
   user: User;
   accessToken: string;
   refreshToken: string;
