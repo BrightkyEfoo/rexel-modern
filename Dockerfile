@@ -6,13 +6,13 @@ FROM $NODE_IMAGE AS base
 FROM base AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm i --legacy-peer-deps
 
 # Production only deps stage  
 FROM base AS production-deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --omit=dev --only=production
+RUN npm i --legacy-peer-deps --omit=dev --only=production
 
 # Build stage
 FROM base AS build

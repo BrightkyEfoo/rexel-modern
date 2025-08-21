@@ -286,7 +286,7 @@ docker build --no-cache -t rexel-frontend-debug .
 
 # Vérifier les dépendances
 npm audit
-npm ci
+npm i --legacy-peer-deps
 ```
 
 #### 2. Problèmes de Connexion API
