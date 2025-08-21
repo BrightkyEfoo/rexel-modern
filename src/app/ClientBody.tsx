@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { type ReactNode } from 'react';
+import { Suspense, type ReactNode } from "react";
 
 interface ClientBodyProps {
   children: ReactNode;
@@ -8,8 +8,13 @@ interface ClientBodyProps {
 
 export default function ClientBody({ children }: ClientBodyProps) {
   return (
-    <body suppressHydrationWarning className="antialiased bg-background text-foreground font-sans">
-      {children}
-    </body>
+    <Suspense fallback={<div></div>}>
+      <body
+        suppressHydrationWarning
+        className="antialiased bg-background text-foreground font-sans"
+      >
+        {children}
+      </body>
+    </Suspense>
   );
 }
