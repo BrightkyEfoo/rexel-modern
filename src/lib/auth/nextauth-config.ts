@@ -40,7 +40,7 @@ export const authOptions: NextAuthOptions = {
               firstName: user.firstName,
               lastName: user.lastName,
               phone: user.phone,
-              userType: user.userType,
+              type: user.type,
               isEmailVerified: user.isEmailVerified,
               accessToken: token,
             };
@@ -87,7 +87,7 @@ export const authOptions: NextAuthOptions = {
         token.firstName = (user as any).firstName;
         token.lastName = (user as any).lastName;
         token.phone = (user as any).phone;
-        token.userType = (user as any).userType;
+        token.type = (user as any).type;
         token.isEmailVerified = (user as any).isEmailVerified;
         token.userId = user.id;
       }
@@ -103,7 +103,7 @@ export const authOptions: NextAuthOptions = {
         session.user.firstName = token.firstName as string;
         session.user.lastName = token.lastName as string;
         session.user.phone = token.phone as string;
-        session.user.userType = token.userType as string;
+        session.user.type = token.type as string;
         session.user.isEmailVerified = token.isEmailVerified as boolean;
       }
 

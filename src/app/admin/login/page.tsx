@@ -34,23 +34,35 @@ export default function AdminLoginPage() {
 
   // Vérifier si l'utilisateur est déjà connecté et admin
   useEffect(() => {
-    
+    console.log('🔍 Effect - isAuthenticated:', isAuthenticated, 'hasRole admin:', hasRole('admin'), 'user:', user);
     if (isAuthenticated && hasRole('admin')) {
+      console.log('✅ Redirecting to admin dashboard');
       router.push('/admin');
     }
-  }, [isAuthenticated, hasRole, router]);
+  }, [isAuthenticated, hasRole, router, user]);
 
   const onSubmit = async (data: AdminLoginFormData) => {
     try {
-      await loginMutation.mutateAsync(data);
-      // Le succès sera géré par l'effet ci-dessus
+      const result = await loginMutation.mutateAsync(data);
+      console.log('🔍 Login result:', result);
+      
+      // Attendre un petit délai pour que NextAuth mette à jour la session
+      setTimeout(() => {
+        console.log('🔍 Current user after delay:', user);
+        console.log('🔍 Is authenticated after delay:', isAuthenticated);
+        console.log('🔍 User type after delay:', user?.type);
+        console.log('🔍 Has admin role after delay:', hasRole('admin'));
+        
+        if (isAuthenticated && !hasRole('admin')) {
+          console.log('🔍 User authenticated but not admin - type:', user?.type);
+          form.setError('root', {
+            message: 'Vous n\'avez pas les permissions administrateur'
+          });
+        }
+      }, 1000);
+      
     } catch (error) {
-      // Les erreurs sont déjà gérées par le hook useLogin
-      if (!hasRole('admin') && isAuthenticated) {
-        form.setError('root', {
-          message: 'Vous n\'avez pas les permissions administrateur'
-        });
-      }
+      console.log('🔍 Login error:', error);
     }
   };
 

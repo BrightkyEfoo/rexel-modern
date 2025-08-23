@@ -1,17 +1,19 @@
-'use client';
+"use client";
 
-import { useSession, signIn, signOut } from 'next-auth/react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { nextAuthApiClient } from '@/lib/api/nextauth-client';
-import type { RegisterData } from '@/lib/api/types';
+import { useSession, signIn, signOut } from "next-auth/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { nextAuthApiClient } from "@/lib/api/nextauth-client";
+import type { RegisterData } from "@/lib/api/types";
 
 // Hook pour obtenir l'état d'authentification
 export function useAuth() {
   const { data: session, status } = useSession();
-  
-  const isLoading = status === 'loading';
-  const isAuthenticated = status === 'authenticated' && !!session;
-  
+
+  const isLoading = status === "loading";
+  const isAuthenticated = status === "authenticated" && !!session;
+
+  console.log("session", session);
+
   return {
     user: session?.user || null,
     session,
@@ -19,8 +21,9 @@ export function useAuth() {
     isLoading,
     status,
     // Helper pour vérifier les rôles
-    hasRole: (role: string) => session?.user?.userType === role,
-    hasAnyRole: (roles: string[]) => session?.user?.userType ? roles.includes(session.user.userType) : false,
+    hasRole: (role: string) => session?.user?.type === role,
+    hasAnyRole: (roles: string[]) =>
+      session?.user?.type ? roles.includes(session.user.type) : false,
   };
 }
 
@@ -29,8 +32,14 @@ export function useLogin() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      const result = await signIn('credentials', {
+    mutationFn: async ({
+      email,
+      password,
+    }: {
+      email: string;
+      password: string;
+    }) => {
+      const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
@@ -40,9 +49,9 @@ export function useLogin() {
         // Gérer les erreurs spéciales
         try {
           const errorData = JSON.parse(result.error);
-          if (errorData.type === 'VERIFICATION_REQUIRED') {
+          if (errorData.type === "VERIFICATION_REQUIRED") {
             throw {
-              type: 'VERIFICATION_REQUIRED',
+              type: "VERIFICATION_REQUIRED",
               message: errorData.message,
               userId: errorData.userId,
               email: errorData.email,
@@ -71,24 +80,24 @@ export function useLogout() {
     mutationFn: async () => {
       // Optionnel: Appeler l'API de déconnexion du backend
       try {
-        await nextAuthApiClient.post('/secured/auth/logout');
+        await nextAuthApiClient.post("/secured/auth/logout");
       } catch (error) {
-        console.warn('Backend logout failed:', error);
+        console.warn("Backend logout failed:", error);
       }
 
       // Déconnexion NextAuth
-      await signOut({ 
+      await signOut({
         redirect: false,
-        callbackUrl: '/' 
+        callbackUrl: "/",
       });
     },
     onSuccess: () => {
       // Nettoyer toutes les données en cache
       queryClient.clear();
-      
+
       // Rediriger vers la page d'accueil
-      if (typeof window !== 'undefined') {
-        window.location.href = '/';
+      if (typeof window !== "undefined") {
+        window.location.href = "/";
       }
     },
   });
@@ -98,8 +107,10 @@ export function useLogout() {
 export function useRegister() {
   return useMutation({
     mutationFn: async (userData: RegisterData) => {
-      console.log('🚀 Frontend register mutation called:', { email: userData.email });
-      
+      console.log("🚀 Frontend register mutation called:", {
+        email: userData.email,
+      });
+
       const response = await nextAuthApiClient.post<{
         message: string;
         data: {
@@ -107,12 +118,12 @@ export function useRegister() {
           email: string;
           requiresVerification: boolean;
         };
-      }>('/opened/auth/register', userData);
+      }>("/opened/auth/register", userData);
 
       if (response.data.data.requiresVerification) {
         // Retourner les informations pour la vérification
         throw {
-          type: 'VERIFICATION_REQUIRED',
+          type: "VERIFICATION_REQUIRED",
           message: response.data.message,
           userId: response.data.data.userId,
           email: response.data.data.email,
@@ -121,11 +132,11 @@ export function useRegister() {
 
       return response.data;
     },
-    onError: (error: any) => {
-      if (error.type === 'VERIFICATION_REQUIRED') {
+    onError: (error: { type: string }) => {
+      if (error.type === "VERIFICATION_REQUIRED") {
         throw error;
       }
-      console.error('❌ Registration error:', error);
+      console.error("❌ Registration error:", error);
     },
     retry: false,
   });
@@ -135,7 +146,7 @@ export function useRegister() {
 export function useVerifyOtp() {
   return useMutation({
     mutationFn: async ({ userId, otp }: { userId: number; otp: string }) => {
-      const response = await nextAuthApiClient.post('/opened/auth/verify-otp', {
+      const response = await nextAuthApiClient.post("/opened/auth/verify-otp", {
         userId,
         otp,
       });
@@ -148,7 +159,7 @@ export function useVerifyOtp() {
 export function useResendOtp() {
   return useMutation({
     mutationFn: async ({ userId }: { userId: number }) => {
-      const response = await nextAuthApiClient.post('/opened/auth/resend-otp', {
+      const response = await nextAuthApiClient.post("/opened/auth/resend-otp", {
         userId,
       });
       return response.data;

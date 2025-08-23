@@ -11,7 +11,7 @@ declare module 'next-auth' {
       firstName: string;
       lastName: string;
       phone: string;
-      userType: string;
+      type: string;
       isEmailVerified: boolean;
     };
   }
@@ -23,7 +23,7 @@ declare module 'next-auth' {
     firstName: string;
     lastName: string;
     phone: string;
-    userType: string;
+    type: string;
     isEmailVerified: boolean;
     accessToken: string;
   }
@@ -36,7 +36,7 @@ declare module 'next-auth/jwt' {
     firstName: string;
     lastName: string;
     phone: string;
-    userType: string;
+    type: string;
     isEmailVerified: boolean;
   }
 }
