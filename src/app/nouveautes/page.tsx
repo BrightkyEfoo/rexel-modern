@@ -3,6 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { ScrollToTop } from '@/components/ui/scroll-to-top';
 
 export default function NouveautesPage() {
   const nouveautes = [
@@ -97,7 +100,9 @@ export default function NouveautesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main>
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
         <div className="container mx-auto px-4 py-16">
@@ -235,13 +240,16 @@ export default function NouveautesPage() {
               <Sparkles className="w-5 h-5 mr-2" />
               Découvrir plus
             </Button>
-            <Button variant="outline" size="lg" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+            <Button variant="outline" size="lg" className="border-primary-foreground text-primary hover:bg-primary-foreground hover:text-primary">
               <ArrowRight className="w-5 h-5 mr-2" />
               Voir le catalogue
             </Button>
           </div>
         </div>
       </div>
+      </main>
+      <Footer />
+      <ScrollToTop />
     </div>
   );
 } 

@@ -889,9 +889,9 @@
       {
         "id": "1",
         "name": "Open",
-        "description": "Rexel vous accompagne dans vos obligations liées au décret tertiaire (Eco Energie Tertiaire) et dans vos démarches de réduction énergétiques.",
+        "description": "KesiMarket vous accompagne dans vos obligations liées au décret tertiaire (Eco Energie Tertiaire) et dans vos démarches de réduction énergétiques.",
         "imageUrl": "https://ext.same-assets.com/1793188226/2564760347.png",
-        "link": "https://open.rexelservices.fr/",
+        "link": "https://open.kesimarketservices.fr/",
         "features": ["Décret tertiaire", "Réduction énergétique", "Accompagnement"]
       },
       {
@@ -899,7 +899,7 @@
         "name": "Freshmile",
         "description": "Freshmile est un opérateur de charge qui vous accompagne dans la supervision de vos bornes de recharge (facturation, assistance, maintenance..etc).",
         "imageUrl": "https://ext.same-assets.com/1793188226/2344397350.png",
-        "link": "https://www.rexel.fr/frx/marques/freshmile",
+        "link": "https://www.kesimarket.fr/frx/marques/freshmile",
         "features": ["Bornes de recharge", "Facturation", "Maintenance"]
       },
       {
@@ -907,23 +907,23 @@
         "name": "Esabora",
         "description": "Avec Esabora, je gère facilement mon entreprise (devis, commandes, etc.), et mes installations électriques et factures sont toujours conformes selon les normes en vigueur.",
         "imageUrl": "https://ext.same-assets.com/1793188226/2951494861.png",
-        "link": "https://www.rexel.fr/frx/marques/esabora",
+        "link": "https://www.kesimarket.fr/frx/marques/esabora",
         "features": ["Gestion d'entreprise", "Devis", "Conformité"]
       },
       {
         "id": "4",
         "name": "Safir",
-        "description": "Installateurs labellisés RGE, déduisez directement le montant des primes sur votre facture d'achat chez Rexel.",
+        "description": "Installateurs labellisés RGE, déduisez directement le montant des primes sur votre facture d'achat chez KesiMarket.",
         "imageUrl": "https://ext.same-assets.com/1793188226/2692196257.png",
-        "link": "https://www.rexel.fr/frx/services/safir",
+        "link": "https://www.kesimarket.fr/frx/services/safir",
         "features": ["Label RGE", "Primes", "Déduction facture"]
       },
       {
         "id": "5",
         "name": "R+",
-        "description": "Avec Rexel, bénéficiez de services vous permettant de vous faire livrer sans quitter votre chantier tout en améliorant votre empreinte carbone.",
+        "description": "Avec KesiMarket, bénéficiez de services vous permettant de vous faire livrer sans quitter votre chantier tout en améliorant votre empreinte carbone.",
         "imageUrl": "https://ext.same-assets.com/1793188226/4171275297.png",
-        "link": "https://www.rexel.fr/frx/communication/rexel/rplus",
+        "link": "https://www.kesimarket.fr/frx/communication/kesimarket/rplus",
         "features": ["Livraison chantier", "Empreinte carbone", "Service mobile"]
       }
   ],
@@ -938,7 +938,7 @@
       {
         "id": "2",
         "name": "Configurateurs",
-        "description": "Rexel et ses partenaires offrent de nouveaux outils de configuration pour simplifier votre quotidien !",
+        "description": "KesiMarket et ses partenaires offrent de nouveaux outils de configuration pour simplifier votre quotidien !",
         "imageUrl": "https://ext.same-assets.com/1793188226/2912230969.png",
         "link": "/configurateurs"
       },
@@ -952,7 +952,7 @@
       {
         "id": "4",
         "name": "Reconnaissance tableau électrique",
-        "description": "Facilitez vos installations électriques avec la reconnaissance de tableaux Rexel !",
+        "description": "Facilitez vos installations électriques avec la reconnaissance de tableaux KesiMarket !",
         "imageUrl": "https://ext.same-assets.com/1793188226/3850197054.png",
         "link": "/reconnaissance-tableau"
       }

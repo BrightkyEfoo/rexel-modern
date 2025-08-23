@@ -31,6 +31,7 @@ export interface RequestConfig {
   cache?: boolean;
   cacheTime?: number;
   headers?: Record<string, string>;
+  params?: Record<string, unknown>;
 }
 
 // Types backend correspondants aux modèles AdonisJS

@@ -59,8 +59,8 @@ export default function VerifyOTPPage() {
     },
     onSuccess: (data) => {
       // Sauvegarder le token
-      localStorage.setItem('rexel_access_token', data.data.token);
-      localStorage.setItem('rexel_user', JSON.stringify(data.data.user));
+      localStorage.setItem('kesimarket_access_token', data.data.token);
+      localStorage.setItem('kesimarket_user', JSON.stringify(data.data.user));
       
       // Vérification réussie - rediriger vers la page précédente
       toast({

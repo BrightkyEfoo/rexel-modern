@@ -1,7 +1,7 @@
-# Product Context - Rexel Modern
+# Product Context - KesiMarket Modern
 
 ## Problème résolu
-Rexel Modern remplace un système e-commerce obsolète par une solution moderne, performante et maintenable.
+KesiMarket Modern remplace un système e-commerce obsolète par une solution moderne, performante et maintenable.
 
 ### Problèmes de l'ancien système
 - Interface utilisateur dépassée

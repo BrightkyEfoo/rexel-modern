@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { ShoppingCart, Heart, Eye, Star } from 'lucide-react';
+import { Heart, Eye, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Logo } from '@/components/ui/logo';
+import { ProductCardFooter } from '@/components/ui/product-card-footer';
+import { QuantitySelector } from '@/components/ui/quantity-selector';
 import { useCartSync } from '@/lib/hooks/useCartSync';
 import type { Product } from '@/lib/api/types';
 
@@ -26,15 +28,28 @@ export function ProductCard({
 }: ProductCardProps) {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
   
-  const { addItem, items } = useCartSync();
+  const { addItem, updateQuantity, removeItem, items } = useCartSync();
   
   // Fonctions utilitaires pour le panier
   const isItemInCart = (productId: string) => 
     items.some(item => item.id === productId);
-  
-  const getItemQuantity = (productId: string) => 
-    items.find(item => item.id === productId)?.quantity || 0;
+
+  // Gestionnaires d'événements
+  const handleAddToCart = () => {
+    addItem(product, selectedQuantity);
+  };
+
+  const handleRemoveFromCart = () => {
+    removeItem(product.id.toString());
+    setSelectedQuantity(1); // Reset la quantité à 1 après suppression
+  };
+
+  const handleEdit = () => {
+    // Modifier signifie mettre à jour la quantité dans le panier
+    updateQuantity(product.id.toString(), selectedQuantity);
+  };
 
   const hasDiscount = product.salePrice && Number(product.salePrice) < Number(product.price);
   const discountPercentage = hasDiscount 
@@ -167,6 +182,20 @@ export function ProductCard({
                   {product.stockQuantity} en stock
                 </p>
               )}
+
+              {/* Quantité */}
+              <div className="mt-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">Quantité:</span>
+                  <QuantitySelector
+                    quantity={selectedQuantity}
+                    onQuantityChange={setSelectedQuantity}
+                    max={product.stockQuantity || 99}
+                    disabled={isOutOfStock}
+                    size="sm"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Actions */}
@@ -190,18 +219,16 @@ export function ProductCard({
                 </Button>
               </div>
               
-              <Button
-                onClick={() => addItem(product)}
-                disabled={isOutOfStock}
-                size="sm"
-                variant={isItemInCart(product.id.toString()) ? "secondary" : "default"}
-              >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                {isItemInCart(product.id.toString()) 
-                  ? `Ajouté (${getItemQuantity(product.id.toString())})`
-                  : 'Ajouter'
-                }
-              </Button>
+              <div className="flex-1 max-w-xs ml-4">
+                <ProductCardFooter
+                  isInCart={isItemInCart(product.id.toString())}
+                  onAddToCart={handleAddToCart}
+                  onRemoveFromCart={handleRemoveFromCart}
+                  onEdit={handleEdit}
+                  isOutOfStock={isOutOfStock}
+                  variant="list"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -211,7 +238,7 @@ export function ProductCard({
 
   // Grid mode
   return (
-    <Card className="group hover:shadow-lg transition-all duration-200 overflow-hidden">
+    <Card className="group hover:shadow-lg transition-all duration-200 overflow-hidden relative flex flex-col h-full">
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-muted">
         {renderImage()}
@@ -219,7 +246,8 @@ export function ProductCard({
         {renderActions()}
       </div>
 
-      <CardContent className="p-4">
+      {/* Content avec padding en bas pour le footer sticky */}
+      <CardContent className="p-4 flex-1 pb-20">
         <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors mb-2">
           {product.name}
         </h3>
@@ -242,28 +270,35 @@ export function ProductCard({
 
         {/* Stock */}
         {product.stockQuantity && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground mb-3">
             {product.stockQuantity} en stock
           </p>
         )}
+
+        {/* Quantité */}
+        <div className="mb-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-muted-foreground">Qté:</span>
+            <QuantitySelector
+              quantity={selectedQuantity}
+              onQuantityChange={setSelectedQuantity}
+              max={product.stockQuantity || 99}
+              disabled={isOutOfStock}
+              size="sm"
+            />
+          </div>
+        </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0">
-        <Button
-          className="w-full"
-          onClick={() => addItem(product)}
-          disabled={isOutOfStock}
-          variant={isItemInCart(product.id.toString()) ? "secondary" : "default"}
-        >
-          <ShoppingCart className="w-4 h-4 mr-2" />
-          {isOutOfStock 
-            ? 'Rupture de stock' 
-            : isItemInCart(product.id.toString())
-            ? `Ajouté (${getItemQuantity(product.id.toString())})`
-            : 'Ajouter au panier'
-          }
-        </Button>
-      </CardFooter>
+      {/* Footer sticky en bas */}
+      <ProductCardFooter
+        isInCart={isItemInCart(product.id.toString())}
+        onAddToCart={handleAddToCart}
+        onRemoveFromCart={handleRemoveFromCart}
+        onEdit={handleEdit}
+        isOutOfStock={isOutOfStock}
+        variant="grid"
+      />
     </Card>
   );
 }

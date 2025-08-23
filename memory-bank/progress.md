@@ -1,4 +1,4 @@
-# Progression - Rexel Modern
+# Progression - KesiMarket Modern
 
 ## 🎯 Statut Global : BACKEND + FRONTEND + PAGINATION AVANCÉE + AUTH THÉMATISÉE + FILTRES DYNAMIQUES ✅
 
@@ -86,7 +86,7 @@
 ##### Page de Connexion (`/auth/login/page.tsx`)
 - ✅ **Arrière-plan** : `from-gray-50 to-gray-100` → `from-muted to-background`
 - ✅ **Logo** : `bg-[#162e77]` → `bg-primary` et `text-white` → `text-primary-foreground`
-- ✅ **Titre Rexel** : `text-[#162e77]` → `text-primary`
+- ✅ **Titre KesiMarket** : `text-[#162e77]` → `text-primary`
 - ✅ **Sous-titre** : `text-gray-500` → `text-muted-foreground`
 - ✅ **Titre principal** : `text-gray-900` → `text-foreground`
 - ✅ **Description** : `text-gray-600` → `text-muted-foreground`

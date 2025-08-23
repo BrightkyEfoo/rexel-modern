@@ -170,7 +170,7 @@ export class ApiClient {
 
   private getAuthToken(): string | null {
     return typeof window !== "undefined"
-      ? localStorage.getItem("rexel_access_token")
+      ? localStorage.getItem("kesimarket_access_token")
       : null;
   }
 
@@ -178,8 +178,8 @@ export class ApiClient {
 
   private handleAuthError(): void {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("rexel_access_token");
-      localStorage.removeItem("rexel_user");
+      localStorage.removeItem("kesimarket_access_token");
+      localStorage.removeItem("kesimarket_user");
       // Redirect to login page
       window.location.href = "/auth/login";
     }
@@ -503,14 +503,14 @@ export class ApiClient {
 
   setAuthToken(token: string): void {
     if (typeof window !== "undefined") {
-      localStorage.setItem("auth_token", token);
+      localStorage.setItem("kesimarket_access_token", token);
     }
   }
 
   removeAuthToken(): void {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("kesimarket_access_token");
+      localStorage.removeItem("kesimarket_user");
     }
   }
 

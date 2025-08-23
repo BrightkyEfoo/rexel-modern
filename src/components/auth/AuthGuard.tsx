@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuthUser } from '@/lib/auth/auth-hooks';
 import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect';
+import { useRequireAuthState } from '@/lib/hooks/useAuthState';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -12,32 +12,32 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children, requireAuth = false, redirectTo = '/auth/login' }: AuthGuardProps) {
-  const { isAuthenticated, isLoading } = useAuthUser();
+  const { shouldShowLogin, canShowContent, isLoading, isHydrated } = useRequireAuthState();
   const router = useRouter();
   const pathname = usePathname();
   const { saveCurrentUrl } = useAuthRedirect();
 
   useEffect(() => {
-    // Ne rien faire pendant le chargement
-    if (isLoading) return;
+    // Ne rien faire pendant l'hydratation ou le chargement
+    if (!isHydrated || isLoading) return;
 
     // Si l'authentification est requise mais l'utilisateur n'est pas connecté
-    if (requireAuth && !isAuthenticated) {
+    if (requireAuth && shouldShowLogin) {
       // Sauvegarder l'URL actuelle avant de rediriger
       saveCurrentUrl(pathname);
       
       // Rediriger vers la page de connexion
       router.push(redirectTo);
     }
-  }, [isAuthenticated, isLoading, requireAuth, pathname, redirectTo, router, saveCurrentUrl]);
+  }, [shouldShowLogin, isLoading, isHydrated, requireAuth, pathname, redirectTo, router, saveCurrentUrl]);
 
-  // Afficher le contenu si pas de restriction ou utilisateur authentifié
-  if (!requireAuth || isAuthenticated) {
+  // Afficher le contenu si pas de restriction ou utilisateur peut voir le contenu
+  if (!requireAuth || canShowContent) {
     return <>{children}</>;
   }
 
-  // Afficher un spinner pendant le chargement
-  if (isLoading) {
+  // Afficher un spinner pendant l'hydratation ou le chargement
+  if (!isHydrated || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

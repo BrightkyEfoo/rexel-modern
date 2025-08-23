@@ -22,7 +22,7 @@ import {
   Phone,
   Mail
 } from 'lucide-react';
-import { useAuthUser, useLogout } from '@/lib/auth/auth-hooks';
+import { useAuth, useLogout } from '@/lib/auth/nextauth-hooks';
 import { useMainCategories } from '@/lib/query/hooks';
 import { appConfig } from '@/lib/config/app';
 import { CartPreview } from '@/components/cart/CartPreview';
@@ -46,7 +46,7 @@ const MobileNavLink = ({ href, children, onNavigate }: { href: string; children:
 
 export function Header({ className }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isAuthenticated, user } = useAuthUser();
+  const { isAuthenticated, user } = useAuth();
   const logoutMutation = useLogout();
   const { data: categoriesResponse, isLoading: categoriesLoading } = useMainCategories();
 

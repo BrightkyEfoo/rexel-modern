@@ -24,11 +24,11 @@ on:
           - 'false'
 
 env:
-  DOCKER_IMAGE_NAME: rexel-frontend-prod
-  VPS_DEPLOY_PATH: ~/rexel-modern/frontend
-  CONTAINER_NAME: rexel-frontend-prod
+  DOCKER_IMAGE_NAME: kesimarket-frontend-prod
+  VPS_DEPLOY_PATH: ~/kesimarket-modern/frontend
+  CONTAINER_NAME: kesimarket-frontend-prod
   CONTAINER_PORT: 3000
-  NETWORK_NAME: rexel-net
+  NETWORK_NAME: kesimarket-net
 
 jobs:
   prepare-directory:
@@ -319,15 +319,15 @@ jobs:
       
       - name: Save Docker image to tar
         run: |
-          docker save ${{ steps.tag.outputs.image-tag }} > rexel-frontend-prod.tar
-          ls -lh rexel-frontend-prod.tar
+          docker save ${{ steps.tag.outputs.image-tag }} > kesimarket-frontend-prod.tar
+          ls -lh kesimarket-frontend-prod.tar
 
       - name: Upload Docker image and compose file
         uses: actions/upload-artifact@v4
         with:
           name: docker-image-prod
           path: |
-            rexel-frontend-prod.tar
+            kesimarket-frontend-prod.tar
             docker-compose.prod.yml
           retention-days: 7
 
@@ -349,7 +349,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           port: 22
-          source: "rexel-frontend-prod.tar,docker-compose.prod.yml"
+          source: "kesimarket-frontend-prod.tar,docker-compose.prod.yml"
           target: ${{ env.VPS_DEPLOY_PATH }}/
       
       - name: Create backup and organize files
@@ -364,12 +364,12 @@ jobs:
             mkdir -p ${{ env.VPS_DEPLOY_PATH }}/images
             
             # Backup previous image if exists
-            if [ -f ${{ env.VPS_DEPLOY_PATH }}/images/rexel-frontend-prod-current.tar ]; then
-              mv ${{ env.VPS_DEPLOY_PATH }}/images/rexel-frontend-prod-current.tar ${{ env.VPS_DEPLOY_PATH }}/backups/rexel-frontend-prod-backup-$(date +%Y%m%d-%H%M%S).tar
+            if [ -f ${{ env.VPS_DEPLOY_PATH }}/images/kesimarket-frontend-prod-current.tar ]; then
+              mv ${{ env.VPS_DEPLOY_PATH }}/images/kesimarket-frontend-prod-current.tar ${{ env.VPS_DEPLOY_PATH }}/backups/kesimarket-frontend-prod-backup-$(date +%Y%m%d-%H%M%S).tar
             fi
             
             # Move new image to images directory
-            mv ${{ env.VPS_DEPLOY_PATH }}/rexel-frontend-prod.tar ${{ env.VPS_DEPLOY_PATH }}/images/rexel-frontend-prod-current.tar
+            mv ${{ env.VPS_DEPLOY_PATH }}/kesimarket-frontend-prod.tar ${{ env.VPS_DEPLOY_PATH }}/images/kesimarket-frontend-prod-current.tar
             
             echo "✅ Files organized and ready for deployment"
 
@@ -414,11 +414,11 @@ jobs:
             fi
             
             # Load the new Docker image
-            ${USE_SUDO}docker load < images/rexel-frontend-prod-current.tar
+            ${USE_SUDO}docker load < images/kesimarket-frontend-prod-current.tar
             
             # Tag the loaded image as latest for docker-compose
-            IMAGE_NAME=$(${USE_SUDO}docker images --format "table {{.Repository}}:{{.Tag}}" | grep rexel-frontend-prod | grep -v latest | head -n 1)
-            ${USE_SUDO}docker tag $IMAGE_NAME rexel-frontend-prod:latest
+            IMAGE_NAME=$(${USE_SUDO}docker images --format "table {{.Repository}}:{{.Tag}}" | grep kesimarket-frontend-prod | grep -v latest | head -n 1)
+            ${USE_SUDO}docker tag $IMAGE_NAME kesimarket-frontend-prod:latest
             
             # Stop existing frontend service
             echo 'Stopping existing frontend service...'
@@ -462,13 +462,13 @@ jobs:
             
             # Keep only the 3 most recent backup images
             cd ${{ env.VPS_DEPLOY_PATH }}/backups
-            ls -t rexel-frontend-prod-backup-*.tar 2>/dev/null | tail -n +4 | xargs -r rm -f
+            ls -t kesimarket-frontend-prod-backup-*.tar 2>/dev/null | tail -n +4 | xargs -r rm -f
             
             echo "✅ Cleanup completed"
 
       - name: Deployment Summary
         run: |
-          echo "## 🚀 Rexel Modern Frontend Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 KesiMarket Modern Frontend Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY

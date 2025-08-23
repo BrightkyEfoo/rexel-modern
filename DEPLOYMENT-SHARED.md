@@ -11,7 +11,7 @@ flowchart TD
     Internet[🌐 Internet]
     
     subgraph VPS[🖥️ VPS - Ubuntu 22.04]
-        subgraph Network[Docker Network: rexel-net]
+        subgraph Network[Docker Network: kesimarket-net]
             Caddy[🔄 Caddy Reverse Proxy<br/>Backend Stack]
             Frontend[⚛️ Frontend Container<br/>Next.js]
             Backend[🔧 Backend Container<br/>AdonisJS]
@@ -40,11 +40,11 @@ flowchart TD
 
 ### 1. Réseau Docker Partagé
 
-Les deux applications utilisent le réseau Docker `rexel-net` :
+Les deux applications utilisent le réseau Docker `kesimarket-net` :
 
 ```bash
 # Création du réseau (une seule fois)
-docker network create rexel-net
+docker network create kesimarket-net
 
 # Ou utiliser le script automatique
 ./scripts/setup-docker-network.sh
@@ -55,9 +55,9 @@ docker network create rexel-net
 Le backend inclut Caddy qui gère les deux applications :
 
 ```yaml
-# rexel-modern-backend/docker-compose.prod.yml
+# kesimarket-modern-backend/docker-compose.prod.yml
 networks:
-  rexel-net:
+  kesimarket-net:
     external: true
 
 services:
@@ -72,14 +72,14 @@ services:
 Le frontend ne contient plus Caddy, juste l'application Next.js :
 
 ```yaml
-# rexel-modern/docker-compose.prod.yml
+# kesimarket-modern/docker-compose.prod.yml
 networks:
-  rexel-net:
+  kesimarket-net:
     external: true
 
 services:
   frontend:  # Nom important pour Caddy
-    image: rexel-frontend-prod:latest
+    image: kesimarket-frontend-prod:latest
 ```
 
 ## 🚀 Workflow de Déploiement
@@ -95,7 +95,7 @@ services:
 
 ```bash
 # Depuis GitHub Actions ou manuellement
-cd ~/rexel-modern/backend
+cd ~/kesimarket-modern/backend
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
@@ -103,12 +103,12 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ```bash
 # Depuis GitHub Actions ou manuellement  
-cd ~/rexel-modern/frontend
+cd ~/kesimarket-modern/frontend
 docker-compose -f docker-compose.prod.yml up -d
 
 # ⚠️ IMPORTANT: Redémarrer Caddy pour détecter le nouveau conteneur frontend
-cd ~/rexel-modern/backend
-docker restart rexel-caddy-prod
+cd ~/kesimarket-modern/backend
+docker restart kesimarket-caddy-prod
 ```
 
 ## 🔄 GitHub Actions
@@ -117,12 +117,12 @@ docker restart rexel-caddy-prod
 
 Les workflows GitHub Actions déploient maintenant :
 
-1. **Backend Workflow** (`rexel-modern-backend`)
+1. **Backend Workflow** (`kesimarket-modern-backend`)
    - Build l'image backend
    - Déploie avec Caddy
    - Configure tous les domaines
 
-2. **Frontend Workflow** (`rexel-modern`)
+2. **Frontend Workflow** (`kesimarket-modern`)
    - Build l'image frontend  
    - Déploie sur le réseau partagé
    - Se connecte automatiquement à Caddy
@@ -144,7 +144,7 @@ VPS_SSH_KEY=your_private_key
 ## 📁 Structure des dossiers VPS
 
 ```
-~/rexel-modern/
+~/kesimarket-modern/
 ├── backend/
 │   ├── images/           # Images Docker backend
 │   ├── logs/            # Logs Caddy (tous domaines)
@@ -157,7 +157,7 @@ VPS_SSH_KEY=your_private_key
 
 ## ⚙️ Variables d'environnement
 
-### Production (rexel-modern/.env.production)
+### Production (kesimarket-modern/.env.production)
 
 ```bash
 NEXT_PUBLIC_API_URL=https://api.kesimarket.com
@@ -165,7 +165,7 @@ NEXTAUTH_URL=https://kesimarket.com
 NEXT_PUBLIC_SITE_URL=https://kesimarket.com
 ```
 
-### Staging (rexel-modern/.env.staging)
+### Staging (kesimarket-modern/.env.staging)
 
 ```bash
 NEXT_PUBLIC_API_URL=https://staging-api.kesimarket.com
@@ -198,7 +198,7 @@ NEXT_PUBLIC_SITE_URL=https://staging.kesimarket.com
 
 ```bash
 # Logs par domaine
-~/rexel-modern/backend/logs/
+~/kesimarket-modern/backend/logs/
 ├── frontend-access.log          # kesimarket.com
 ├── api-access.log              # api.kesimarket.com  
 ├── staging-frontend-access.log # staging.kesimarket.com
@@ -222,19 +222,19 @@ curl https://staging-api.kesimarket.com/health
 ### Vérifier le réseau
 
 ```bash
-docker network ls | grep rexel-net
-docker network inspect rexel-net
+docker network ls | grep kesimarket-net
+docker network inspect kesimarket-net
 ```
 
 ### Vérifier les conteneurs
 
 ```bash
 # Backend stack (avec Caddy)
-cd ~/rexel-modern/backend
+cd ~/kesimarket-modern/backend
 docker-compose -f docker-compose.prod.yml ps
 
 # Frontend
-cd ~/rexel-modern/frontend  
+cd ~/kesimarket-modern/frontend  
 docker-compose -f docker-compose.prod.yml ps
 ```
 
@@ -242,27 +242,27 @@ docker-compose -f docker-compose.prod.yml ps
 
 ```bash
 # Depuis le conteneur Caddy
-docker exec rexel-caddy-prod curl http://frontend:3000
-docker exec rexel-caddy-prod curl http://app:3333/health
+docker exec kesimarket-caddy-prod curl http://frontend:3000
+docker exec kesimarket-caddy-prod curl http://app:3333/health
 ```
 
-### Problème : Network rexel-net not found
+### Problème : Network kesimarket-net not found
 
-**Symptôme** : `network rexel-net declared as external, but could not be found`
+**Symptôme** : `network kesimarket-net declared as external, but could not be found`
 
 **Cause** : Le réseau partagé n'existe pas encore sur le VPS
 
 **Solution** : Créer le réseau avant le déploiement
 ```bash
 # Option 1: Script automatique
-cd ~/rexel-modern/backend
+cd ~/kesimarket-modern/backend
 ./scripts/setup-docker-network.sh
 
 # Option 2: Commande manuelle
-docker network create rexel-net
+docker network create kesimarket-net
 
 # Vérifier
-docker network ls | grep rexel-net
+docker network ls | grep kesimarket-net
 ```
 
 **Note** : Les workflows GitHub Actions créent automatiquement ce réseau, mais pour les déploiements manuels il faut le créer d'abord.
@@ -271,8 +271,8 @@ docker network ls | grep rexel-net
 
 **Symptôme** : 
 ```
-out: ✅ Network 'rexel-net' already exists
-err: Error response from daemon: network rexel-net not found
+out: ✅ Network 'kesimarket-net' already exists
+err: Error response from daemon: network kesimarket-net not found
 out: ❌ Network verification failed
 ```
 
@@ -282,7 +282,7 @@ out: ❌ Network verification failed
 
 #### 1. Script de nettoyage automatique (Recommandé)
 ```bash
-cd ~/rexel-modern/backend
+cd ~/kesimarket-modern/backend
 chmod +x scripts/cleanup-network.sh
 ./scripts/cleanup-network.sh
 ```
@@ -293,25 +293,25 @@ chmod +x scripts/cleanup-network.sh
 docker network ls
 
 # Supprimer le réseau corrompu
-docker network rm rexel-net --force
+docker network rm kesimarket-net --force
 
 # Recréer proprement
-docker network create rexel-net --driver bridge
+docker network create kesimarket-net --driver bridge
 
 # Vérifier
-docker network inspect rexel-net
+docker network inspect kesimarket-net
 ```
 
 #### 3. Reset complet Docker (en dernier recours)
 ```bash
-# Arrêter tous les conteneurs rexel
-docker stop $(docker ps -q -f name=rexel-) 2>/dev/null || true
+# Arrêter tous les conteneurs kesimarket
+docker stop $(docker ps -q -f name=kesimarket-) 2>/dev/null || true
 
 # Nettoyer les réseaux
 docker network prune -f
 
 # Recréer le réseau
-docker network create rexel-net --driver bridge
+docker network create kesimarket-net --driver bridge
 ```
 
 ### Problème : Database not ready / service "db" is not running
@@ -333,14 +333,14 @@ err: service "db" is not running
 Variables requises dans GitHub Secrets :
 ```bash
 # Database
-DB_USER=rexel_user
+DB_USER=kesimarket_user
 DB_PASSWORD=your_secure_password
-DB_DATABASE=rexel_modern
+DB_DATABASE=kesimarket_modern
 
 # MinIO  
 MINIO_ACCESS_KEY=minioadmin
 MINIO_SECRET_KEY=your_minio_secret_key
-MINIO_BUCKET=rexel-storage
+MINIO_BUCKET=kesimarket-storage
 
 # Redis
 REDIS_PASSWORD=your_redis_password
@@ -363,13 +363,13 @@ REDIS_HOST=redis    # Service interne
 #### 3. Vérification manuelle
 ```bash
 # Vérifier que PostgreSQL démarre
-docker logs rexel-postgres-prod
+docker logs kesimarket-postgres-prod
 
 # Tester la connexion
-docker exec rexel-postgres-prod pg_isready -U your_user -d your_database
+docker exec kesimarket-postgres-prod pg_isready -U your_user -d your_database
 
 # Vérifier les variables d'environnement
-docker exec rexel-postgres-prod env | grep POSTGRES
+docker exec kesimarket-postgres-prod env | grep POSTGRES
 ```
 
 ### Problème : Frontend pas accessible après déploiement
@@ -378,11 +378,11 @@ docker exec rexel-postgres-prod env | grep POSTGRES
 
 **Solution** : Redémarrer Caddy après chaque déploiement frontend
 ```bash
-cd ~/rexel-modern/backend
-docker restart rexel-caddy-prod
+cd ~/kesimarket-modern/backend
+docker restart kesimarket-caddy-prod
 
 # Vérifier que Caddy peut atteindre le frontend
-docker exec rexel-caddy-prod curl -f http://frontend:3000
+docker exec kesimarket-caddy-prod curl -f http://frontend:3000
 ```
 
 **Pourquoi ?** : Quand un nouveau conteneur frontend est créé, Caddy doit redémarrer pour détecter la nouvelle instance sur le réseau Docker.
@@ -391,13 +391,13 @@ docker exec rexel-caddy-prod curl -f http://frontend:3000
 
 ```bash
 # Caddy logs
-docker logs -f rexel-caddy-prod
+docker logs -f kesimarket-caddy-prod
 
 # Frontend logs
-docker logs -f rexel-frontend-prod
+docker logs -f kesimarket-frontend-prod
 
 # Backend logs  
-docker logs -f rexel-backend-prod
+docker logs -f kesimarket-backend-prod
 ```
 
 ## 🎯 Avantages de cette architecture
@@ -412,6 +412,6 @@ docker logs -f rexel-backend-prod
 
 ## 📚 Liens utiles
 
-- [Guide Caddy](./rexel-modern-backend/CADDY.md)
-- [Déploiement Backend](./rexel-modern-backend/DEPLOYMENT.md)
+- [Guide Caddy](./kesimarket-modern-backend/CADDY.md)
+- [Déploiement Backend](./kesimarket-modern-backend/DEPLOYMENT.md)
 - [Configuration GitHub Actions](./GITHUB-SETUP.md) 

@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Script to setup shared Docker network for Rexel Modern
+# Script to setup shared Docker network for KesiMarket Modern
 # This script creates the shared network used by both frontend and backend
 
 set -e
 
-NETWORK_NAME="rexel-net"
+NETWORK_NAME="kesimarket-net"
 
-echo "🔗 Setting up Docker network for Rexel Modern..."
+echo "🔗 Setting up Docker network for KesiMarket Modern..."
 
 # Check if Docker is running
 if ! docker info >/dev/null 2>&1; then
@@ -33,8 +33,8 @@ echo ""
 echo "✅ Docker network setup complete!"
 echo ""
 echo "📝 Next steps:"
-echo "   1. Deploy backend: cd rexel-modern-backend && docker-compose -f docker-compose.prod.yml up -d"
-echo "   2. Deploy frontend: cd rexel-modern && docker-compose -f docker-compose.prod.yml up -d"
+echo "   1. Deploy backend: cd kesimarket-modern-backend && docker-compose -f docker-compose.prod.yml up -d"
+echo "   2. Deploy frontend: cd kesimarket-modern && docker-compose -f docker-compose.prod.yml up -d"
 echo ""
 echo "🌐 Your apps will be available at:"
 echo "   Production:"

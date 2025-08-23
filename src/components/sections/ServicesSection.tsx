@@ -88,7 +88,7 @@ export function ServicesSection() {
         <div className="text-center">
           <div className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-8 text-primary-foreground">
             <h3 className="text-2xl font-bold mb-4">
-              Découvrez tous les services et solutions Rexel
+              Découvrez tous les services et solutions KesiMarket
             </h3>
             <p className="text-primary-foreground/80 mb-6 max-w-2xl mx-auto">
               De la gestion énergétique aux solutions d'éclairage, en passant par

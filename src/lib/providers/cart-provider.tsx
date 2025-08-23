@@ -21,7 +21,7 @@ export function CartProvider({ children }: CartProviderProps) {
   
   // Vérifier si on a un token valide
   const hasValidToken = typeof window !== 'undefined' 
-    ? !!localStorage.getItem('rexel_access_token') 
+    ? !!localStorage.getItem('kesimarket_access_token') 
     : false;
   
   // Charger le panier backend seulement si authentifié ET token disponible

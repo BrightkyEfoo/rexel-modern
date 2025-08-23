@@ -1,4 +1,4 @@
-# System Patterns - Rexel Modern
+# System Patterns - KesiMarket Modern
 
 ## Architecture générale
 

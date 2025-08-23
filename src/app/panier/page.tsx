@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { useAuthUser } from "@/lib/auth/auth-hooks";
+import { useAuth } from "@/lib/auth/nextauth-hooks";
 import {
   useCart,
   useRemoveFromCart,
@@ -34,12 +34,17 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Logo } from "@/components/ui/logo";
+import { AddressSelector } from "@/components/ui/address-selector";
+import { BillingAddressSelector } from "@/components/ui/billing-address-selector";
+import { AddressFormData } from "@/components/ui/address-form";
+import { useAddresses, useCreateAddress } from "@/lib/hooks/useAddresses";
 
 type CheckoutStep = "cart" | "shipping" | "payment" | "confirmation";
 
 export default function CartPage() {
-  const { user, isAuthenticated } = useAuthUser();
+  const { user, isAuthenticated } = useAuth();
   const { data: cart, isLoading, error } = useCart();
   const updateCartItemMutation = useUpdateCartItem();
   const removeFromCartMutation = useRemoveFromCart();
@@ -53,6 +58,21 @@ export default function CartPage() {
     useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [orderNotes, setOrderNotes] = useState("");
+  const [deliveryMethod, setDeliveryMethod] = useState<string>("standard");
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+  const handleImageError = (productId: string) => {
+    setImageErrors(prev => ({ ...prev, [productId]: true }));
+  };
+
+  // Fonction utilitaire pour formater les prix
+  const formatPrice = (price: number): string => {
+    return price.toLocaleString('fr-FR', { 
+      style: 'currency', 
+      currency: 'EUR',
+      minimumFractionDigits: 2 
+    });
+  };
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -109,16 +129,34 @@ export default function CartPage() {
   };
 
   const calculateTotals = () => {
-    if (!cart?.data)
-      return { subtotal: 0, shipping: 0, tax: 0, discount: 0, total: 0 };
+    if (!cart?.data) {
+      return { subtotal: 0, shipping: 0, discount: 0, total: 0 };
+    }
 
-    const subtotal = cart.data.subtotal || 0;
-    const shipping = cart.data.shippingAmount || 0;
-    const tax = cart.data.taxAmount || 0;
+    // Calcul du sous-total à partir des items du panier
+    const subtotal = cart.data.items?.reduce((sum, item) => {
+      const itemPrice = Number(item.product?.price || item.price || 0);
+      const quantity = Number(item.quantity || 0);
+      return sum + (itemPrice * quantity);
+    }, 0) || 0;
+
+    // Frais de livraison selon la méthode choisie (seulement si une méthode est sélectionnée)
+    let shipping = 0;
+    if (deliveryMethod === "standard") {
+      shipping = 8.50;
+    } else if (deliveryMethod === "express") {
+      shipping = 15.90;
+    } else if (deliveryMethod === "pickup") {
+      shipping = 0;
+    }
+
     const discount = promoDiscount;
-    const total = Math.max(0, subtotal + shipping + tax - discount);
+    
+    // Le total inclut la livraison seulement si une méthode est sélectionnée
+    const shippingToAdd = (deliveryMethod && deliveryMethod !== "") ? shipping : 0;
+    const total = Math.max(0, subtotal + shippingToAdd - discount);
 
-    return { subtotal, shipping, tax, discount, total };
+    return { subtotal, shipping, discount, total };
   };
 
   const totals = calculateTotals();
@@ -133,14 +171,14 @@ export default function CartPage() {
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-64" />
+            <div className="h-8 bg-muted rounded w-64" />
             <div className="grid lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-4">
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-32 bg-gray-200 rounded" />
+                  <div key={i} className="h-32 bg-muted rounded" />
                 ))}
               </div>
-              <div className="h-96 bg-gray-200 rounded" />
+              <div className="h-96 bg-muted rounded" />
             </div>
           </div>
         </div>
@@ -174,11 +212,11 @@ export default function CartPage() {
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-16">
-            <ShoppingCart className="w-24 h-24 text-gray-300 mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <ShoppingCart className="w-24 h-24 text-muted-foreground mx-auto mb-6" />
+            <h2 className="text-2xl font-bold text-foreground mb-4">
               Votre panier est vide
             </h2>
-            <p className="text-gray-600 mb-8">
+            <p className="text-muted-foreground mb-8">
               Découvrez nos produits et ajoutez-les à votre panier
             </p>
             <Button asChild>
@@ -197,12 +235,12 @@ export default function CartPage() {
 
       <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
-        <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
-          <Link href="/" className="hover:text-[#162e77]">
+        <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-8">
+          <Link href="/" className="hover:text-primary">
             Accueil
           </Link>
           <span>/</span>
-          <span className="text-gray-900">Panier</span>
+          <span className="text-foreground">Panier</span>
         </nav>
 
         {/* Step Indicator */}
@@ -218,26 +256,26 @@ export default function CartPage() {
                 <div
                   className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
                     step === currentStep
-                      ? "border-[#162e77] bg-[#162e77] text-white"
+                      ? "border-primary bg-primary text-white"
                       : index <
                         ["cart", "shipping", "payment", "confirmation"].indexOf(
                           currentStep
                         )
                       ? "border-green-500 bg-green-500 text-white"
-                      : "border-gray-300 text-gray-400"
+                      : "border-border text-muted-foreground"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
                 </div>
                 <span
                   className={`ml-2 text-sm font-medium ${
-                    step === currentStep ? "text-[#162e77]" : "text-gray-500"
+                    step === currentStep ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
                   {label}
                 </span>
                 {index < 3 && (
-                  <ArrowRight className="w-4 h-4 text-gray-400 mx-4" />
+                  <ArrowRight className="w-4 h-4 text-muted-foreground mx-4" />
                 )}
               </div>
             ))}
@@ -249,7 +287,7 @@ export default function CartPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-6">
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-3xl font-bold text-foreground">
                 Mon panier ({cartData.totalItems} articles)
               </h1>
 
@@ -259,14 +297,21 @@ export default function CartPage() {
                     <CardContent className="p-6">
                       <div className="flex items-center space-x-6">
                         {/* Product Image */}
-                        <div className="w-24 h-24 bg-gray-50 rounded-lg flex-shrink-0">
-                          <Image
-                            src={item.product.imageUrl || "/placeholder.png"}
-                            alt={item.product.name}
-                            width={96}
-                            height={96}
-                            className="object-contain w-full h-full p-2"
-                          />
+                        <div className="w-24 h-24 bg-muted rounded-lg flex-shrink-0 overflow-hidden">
+                          {imageErrors[item.product.id.toString()] || !item.product.imageUrl ? (
+                            <div className="w-full h-full flex items-center justify-center bg-muted">
+                              <Logo variant="light" size="sm" showText={false} />
+                            </div>
+                          ) : (
+                            <Image
+                              src={item.product.files?.[0]?.url || item.product.imageUrl}
+                              alt={item.product.name}
+                              width={96}
+                              height={96}
+                              className="object-contain w-full h-full p-2"
+                              onError={() => handleImageError(item.product.id.toString())}
+                            />
+                          )}
                         </div>
 
                         {/* Product Info */}
@@ -275,11 +320,11 @@ export default function CartPage() {
                             <div>
                               <Link
                                 href={`/produit/${item.productId}`}
-                                className="font-semibold text-gray-900 hover:text-[#162e77]"
+                                className="font-semibold text-foreground hover:text-primary"
                               >
                                 {item.product.name}
                               </Link>
-                              <div className="text-sm text-gray-600 mt-1">
+                              <div className="text-sm text-muted-foreground mt-1">
                                 <Badge variant="secondary">
                                   {item.product.brand?.name}
                                 </Badge>
@@ -288,7 +333,7 @@ export default function CartPage() {
                                 </span>
                               </div>
                               {item.variant && (
-                                <div className="text-sm text-gray-600 mt-1">
+                                <div className="text-sm text-muted-foreground mt-1">
                                   Variante: {item.variant.name}
                                 </div>
                               )}
@@ -300,7 +345,7 @@ export default function CartPage() {
                                       : "bg-red-500"
                                   }`}
                                 />
-                                <span className="text-sm text-gray-600">
+                                <span className="text-sm text-muted-foreground">
                                   {item.product.availability === "in_stock"
                                     ? "En stock"
                                     : "Rupture de stock"}
@@ -308,11 +353,15 @@ export default function CartPage() {
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="text-xl font-bold text-[#162e77]">
-                                {item.totalPrice.toFixed(2)} €
+                              <div className="text-xl font-bold text-foreground">
+                                {item.totalPrice?.toLocaleString('fr-FR', { 
+                                  style: 'currency', 
+                                  currency: 'EUR',
+                                  minimumFractionDigits: 2 
+                                })}
                               </div>
-                              <div className="text-sm text-gray-500">
-                                {item.price.toFixed(2)} € / unité
+                              <div className="text-sm text-muted-foreground">
+                                {item.product?.price ? formatPrice(Number(item.product.price)) : formatPrice(Number(item.price || 0))} / unité
                               </div>
                             </div>
                           </div>
@@ -365,7 +414,7 @@ export default function CartPage() {
                                 size="sm"
                                 onClick={() => handleRemoveItem(item.id?.toString() || "")}
                                 disabled={removeFromCartMutation.isPending}
-                                className="text-red-600 hover:text-red-700"
+                                className="text-destructive hover:text-destructive/80"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -423,32 +472,30 @@ export default function CartPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Sous-total</span>
-                      <span>{totals.subtotal.toFixed(2)} €</span>
+                      <span>{formatPrice(totals.subtotal)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Livraison</span>
-                      <span>{totals.shipping.toFixed(2)} €</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>TVA</span>
-                      <span>{totals.tax.toFixed(2)} €</span>
-                    </div>
+                    {deliveryMethod && deliveryMethod !== "" && (
+                      <div className="flex justify-between">
+                        <span>Livraison</span>
+                        <span>{deliveryMethod === "pickup" ? "GRATUIT" : formatPrice(totals.shipping)}</span>
+                      </div>
+                    )}
                     {totals.discount > 0 && (
                       <div className="flex justify-between text-green-600">
                         <span>Remise</span>
-                        <span>-{totals.discount.toFixed(2)} €</span>
+                        <span>-{formatPrice(totals.discount)}</span>
                       </div>
                     )}
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span>{totals.total.toFixed(2)} €</span>
+                      <span>{formatPrice(totals.total)}</span>
                     </div>
                   </div>
 
                   {/* Checkout Button */}
                   <Button
-                    className="w-full bg-[#162e77] hover:bg-[#1e40af] text-white font-semibold"
+                    className="w-full bg-primary hover:bg-primary/90 text-white font-semibold"
                     onClick={() => setCurrentStep("shipping")}
                   >
                     Passer la commande
@@ -457,19 +504,19 @@ export default function CartPage() {
 
                   {/* Trust Badges */}
                   <div className="grid grid-cols-2 gap-4 pt-4">
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                       <Shield className="w-4 h-4 text-green-600" />
                       <span>Paiement sécurisé</span>
                     </div>
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                       <Truck className="w-4 h-4 text-blue-600" />
                       <span>Livraison rapide</span>
                     </div>
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                       <Package className="w-4 h-4 text-purple-600" />
                       <span>Retour gratuit</span>
                     </div>
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                       <Clock className="w-4 h-4 text-orange-600" />
                       <span>Support 24/7</span>
                     </div>
@@ -493,13 +540,13 @@ export default function CartPage() {
                         key={index}
                         className="flex items-center space-x-3 p-3 border rounded-lg"
                       >
-                        <div className="w-12 h-12 bg-gray-100 rounded" />
+                        <div className="w-12 h-12 bg-muted rounded" />
                         <div className="flex-1">
                           <div className="font-medium text-sm">
                             {product.name}
                           </div>
-                          <div className="text-sm text-[#162e77] font-semibold">
-                            {Number(product.price).toFixed(2)} €
+                          <div className="text-sm text-primary font-semibold">
+                            {formatPrice(Number(product.price))}
                           </div>
                         </div>
                         <Button size="sm" variant="outline">
@@ -522,6 +569,8 @@ export default function CartPage() {
             setSelectedShippingAddress={setSelectedShippingAddress}
             selectedBillingAddress={selectedBillingAddress}
             setSelectedBillingAddress={setSelectedBillingAddress}
+            deliveryMethod={deliveryMethod}
+            setDeliveryMethod={setDeliveryMethod}
             onNext={() => setCurrentStep("payment")}
             onBack={() => setCurrentStep("cart")}
             totals={totals}
@@ -535,6 +584,7 @@ export default function CartPage() {
             setPaymentMethod={setPaymentMethod}
             orderNotes={orderNotes}
             setOrderNotes={setOrderNotes}
+            deliveryMethod={deliveryMethod}
             onNext={() => setCurrentStep("confirmation")}
             onBack={() => setCurrentStep("shipping")}
             totals={totals}
@@ -551,6 +601,7 @@ export default function CartPage() {
             selectedBillingAddress={selectedBillingAddress}
             paymentMethod={paymentMethod}
             orderNotes={orderNotes}
+            deliveryMethod={deliveryMethod}
           />
         )}
       </main>
@@ -567,6 +618,8 @@ interface ShippingStepProps {
   setSelectedShippingAddress: (id: string) => void;
   selectedBillingAddress: string;
   setSelectedBillingAddress: (id: string) => void;
+  deliveryMethod: string;
+  setDeliveryMethod: (method: string) => void;
   onNext: () => void;
   onBack: () => void;
   totals: any;
@@ -578,145 +631,79 @@ function ShippingStep({
   setSelectedShippingAddress,
   selectedBillingAddress,
   setSelectedBillingAddress,
+  deliveryMethod,
+  setDeliveryMethod,
   onNext,
   onBack,
   totals,
 }: ShippingStepProps) {
+  const [useSameAsShipping, setUseSameAsShipping] = useState(false);
+  
+  // Hooks pour la gestion des adresses
+  const { data: addresses = [], isLoading: addressesLoading } = useAddresses();
+  const createAddressMutation = useCreateAddress();
+
+  // Fonction utilitaire pour formater les prix
+  const formatPrice = (price: number): string => {
+    return price.toLocaleString('fr-FR', { 
+      style: 'currency', 
+      currency: 'EUR',
+      minimumFractionDigits: 2 
+    });
+  };
+
+  // Gérer l'ajout d'une nouvelle adresse
+  const handleAddAddress = async (addressData: AddressFormData, type: 'shipping' | 'billing') => {
+    try {
+      const newAddress = await createAddressMutation.mutateAsync({
+        ...addressData,
+        type
+      });
+      
+      // Sélectionner automatiquement la nouvelle adresse
+      if (type === 'shipping') {
+        setSelectedShippingAddress(newAddress.id);
+      } else {
+        setSelectedBillingAddress(newAddress.id);
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de l\'adresse:', error);
+    }
+  };
   return (
     <div className="grid lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-6">
-        <h2 className="text-3xl font-bold text-gray-900">
+        <h2 className="text-3xl font-bold text-foreground">
           Informations de livraison
         </h2>
 
         {/* Shipping Address */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Adresse de livraison</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {user?.addresses
-              ?.filter((addr: any) => addr.type === "shipping")
-              .map((address: any) => (
-                <div
-                  key={address.id}
-                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                    selectedShippingAddress === address.id
-                      ? "border-[#162e77] bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                  onClick={() => setSelectedShippingAddress(address.id)}
-                >
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="radio"
-                      checked={selectedShippingAddress === address.id}
-                      onChange={() => setSelectedShippingAddress(address.id)}
-                      className="text-[#162e77]"
-                    />
-                    <div className="flex-1">
-                      <div className="font-semibold">{address.name}</div>
-                      {address.company && (
-                        <div className="text-sm text-gray-600">
-                          {address.company}
-                        </div>
-                      )}
-                      <div className="text-sm text-gray-600">
-                        {address.street}
-                        <br />
-                        {address.postalCode} {address.city}
-                        <br />
-                        {address.country}
-                      </div>
-                      {address.isDefault && (
-                        <Badge variant="secondary" className="mt-2">
-                          Par défaut
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            <Button variant="outline" className="w-full">
-              <Plus className="w-4 h-4 mr-2" />
-              Ajouter une nouvelle adresse
-            </Button>
-          </CardContent>
-        </Card>
+        {addressesLoading ? (
+          <div className="p-8 text-center">
+            <p>Chargement des adresses...</p>
+          </div>
+        ) : (
+          <AddressSelector
+            addresses={addresses}
+            selectedAddressId={selectedShippingAddress}
+            onAddressSelect={setSelectedShippingAddress}
+            onAddressAdd={(data) => handleAddAddress(data, 'shipping')}
+            type="shipping"
+            title="Adresse de livraison"
+            isAddingAddress={createAddressMutation.isPending}
+          />
+        )}
 
         {/* Billing Address */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Adresse de facturation</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-lg">
-              <input
-                type="checkbox"
-                id="same-address"
-                checked={selectedBillingAddress === selectedShippingAddress}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedBillingAddress(selectedShippingAddress);
-                  } else {
-                    setSelectedBillingAddress("");
-                  }
-                }}
-                className="text-[#162e77]"
-              />
-              <label htmlFor="same-address" className="text-sm">
-                Utiliser la même adresse que la livraison
-              </label>
-            </div>
-
-            {selectedBillingAddress !== selectedShippingAddress && (
-              <>
-                {user?.addresses
-                  ?.filter((addr: any) => addr.type === "billing")
-                  .map((address: any) => (
-                    <div
-                      key={address.id}
-                      className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                        selectedBillingAddress === address.id
-                          ? "border-[#162e77] bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      onClick={() => setSelectedBillingAddress(address.id)}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <input
-                          type="radio"
-                          checked={selectedBillingAddress === address.id}
-                          onChange={() => setSelectedBillingAddress(address.id)}
-                          className="text-[#162e77]"
-                        />
-                        <div className="flex-1">
-                          <div className="font-semibold">{address.name}</div>
-                          {address.company && (
-                            <div className="text-sm text-gray-600">
-                              {address.company}
-                            </div>
-                          )}
-                          <div className="text-sm text-gray-600">
-                            {address.street}
-                            <br />
-                            {address.postalCode} {address.city}
-                            <br />
-                            {address.country}
-                          </div>
-                          {address.isDefault && (
-                            <Badge variant="secondary" className="mt-2">
-                              Par défaut
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <BillingAddressSelector
+          addresses={addresses}
+          selectedBillingAddressId={selectedBillingAddress}
+          selectedShippingAddressId={selectedShippingAddress}
+          onBillingAddressSelect={setSelectedBillingAddress}
+          onAddressAdd={(data) => handleAddAddress(data, 'billing')}
+          useSameAsShipping={useSameAsShipping}
+          onUseSameAsShippingChange={setUseSameAsShipping}
+        />
 
         {/* Shipping Options */}
         <Card>
@@ -725,60 +712,105 @@ function ShippingStep({
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex items-center justify-between p-4 border border-border rounded-lg">
                 <div className="flex items-center space-x-3">
                   <input
                     type="radio"
                     name="shipping"
-                    defaultChecked
-                    className="text-[#162e77]"
+                    value="standard"
+                    checked={deliveryMethod === "standard"}
+                    onChange={(e) => setDeliveryMethod(e.target.value)}
+                    className="text-primary"
                   />
                   <div>
                     <div className="font-semibold">Livraison standard</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       3-5 jours ouvrés
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-semibold">8,50 €</div>
+                  <div className="font-semibold">{formatPrice(8.50)}</div>
                 </div>
               </div>
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex items-center justify-between p-4 border border-border rounded-lg">
                 <div className="flex items-center space-x-3">
                   <input
                     type="radio"
                     name="shipping"
-                    className="text-[#162e77]"
+                    value="express"
+                    checked={deliveryMethod === "express"}
+                    onChange={(e) => setDeliveryMethod(e.target.value)}
+                    className="text-primary"
                   />
                   <div>
                     <div className="font-semibold">Livraison express</div>
-                    <div className="text-sm text-gray-600">24-48h</div>
+                    <div className="text-sm text-muted-foreground">24-48h</div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-semibold">15,90 €</div>
+                  <div className="font-semibold">{formatPrice(15.90)}</div>
                 </div>
               </div>
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex items-center justify-between p-4 border border-border rounded-lg bg-secondary/5">
                 <div className="flex items-center space-x-3">
                   <input
                     type="radio"
                     name="shipping"
-                    className="text-[#162e77]"
+                    value="pickup"
+                    checked={deliveryMethod === "pickup"}
+                    onChange={(e) => setDeliveryMethod(e.target.value)}
+                    className="text-primary"
                   />
-                  <div>
-                    <div className="font-semibold">Retrait en agence</div>
-                    <div className="text-sm text-gray-600">
-                      Disponible sous 2h
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-secondary/20 rounded-full flex items-center justify-center">
+                      <Package className="w-5 h-5 text-secondary" />
+                    </div>
+                    <div>
+                      <div className="font-semibold">Retrait en boutique</div>
+                      <div className="text-sm text-muted-foreground">
+                        Disponible sous 2h • Plus de 50 boutiques partenaires
+                      </div>
+                      <div className="text-xs text-secondary font-medium mt-1">
+                        📍 Trouvez la boutique la plus proche
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-semibold text-green-600">Gratuit</div>
+                  <div className="font-semibold text-green-600 text-lg">GRATUIT</div>
+                  <div className="text-xs text-muted-foreground">Économisez la livraison</div>
                 </div>
               </div>
             </div>
+
+            {/* Liste des boutiques pour retrait */}
+            {deliveryMethod === "pickup" && (
+              <div className="mt-4 p-4 bg-secondary/5 rounded-lg border border-secondary/20">
+                <h4 className="font-semibold text-foreground mb-3">Choisissez votre boutique</h4>
+                <div className="space-y-2">
+                  {[
+                    { name: "KesiMarket Paris Centre", address: "123 Rue de Rivoli, 75001 Paris", distance: "0.5 km" },
+                    { name: "KesiMarket Paris Nord", address: "45 Avenue Jean Jaurès, 75019 Paris", distance: "2.1 km" },
+                    { name: "KesiMarket Boulogne", address: "78 Route de la Reine, 92100 Boulogne", distance: "5.3 km" }
+                  ].map((store, index) => (
+                    <div 
+                      key={index}
+                      className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-primary/5 cursor-pointer"
+                    >
+                      <div>
+                        <div className="font-medium text-foreground">{store.name}</div>
+                        <div className="text-sm text-muted-foreground">{store.address}</div>
+                      </div>
+                      <div className="text-sm text-secondary font-medium">{store.distance}</div>
+                    </div>
+                  ))}
+                </div>
+                <Button variant="outline" size="sm" className="mt-3 w-full">
+                  Voir toutes les boutiques sur la carte
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -791,7 +823,7 @@ function ShippingStep({
           <Button
             onClick={onNext}
             disabled={!selectedShippingAddress || !selectedBillingAddress}
-            className="bg-[#162e77] hover:bg-[#1e40af]"
+            className="bg-primary hover:bg-primary/90"
           >
             Continuer vers le paiement
             <ArrowRight className="w-4 h-4 ml-2" />
@@ -809,26 +841,25 @@ function ShippingStep({
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Sous-total</span>
-                <span>{totals.subtotal.toFixed(2)} €</span>
+                <span>{formatPrice(totals.subtotal)}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Livraison</span>
-                <span>{totals.shipping.toFixed(2)} €</span>
-              </div>
-              <div className="flex justify-between">
-                <span>TVA</span>
-                <span>{totals.tax.toFixed(2)} €</span>
-              </div>
+              {deliveryMethod && deliveryMethod !== "" && (
+                <div className="flex justify-between">
+                  <span>Livraison</span>
+                  <span>{deliveryMethod === "pickup" ? "GRATUIT" : formatPrice(totals.shipping)}</span>
+                </div>
+              )}
+
               {totals.discount > 0 && (
                 <div className="flex justify-between text-green-600">
                   <span>Remise</span>
-                  <span>-{totals.discount.toFixed(2)} €</span>
+                  <span>-{formatPrice(totals.discount)}</span>
                 </div>
               )}
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total</span>
-                <span>{totals.total.toFixed(2)} €</span>
+                <span>{formatPrice(totals.total)}</span>
               </div>
             </div>
           </CardContent>
@@ -844,6 +875,7 @@ interface PaymentStepProps {
   setPaymentMethod: (method: string) => void;
   orderNotes: string;
   setOrderNotes: (notes: string) => void;
+  deliveryMethod: string;
   onNext: () => void;
   onBack: () => void;
   totals: any;
@@ -854,14 +886,23 @@ function PaymentStep({
   setPaymentMethod,
   orderNotes,
   setOrderNotes,
+  deliveryMethod,
   onNext,
   onBack,
   totals,
 }: PaymentStepProps) {
+  // Fonction utilitaire pour formater les prix
+  const formatPrice = (price: number): string => {
+    return price.toLocaleString('fr-FR', { 
+      style: 'currency', 
+      currency: 'EUR',
+      minimumFractionDigits: 2 
+    });
+  };
   return (
     <div className="grid lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-6">
-        <h2 className="text-3xl font-bold text-gray-900">Paiement</h2>
+        <h2 className="text-3xl font-bold text-foreground">Paiement</h2>
 
         {/* Payment Methods */}
         <Card>
@@ -873,8 +914,8 @@ function PaymentStep({
               <div
                 className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                   paymentMethod === "credit_card"
-                    ? "border-[#162e77] bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:border-border/80"
                 }`}
                 onClick={() => setPaymentMethod("credit_card")}
               >
@@ -883,12 +924,12 @@ function PaymentStep({
                     type="radio"
                     checked={paymentMethod === "credit_card"}
                     onChange={() => setPaymentMethod("credit_card")}
-                    className="text-[#162e77]"
+                    className="text-primary"
                   />
-                  <CreditCard className="w-5 h-5 text-gray-600" />
+                  <CreditCard className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <div className="font-semibold">Carte bancaire</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       Visa, MasterCard, American Express
                     </div>
                   </div>
@@ -927,8 +968,8 @@ function PaymentStep({
               <div
                 className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                   paymentMethod === "check"
-                    ? "border-[#162e77] bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:border-border/80"
                 }`}
                 onClick={() => setPaymentMethod("check")}
               >
@@ -937,14 +978,14 @@ function PaymentStep({
                     type="radio"
                     checked={paymentMethod === "check"}
                     onChange={() => setPaymentMethod("check")}
-                    className="text-[#162e77]"
+                    className="text-primary"
                   />
                   <div className="w-5 h-5 bg-green-100 rounded flex items-center justify-center">
                     <Check className="w-3 h-3 text-green-600" />
                   </div>
                   <div>
                     <div className="font-semibold">Chèque</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       À l'ordre de KesiMarket
                     </div>
                   </div>
@@ -1001,7 +1042,7 @@ function PaymentStep({
               placeholder="Instructions particulières, accès difficile, créneaux préférés..."
               value={orderNotes}
               onChange={(e) => setOrderNotes(e.target.value)}
-              className="w-full p-3 border border-gray-200 rounded-lg resize-none h-24"
+              className="w-full p-3 border border-border rounded-lg resize-none h-24"
             />
           </CardContent>
         </Card>
@@ -1013,21 +1054,21 @@ function PaymentStep({
               <input
                 type="checkbox"
                 id="terms"
-                className="mt-1 text-[#162e77]"
+                className="mt-1 text-primary"
                 required
               />
               <label htmlFor="terms" className="text-sm text-gray-700">
                 J'accepte les{" "}
                 <Link
                   href="/conditions-generales"
-                  className="text-[#162e77] hover:underline"
+                  className="text-primary hover:underline"
                 >
                   conditions générales de vente
                 </Link>{" "}
                 et la{" "}
                 <Link
                   href="/politique-confidentialite"
-                  className="text-[#162e77] hover:underline"
+                  className="text-primary hover:underline"
                 >
                   politique de confidentialité
                 </Link>
@@ -1045,7 +1086,7 @@ function PaymentStep({
           <Button
             onClick={onNext}
             disabled={!paymentMethod}
-            className="bg-[#162e77] hover:bg-[#1e40af]"
+            className="bg-primary hover:bg-primary/90"
           >
             Valider la commande
             <ArrowRight className="w-4 h-4 ml-2" />
@@ -1063,36 +1104,35 @@ function PaymentStep({
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Sous-total</span>
-                <span>{totals.subtotal.toFixed(2)} €</span>
+                <span>{formatPrice(totals.subtotal)}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Livraison</span>
-                <span>{totals.shipping.toFixed(2)} €</span>
-              </div>
-              <div className="flex justify-between">
-                <span>TVA</span>
-                <span>{totals.tax.toFixed(2)} €</span>
-              </div>
+              {deliveryMethod && deliveryMethod !== "" && (
+                <div className="flex justify-between">
+                  <span>Livraison</span>
+                  <span>{deliveryMethod === "pickup" ? "GRATUIT" : formatPrice(totals.shipping)}</span>
+                </div>
+              )}
+
               {totals.discount > 0 && (
                 <div className="flex justify-between text-green-600">
                   <span>Remise</span>
-                  <span>-{totals.discount.toFixed(2)} €</span>
+                  <span>-{formatPrice(totals.discount)}</span>
                 </div>
               )}
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total</span>
-                <span>{totals.total.toFixed(2)} €</span>
+                <span>{formatPrice(totals.total)}</span>
               </div>
             </div>
 
             {/* Security Info */}
             <div className="pt-4 space-y-2">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <Shield className="w-4 h-4 text-green-600" />
                 <span>Paiement 100% sécurisé</span>
               </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <Package className="w-4 h-4 text-blue-600" />
                 <span>Livraison assurée</span>
               </div>
@@ -1113,6 +1153,7 @@ interface ConfirmationStepProps {
   selectedBillingAddress: string;
   paymentMethod: string;
   orderNotes: string;
+  deliveryMethod: string;
 }
 
 function ConfirmationStep({
@@ -1123,7 +1164,23 @@ function ConfirmationStep({
   selectedBillingAddress,
   paymentMethod,
   orderNotes,
+  deliveryMethod,
 }: ConfirmationStepProps) {
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  
+  const handleImageError = (productId: string) => {
+    setImageErrors(prev => ({ ...prev, [productId]: true }));
+  };
+
+  // Fonction utilitaire pour formater les prix
+  const formatPrice = (price: number): string => {
+    return price.toLocaleString('fr-FR', { 
+      style: 'currency', 
+      currency: 'EUR',
+      minimumFractionDigits: 2 
+    });
+  };
+
   const orderNumber = `REX-${new Date().getFullYear()}-${Math.random()
     .toString(36)
     .substr(2, 9)
@@ -1135,10 +1192,10 @@ function ConfirmationStep({
         <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
           <Check className="w-8 h-8" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+        <h2 className="text-3xl font-bold text-foreground mb-4">
           Commande confirmée !
         </h2>
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           Merci pour votre commande. Vous recevrez un email de confirmation sous
           peu.
         </p>
@@ -1153,7 +1210,7 @@ function ConfirmationStep({
           <CardContent className="space-y-4">
             <div>
               <div className="font-semibold">Numéro de commande</div>
-              <div className="text-[#162e77] font-mono">{orderNumber}</div>
+              <div className="text-primary font-mono">{orderNumber}</div>
             </div>
             <div>
               <div className="font-semibold">Date de commande</div>
@@ -1197,26 +1254,25 @@ function ConfirmationStep({
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Sous-total</span>
-                <span>{totals.subtotal.toFixed(2)} €</span>
+                <span>{formatPrice(totals.subtotal)}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Livraison</span>
-                <span>{totals.shipping.toFixed(2)} €</span>
-              </div>
-              <div className="flex justify-between">
-                <span>TVA</span>
-                <span>{totals.tax.toFixed(2)} €</span>
-              </div>
+              {deliveryMethod && deliveryMethod !== "" && (
+                <div className="flex justify-between">
+                  <span>Livraison</span>
+                  <span>{deliveryMethod === "pickup" ? "GRATUIT" : formatPrice(totals.shipping)}</span>
+                </div>
+              )}
+
               {totals.discount > 0 && (
                 <div className="flex justify-between text-green-600">
                   <span>Remise</span>
-                  <span>-{totals.discount.toFixed(2)} €</span>
+                  <span>-{formatPrice(totals.discount)}</span>
                 </div>
               )}
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total</span>
-                <span>{totals.total.toFixed(2)} €</span>
+                <span>{formatPrice(totals.total)}</span>
               </div>
             </div>
           </CardContent>
@@ -1233,26 +1289,32 @@ function ConfirmationStep({
             {cart.items.map((item: any) => (
               <div
                 key={item.id}
-                className="flex items-center space-x-4 py-4 border-b border-gray-100 last:border-b-0"
+                className="flex items-center space-x-4 py-4 border-b border-border last:border-b-0"
               >
-                <div className="w-16 h-16 bg-gray-50 rounded-lg">
-                  <Image
-                    src={item.product.imageUrl || "/placeholder.png"}
-                    alt={item.product.name}
-                    width={64}
-                    height={64}
-                    className="object-contain w-full h-full p-1"
-                  />
+                <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden">
+                  {imageErrors[item.product.id.toString()] || !item.product.imageUrl ? (
+                    <div className="w-full h-full flex items-center justify-center bg-muted">
+                      <Logo variant="light" size="sm" showText={false} />
+                    </div>
+                  ) : (
+                    <Image
+                      src={item.product.files?.[0]?.url || item.product.imageUrl}
+                      alt={item.product.name}
+                      width={64}
+                      height={64}
+                      className="object-contain w-full h-full p-1"
+                      onError={() => handleImageError(item.product.id.toString())}
+                    />
+                  )}
                 </div>
                 <div className="flex-1">
                   <div className="font-semibold">{item.product.name}</div>
-                  <div className="text-sm text-gray-600">
-                    Quantité: {item.quantity} • {item.price.toFixed(2)} € /
-                    unité
+                  <div className="text-sm text-muted-foreground">
+                    Quantité: {item.quantity} • {item.product?.price ? formatPrice(Number(item.product.price)) : (item.price ? formatPrice(Number(item.price)) : '')} / unité
                   </div>
                 </div>
                 <div className="font-semibold">
-                  {item.totalPrice.toFixed(2)} €
+                  {item.totalPrice ? formatPrice(item.totalPrice) : ''}
                 </div>
               </div>
             ))}

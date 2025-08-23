@@ -1,6 +1,6 @@
-# 🚀 Guide de Déploiement - Rexel Modern Frontend
+# 🚀 Guide de Déploiement - KesiMarket Modern Frontend
 
-Ce guide explique comment déployer l'application frontend Rexel Modern en production avec **GitHub Actions** (méthode recommandée) ou manuellement.
+Ce guide explique comment déployer l'application frontend KesiMarket Modern en production avec **GitHub Actions** (méthode recommandée) ou manuellement.
 
 ## 📋 Table des Matières
 
@@ -124,11 +124,11 @@ www.votredomaine.com    A    203.0.113.1
 
 ```bash
 # Sur le serveur
-mkdir -p ~/rexel-modern/frontend
-cd ~/rexel-modern/frontend
+mkdir -p ~/kesimarket-modern/frontend
+cd ~/kesimarket-modern/frontend
 
 # Cloner le repository
-git clone https://github.com/votre-username/rexel-modern.git .
+git clone https://github.com/votre-username/kesimarket-modern.git .
 ```
 
 #### 2. Configuration des Variables
@@ -158,7 +158,7 @@ NEXTAUTH_SECRET=votre-secret-genere
 ACME_EMAIL=admin@votredomaine.com
 
 # Application
-NEXT_PUBLIC_APP_NAME="Rexel Modern"
+NEXT_PUBLIC_APP_NAME="KesiMarket Modern"
 NEXT_PUBLIC_SITE_URL=https://app.votredomaine.com
 ```
 
@@ -169,7 +169,7 @@ NEXT_PUBLIC_SITE_URL=https://app.votredomaine.com
 openssl rand -base64 32
 
 # Générer une clé SSH (si nécessaire)
-ssh-keygen -t ed25519 -C "rexel-frontend-deploy"
+ssh-keygen -t ed25519 -C "kesimarket-frontend-deploy"
 ```
 
 ### 🚀 Déploiement
@@ -241,13 +241,13 @@ curl https://app.votredomaine.com/api/health
 
 ```bash
 # Statut des conteneurs
-docker ps -f name=rexel-frontend
+docker ps -f name=kesimarket-frontend
 
 # Utilisation des ressources
-docker stats rexel-frontend-prod
+docker stats kesimarket-frontend-prod
 
 # Logs en temps réel
-docker logs -f rexel-frontend-prod
+docker logs -f kesimarket-frontend-prod
 ```
 
 ### 📈 Métriques
@@ -282,7 +282,7 @@ openssl s_client -connect app.votredomaine.com:443 -servername app.votredomaine.
 
 ```bash
 # Logs détaillés du build
-docker build --no-cache -t rexel-frontend-debug .
+docker build --no-cache -t kesimarket-frontend-debug .
 
 # Vérifier les dépendances
 npm audit
@@ -296,27 +296,27 @@ npm i --legacy-peer-deps
 curl -I https://api.votredomaine.com/health
 
 # Vérifier les variables d'environnement
-docker exec rexel-frontend-prod env | grep NEXT_PUBLIC_API_URL
+docker exec kesimarket-frontend-prod env | grep NEXT_PUBLIC_API_URL
 ```
 
 #### 3. Erreurs SSL/HTTPS
 
 ```bash
 # Vérifier Caddy
-docker logs rexel-frontend-caddy-prod
+docker logs kesimarket-frontend-caddy-prod
 
 # Renouveler le certificat
-docker exec rexel-frontend-caddy-prod caddy reload --config /etc/caddy/Caddyfile
+docker exec kesimarket-frontend-caddy-prod caddy reload --config /etc/caddy/Caddyfile
 ```
 
 #### 4. Problèmes de Performance
 
 ```bash
 # Vérifier l'utilisation mémoire
-docker stats --no-stream rexel-frontend-prod
+docker stats --no-stream kesimarket-frontend-prod
 
 # Redémarrer en cas de fuite mémoire
-docker restart rexel-frontend-prod
+docker restart kesimarket-frontend-prod
 ```
 
 ### 🔄 Commandes de Récupération
@@ -353,8 +353,8 @@ docker system prune -af
 docker compose -f docker-compose.prod.yml logs --tail=100 -f
 
 # Logs par service
-docker logs rexel-frontend-prod --tail=50
-docker logs rexel-frontend-caddy-prod --tail=50
+docker logs kesimarket-frontend-prod --tail=50
+docker logs kesimarket-frontend-caddy-prod --tail=50
 ```
 
 ---
@@ -406,4 +406,4 @@ docker logs rexel-frontend-caddy-prod --tail=50
 
 ---
 
-**🎉 Félicitations ! Votre frontend Rexel Modern est maintenant déployé en production avec GitHub Actions !** 
+**🎉 Félicitations ! Votre frontend KesiMarket Modern est maintenant déployé en production avec GitHub Actions !** 

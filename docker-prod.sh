@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Rexel Modern Frontend - Production Docker Management Script
+# KesiMarket Modern Frontend - Production Docker Management Script
 # Usage: ./docker-prod.sh [command]
 
 set -e
@@ -91,7 +91,7 @@ build_production() {
     log_info "Building production images..."
     
     # Build the frontend image
-    docker build -t rexel-frontend-prod:latest .
+    docker build -t kesimarket-frontend-prod:latest .
     
     log_success "Production images built successfully"
 }
@@ -229,7 +229,7 @@ monitor() {
     
     while true; do
         clear
-        echo "=== Rexel Frontend Production Monitor ==="
+        echo "=== KesiMarket Frontend Production Monitor ==="
         echo "$(date)"
         echo ""
         
@@ -254,7 +254,7 @@ monitor() {
 
 # Display help
 show_help() {
-    echo "Rexel Modern Frontend - Production Docker Management"
+    echo "KesiMarket Modern Frontend - Production Docker Management"
     echo ""
     echo "Usage: $0 [command]"
     echo ""

@@ -85,7 +85,7 @@ jobs:
           cat > .env.production << EOF
           NODE_ENV=production
           NEXT_TELEMETRY_DISABLED=1
-          NEXT_PUBLIC_APP_NAME="Rexel Modern Test"
+          NEXT_PUBLIC_APP_NAME="KesiMarket Modern Test"
           NEXT_PUBLIC_API_URL=http://localhost:3333
           NEXTAUTH_URL=http://localhost:3000
           NEXTAUTH_SECRET=test-secret-for-docker-build
@@ -95,12 +95,12 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t rexel-frontend-test:latest .
+          docker build -t kesimarket-frontend-test:latest .
 
       - name: Test Docker image
         run: |
           # Start container in background
-          docker run -d --name rexel-frontend-test -p 3000:3000 rexel-frontend-test:latest
+          docker run -d --name kesimarket-frontend-test -p 3000:3000 kesimarket-frontend-test:latest
           
           # Wait for container to start
           sleep 10
@@ -109,10 +109,10 @@ jobs:
           timeout 30 bash -c 'until curl -f http://localhost:3000/api/health; do sleep 2; done'
           
           # Clean up
-          docker stop rexel-frontend-test
-          docker rm rexel-frontend-test
+          docker stop kesimarket-frontend-test
+          docker rm kesimarket-frontend-test
 
       - name: Check image size
         run: |
           echo "### Docker Image Size" >> $GITHUB_STEP_SUMMARY
-          docker images rexel-frontend-test:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" >> $GITHUB_STEP_SUMMARY 
+          docker images kesimarket-frontend-test:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" >> $GITHUB_STEP_SUMMARY 

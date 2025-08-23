@@ -26,14 +26,14 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useProduct } from '@/lib/query/hooks';
 import { useAddToCart, useCart } from '@/lib/query/hooks';
-import { useAuthUser } from '@/lib/auth/auth-hooks';
+import { useAuth } from '@/lib/auth/nextauth-hooks';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const productId = params.id as string;
-  const { user, isAuthenticated } = useAuthUser();
+  const { user, isAuthenticated } = useAuth();
 
   const { data: product, isLoading, error } = useProduct(productId);
   const addToCartMutation = useAddToCart();

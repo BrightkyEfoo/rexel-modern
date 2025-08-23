@@ -47,7 +47,7 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
         </Button>
       </SheetTrigger>
       
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent className="w-[400px] sm:w-[540px] flex flex-col">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
@@ -55,11 +55,11 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
           </SheetTitle>
         </SheetHeader>
 
-        <div className="flex flex-col h-full mt-6">
+        <div className="flex flex-col grow mt-6">
           {items.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
               <ShoppingCart className="h-16 w-16 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Votre panier est vide</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Votre panier est vide</h3>
               <p className="text-muted-foreground mb-4">
                 Découvrez nos produits et ajoutez-les à votre panier
               </p>
@@ -72,16 +72,16 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
               {/* Items */}
               <div className="flex-1 overflow-y-auto space-y-4">
                 {items.map((item) => (
-                  <div key={item.id} className="flex gap-3 p-3 border rounded-lg">
+                  <div key={item.id} className="flex gap-3 p-3 border border-border rounded-lg bg-card">
                     {/* Image */}
                     <div className="w-16 h-16 bg-muted rounded-md overflow-hidden flex-shrink-0">
-                      {imageErrors[item.id] ? (
+                      {imageErrors[item.id] || !item.product.imageUrl ? (
                         <div className="w-full h-full flex items-center justify-center bg-muted">
                           <Logo variant="light" size="sm" showText={false} />
                         </div>
                       ) : (
                         <img
-                          src={item.product.imageUrl || '/images/placeholder.jpg'}
+                          src={item.product.files?.[0]?.url || item.product.imageUrl}
                           alt={item.product.name}
                           className="w-full h-full object-cover"
                           onError={() => handleImageError(item.id)}
@@ -91,7 +91,7 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm leading-tight mb-1 line-clamp-2">
+                      <h4 className="font-medium text-sm leading-tight mb-1 line-clamp-2 text-foreground">
                         {item.product.name}
                       </h4>
                       <p className="text-xs text-muted-foreground mb-2">
@@ -102,7 +102,7 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
                       <div className="flex items-center gap-2 mb-2">
                         {item.product.salePrice ? (
                           <>
-                            <span className="font-semibold text-sm">
+                            <span className="font-semibold text-sm text-foreground">
                               {Number(item.product.salePrice).toFixed(2)} €
                             </span>
                             <span className="text-xs text-muted-foreground line-through">
@@ -110,7 +110,7 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
                             </span>
                           </>
                         ) : (
-                          <span className="font-semibold text-sm">
+                          <span className="font-semibold text-sm text-foreground">
                             {Number(item.product.price).toFixed(2)} €
                           </span>
                         )}
@@ -127,7 +127,7 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
-                          <span className="w-8 text-center text-sm">{item.quantity}</span>
+                          <span className="w-8 text-center text-sm text-foreground font-medium">{item.quantity}</span>
                           <Button
                             variant="outline"
                             size="icon"
@@ -155,10 +155,10 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
               <Separator className="my-4" />
 
               {/* Total */}
-              <div className="space-y-3">
+              <div className="space-y-3 bg-muted/50 p-4 rounded-lg border border-border">
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold">Total</span>
-                  <span className="font-bold text-lg">
+                  <span className="font-semibold text-foreground">Total</span>
+                  <span className="font-bold text-lg text-foreground">
                     {totalPrice.toFixed(2)} €
                   </span>
                 </div>

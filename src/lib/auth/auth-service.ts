@@ -11,9 +11,9 @@ import type {
 import { UserType } from "../types/user";
 
 export class AuthService {
-  private readonly ACCESS_TOKEN_KEY = "rexel_access_token";
-  private readonly REFRESH_TOKEN_KEY = "rexel_refresh_token";
-  private readonly USER_KEY = "rexel_user";
+  private readonly ACCESS_TOKEN_KEY = "kesimarket_access_token";
+  private readonly REFRESH_TOKEN_KEY = "kesimarket_refresh_token";
+  private readonly USER_KEY = "kesimarket_user";
 
   // Login user
   async login(credentials: LoginCredentials): Promise<AuthResponse> {

@@ -1,8 +1,8 @@
-# 🚀 Configuration de Déploiement Frontend - Rexel Modern
+# 🚀 Configuration de Déploiement Frontend - KesiMarket Modern
 
 ## 📄 Résumé
 
-Cette configuration de déploiement pour le frontend Rexel Modern est basée sur la configuration éprouvée du backend et adaptée pour Next.js.
+Cette configuration de déploiement pour le frontend KesiMarket Modern est basée sur la configuration éprouvée du backend et adaptée pour Next.js.
 
 ## 🎯 Ce qui a été créé
 

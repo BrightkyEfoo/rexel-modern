@@ -40,8 +40,19 @@ export const registerSchema = z.object({
     .string()
     .optional()
     .refine(
-      (phone) => !phone || /^(\+33|0)[1-9](\d{8})$/.test(phone.replace(/\s/g, '')),
-      "Format de téléphone invalide"
+      (phone) => {
+        if (!phone) return true;
+        const cleanPhone = phone.replace(/\s/g, '');
+        
+        // Format international : +237 6XX XX XX XX
+        const internationalPattern = /^\+237[67]\d{8}$/;
+        
+        // Format national : 6XX XX XX XX (commençant par 6 ou 7)
+        const nationalPattern = /^[67]\d{8}$/;
+        
+        return internationalPattern.test(cleanPhone) || nationalPattern.test(cleanPhone);
+      },
+      "Format de téléphone camerounais invalide (ex: +237 6XX XX XX XX ou 6XX XX XX XX)"
     ),
   acceptedTerms: z
     .boolean()

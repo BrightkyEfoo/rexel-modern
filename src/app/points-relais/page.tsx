@@ -4,12 +4,17 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { appConfig } from '@/lib/config/app';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { ScrollToTop } from '@/components/ui/scroll-to-top';
 
 export default function PointsRelaisPage() {
   const pointsRelais = appConfig.relayPoints;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main>
       {/* Hero Section */}
       <div className="bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 py-16">
@@ -145,13 +150,16 @@ export default function PointsRelaisPage() {
               <Phone className="w-5 h-5 mr-2" />
               Nous contacter
             </Button>
-            <Button variant="outline" size="lg" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+            <Button variant="outline" size="lg" className="border-primary-foreground text-primary hover:bg-primary-foreground hover:text-primary">
               <Mail className="w-5 h-5 mr-2" />
               Demander un devis
             </Button>
           </div>
         </div>
       </div>
+      </main>
+      <Footer />
+      <ScrollToTop />
     </div>
   );
 } 

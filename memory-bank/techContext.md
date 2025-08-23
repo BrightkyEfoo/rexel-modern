@@ -1,4 +1,4 @@
-# Tech Context - Rexel Modern
+# Tech Context - KesiMarket Modern
 
 ## Stack technique
 
@@ -37,7 +37,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=password
-DB_DATABASE=rexel_modern
+DB_DATABASE=kesimarket_modern
 
 # MinIO
 MINIO_HOST=localhost

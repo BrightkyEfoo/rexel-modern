@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Lock, Mail, ArrowRight, AlertCircle, CheckCircle2, User, Building2, Phone } from 'lucide-react';
@@ -10,16 +10,19 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FormField } from '@/components/ui/form-field';
 import { FormCheckbox } from '@/components/ui/form-checkbox';
-import { useRegister, useAuthUser } from '@/lib/auth/auth-hooks';
+import { PhoneField } from '@/components/ui/phone-field';
+import { useRegister, useAuth } from '@/lib/auth/nextauth-hooks';
 import { registerSchema, type RegisterFormData } from '@/lib/validations/auth';
 import { appConfig } from '@/lib/config/app';
 import { Logo } from '@/components/ui/logo';
 import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect';
 import { useToast } from '@/hooks/use-toast';
+import { preserveRedirectUrl } from '@/lib/utils/auth-redirect';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthUser();
+  const searchParams = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const registerMutation = useRegister();
   const { redirectAfterAuth } = useAuthRedirect();
   const { toast } = useToast();
@@ -51,18 +54,17 @@ export default function RegisterPage() {
     try {
       const response = await registerMutation.mutateAsync(registerData);
       
-      // Inscription réussie - toujours rediriger vers OTP
+      // Inscription réussie - rediriger vers la page de connexion
       toast({
         title: "Inscription réussie",
-        description: "Un code de vérification vous a été envoyé par email.",
+        description: "Votre compte a été créé. Veuillez vous connecter pour continuer.",
       });
       
-      // Rediriger vers OTP avec les données de la réponse
-      const params = new URLSearchParams({
-        userId: response.data.userId.toString(),
-        email: registerData.email,
+      // Rediriger vers la page de connexion en préservant l'URL de redirection
+      const loginPath = preserveRedirectUrl(searchParams, '/auth/login', {
+        email: registerData.email
       });
-      router.push(`/auth/verify-otp?${params.toString()}`);
+      router.push(loginPath);
       
     } catch (error: unknown) {
       if (
@@ -71,7 +73,7 @@ export default function RegisterPage() {
         'type' in error &&
         error.type === 'VERIFICATION_REQUIRED'
       ) {
-        // Même traitement que le succès - rediriger vers OTP
+        // Compte créé mais nécessite vérification - rediriger vers connexion
         const verificationError = error as {
           type: 'VERIFICATION_REQUIRED';
           userId: number;
@@ -80,14 +82,14 @@ export default function RegisterPage() {
         
         toast({
           title: "Inscription réussie",
-          description: "Un code de vérification vous a été envoyé par email.",
+          description: "Votre compte a été créé. Veuillez vous connecter pour continuer.",
         });
         
-        const params = new URLSearchParams({
-          userId: verificationError.userId.toString(),
-          email: verificationError.email,
+        // Rediriger vers la page de connexion
+        const loginPath = preserveRedirectUrl(searchParams, '/auth/login', {
+          email: verificationError.email
         });
-        router.push(`/auth/verify-otp?${params.toString()}`);
+        router.push(loginPath);
       } else {
         // Erreur d'inscription
         toast({
@@ -208,16 +210,18 @@ export default function RegisterPage() {
               />
 
               {/* Phone */}
-              <FormField
-                name="phone"
-                label="Téléphone"
-                type="tel"
-                placeholder="01 23 45 67 89"
-                register={register}
-                error={errors.phone}
-                disabled={registerMutation.isPending}
-                icon={Phone}
-              />
+              <div>
+                <PhoneField
+                  label="Téléphone"
+                  placeholder="+237 6XX XX XX XX ou 6XX XX XX XX"
+                  error={errors.phone}
+                  disabled={registerMutation.isPending}
+                  showOperator={true}
+                  showExamples={true}
+                  helperText="Format camerounais uniquement"
+                  {...register('phone')}
+                />
+              </div>
             </div>
 
             {/* Password */}
@@ -314,7 +318,7 @@ export default function RegisterPage() {
             <p className="text-sm text-muted-foreground">
               Déjà un compte ?{' '}
               <Link
-                href="/auth/login"
+                href={preserveRedirectUrl(searchParams, '/auth/login')}
                 className="font-medium text-primary hover:text-primary/80"
               >
                 Se connecter

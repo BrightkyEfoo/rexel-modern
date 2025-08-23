@@ -320,7 +320,7 @@ export function useMergeCart() {
       
       // Vérifier qu'on a un token avant d'appeler
       const token = typeof window !== 'undefined' 
-        ? localStorage.getItem('rexel_access_token') 
+        ? localStorage.getItem('kesimarket_access_token') 
         : null;
       
       if (!token) {

@@ -2,36 +2,53 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Lock, Mail, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FormField } from '@/components/ui/form-field';
-import { useLogin, useAuthUser } from '@/lib/auth/auth-hooks';
+import { useLogin, useAuth } from '@/lib/auth/nextauth-hooks';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 import { appConfig } from '@/lib/config/app';
 import { Logo } from '@/components/ui/logo';
 import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect';
 import { useToast } from '@/hooks/use-toast';
+import { preserveRedirectUrl } from '@/lib/utils/auth-redirect';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthUser();
+  const { isAuthenticated } = useAuth();
   const loginMutation = useLogin();
   const { redirectAfterAuth } = useAuthRedirect();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const searchParams = useSearchParams();
+
+  // Récupérer l'email pré-rempli depuis les paramètres URL
+  const prefilledEmail = searchParams.get('email') || '';
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isValid },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     mode: 'onChange',
+    defaultValues: {
+      email: prefilledEmail,
+      password: '',
+    },
   });
+
+  // Pré-remplir l'email si fourni dans l'URL
+  useEffect(() => {
+    if (prefilledEmail) {
+      setValue('email', prefilledEmail);
+    }
+  }, [prefilledEmail, setValue]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -195,7 +212,7 @@ export default function LoginPage() {
             <p className="text-sm text-muted-foreground">
               Pas encore de compte ?{' '}
               <Link
-                href="/auth/register"
+                href={preserveRedirectUrl(searchParams, '/auth/register')}
                 className="font-medium text-primary hover:text-primary/80"
               >
                 Créer un compte

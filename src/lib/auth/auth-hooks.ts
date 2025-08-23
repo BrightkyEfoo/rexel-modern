@@ -32,6 +32,7 @@ export function useIsAuthenticated() {
     queryFn: () => authService.isAuthenticated(),
     staleTime: 60 * 1000, // 1 minute
     gcTime: 5 * 60 * 1000, // 5 minutes
+    initialData: false, // Valeur par défaut avant hydratation
   });
 }
 

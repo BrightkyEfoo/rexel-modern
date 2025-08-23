@@ -33,12 +33,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useProducts, useCategories, useBrands } from '@/lib/query/hooks';
-import { useAuthUser } from '@/lib/auth/auth-hooks';
+import { useAuth } from '@/lib/auth/nextauth-hooks';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
 export default function AdminDashboardPage() {
-  const { user, isAuthenticated, hasRole } = useAuthUser();
+  const { user, isAuthenticated, hasRole } = useAuth();
   const { data: products, isLoading: productsLoading } = useProducts({});
   const { data: categories, isLoading: categoriesLoading } = useCategories();
   const { data: brands, isLoading: brandsLoading } = useBrands();

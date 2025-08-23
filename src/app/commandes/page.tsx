@@ -34,12 +34,12 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 // import { useOrders } from '@/lib/query/hooks';
-import { useAuthUser } from "@/lib/auth/auth-hooks";
+import { useAuth } from "@/lib/auth/nextauth-hooks";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
 export default function OrdersPage() {
-  const { user, isAuthenticated } = useAuthUser();
+  const { user, isAuthenticated } = useAuth();
   // const { data: orders, isLoading, error } = useOrders();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -369,12 +369,12 @@ export default function OrdersPage() {
                                 </Link>
                                 <div className="text-sm text-gray-600">
                                   Quantité: {item.quantity} •{" "}
-                                  {item.price.toFixed(2)} € / unité
+                                  {item.price?.toFixed(2)} € / unité
                                 </div>
                               </div>
                               <div className="text-right">
                                 <div className="font-semibold text-gray-900">
-                                  {item.totalPrice.toFixed(2)} €
+                                  {item.totalPrice?.toFixed(2)} €
                                 </div>
                               </div>
                             </div>

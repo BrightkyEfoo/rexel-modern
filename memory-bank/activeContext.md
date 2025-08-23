@@ -1,4 +1,4 @@
-# Contexte Actif - Rexel Modern
+# Contexte Actif - KesiMarket Modern
 
 ## 🎯 Focus Actuel (Janvier 2025)
 **✅ Architecture Caddy Partagée Implémentée + Système de Types d'Utilisateurs Unifié + Pages Auth Thématisées + Filtres Dynamiques Backend**
@@ -7,7 +7,7 @@
 
 ### ✅ Migration vers Architecture Caddy Centralisée
 1. **Caddy centralisé sur backend** - Un seul reverse proxy gère frontend et API
-2. **Réseau Docker partagé `rexel-net`** - Communication entre conteneurs
+2. **Réseau Docker partagé `kesimarket-net`** - Communication entre conteneurs
 3. **Domaines unifiés** - kesimarket.com et api.kesimarket.com gérés par un seul Caddy
 4. **Déploiements indépendants** - Frontend et backend se déploient séparément
 5. **Configuration SSL centralisée** - Let's Encrypt géré uniquement par le backend
@@ -55,7 +55,7 @@ services:
 **Après :**
 ```yaml
 networks:
-  rexel-net:
+  kesimarket-net:
     external: true
 
 services:
@@ -72,7 +72,7 @@ services:
 5. **Documentation URLs** - Affichage des domaines finaux
 
 **Workflow steps modifiés :**
-- ✅ `docker-setup` : Vérification + création réseau `rexel-net`
+- ✅ `docker-setup` : Vérification + création réseau `kesimarket-net`
 - ✅ `build-docker` : Support environnements staging/production
 - ✅ `transfer-image` : Plus de transfert Caddyfile
 - ✅ `load-and-run` : Déploiement uniquement du service `frontend`
@@ -118,7 +118,7 @@ services:
 - ✅ **Cohérence** - Même enum partagé entre backend et frontend
 
 **Comptes de test créés :**
-- **Admin** : `admin@rexel.com` (admin123) - Type: `ADMIN`
+- **Admin** : `admin@kesimarket.com` (admin123) - Type: `ADMIN`
 - **Customers** : 4 comptes avec différents emails (customer123) - Type: `CUSTOMER`
 
 **Avantages du système :**
@@ -135,7 +135,7 @@ services:
 #### Page de Connexion (`/auth/login/page.tsx`)
 - ✅ **Arrière-plan** : `from-gray-50 to-gray-100` → `from-muted to-background`
 - ✅ **Logo** : `bg-[#162e77]` → `bg-primary` et `text-white` → `text-primary-foreground`
-- ✅ **Titre Rexel** : `text-[#162e77]` → `text-primary`
+- ✅ **Titre KesiMarket** : `text-[#162e77]` → `text-primary`
 - ✅ **Sous-titre** : `text-gray-500` → `text-muted-foreground`
 - ✅ **Titre principal** : `text-gray-900` → `text-foreground`
 - ✅ **Description** : `text-gray-600` → `text-muted-foreground`
@@ -195,10 +195,10 @@ NEXT_PUBLIC_SHOW_STAGING_BANNER=true
 ./scripts/setup-docker-network.sh
 
 # 2. Déployer backend (avec Caddy)
-cd ~/rexel-modern/backend && docker-compose -f docker-compose.prod.yml up -d
+cd ~/kesimarket-modern/backend && docker-compose -f docker-compose.prod.yml up -d
 
 # 3. Déployer frontend
-cd ~/rexel-modern/frontend && docker-compose -f docker-compose.prod.yml up -d
+cd ~/kesimarket-modern/frontend && docker-compose -f docker-compose.prod.yml up -d
 ```
 
 ## 🏗️ Architecture Actuelle (Unifiée)
@@ -207,9 +207,9 @@ cd ~/rexel-modern/frontend && docker-compose -f docker-compose.prod.yml up -d
 ```yaml
 # Réseau partagé
 networks:
-  rexel-net: external
+  kesimarket-net: external
 
-# Backend Stack (rexel-modern-backend)
+# Backend Stack (kesimarket-modern-backend)
 services:
   caddy:    # Reverse proxy pour TOUS les domaines
   app:      # AdonisJS backend  
@@ -217,7 +217,7 @@ services:
   minio:    # Object storage
   redis:    # Cache
 
-# Frontend Stack (rexel-modern)  
+# Frontend Stack (kesimarket-modern)  
 services:
   frontend: # Next.js app
 ```
@@ -251,7 +251,7 @@ services:
 
 ### Structure VPS ✅
 ```
-~/rexel-modern/
+~/kesimarket-modern/
 ├── backend/
 │   ├── logs/              # Logs Caddy (tous domaines)
 │   ├── uploads/           # Fichiers backend
@@ -265,12 +265,12 @@ services:
 ### ✅ Issues Critiques Résolues
 
 #### Réseau Docker Manquant (31/01/2025)
-- 🚨 **Issue** : `network rexel-net declared as external, but could not be found`
+- 🚨 **Issue** : `network kesimarket-net declared as external, but could not be found`
 - ✅ **Solution** : Ajout création automatique du réseau dans workflow backend
-- ✅ **Script créé** : `rexel-modern-backend/scripts/setup-docker-network.sh`
+- ✅ **Script créé** : `kesimarket-modern-backend/scripts/setup-docker-network.sh`
 - ✅ **Documentation** : Section dépannage ajoutée à DEPLOYMENT-SHARED.md
 - 📝 **Cause** : Le workflow backend ne créait pas le réseau partagé nécessaire
-- 🔧 **Fix workflow** : Detection + création automatique du réseau `rexel-net`
+- 🔧 **Fix workflow** : Detection + création automatique du réseau `kesimarket-net`
 
 #### Redémarrage Caddy après Déploiement Frontend
 - ✅ **Workflow frontend** : Redémarrage automatique de Caddy après déploiement
@@ -291,7 +291,7 @@ services:
   - Documentation dépannage complète avec vérifications manuelles
 
 #### Détection Réseau Incohérente (31/01/2025)
-- 🚨 **Issue** : `Network 'rexel-net' already exists` mais `network rexel-net not found` lors de la vérification
+- 🚨 **Issue** : `Network 'kesimarket-net' already exists` mais `network kesimarket-net not found` lors de la vérification
 - 🔍 **Cause** : Faux positif du `grep` - détection imprécise des réseaux existants
 - ✅ **Solutions implémentées** :
   - Remplacement `grep` par `docker network inspect` (vérification précise)
@@ -340,9 +340,9 @@ NEXT_PUBLIC_APP_NAME, ACME_EMAIL
 ```
 
 ### Monitoring Production ⚠️
-- **Logs Caddy** : ~/rexel-modern/backend/logs/
-- **Containers status** : `docker ps -f name=rexel`
-- **Network connectivity** : `docker network inspect rexel-net`
+- **Logs Caddy** : ~/kesimarket-modern/backend/logs/
+- **Containers status** : `docker ps -f name=kesimarket`
+- **Network connectivity** : `docker network inspect kesimarket-net`
 - **SSL certificates** : Vérification Let's Encrypt
 
 ## 📊 Métriques Actuelles
@@ -351,7 +351,7 @@ NEXT_PUBLIC_APP_NAME, ACME_EMAIL
 ```
 Services Docker:     6/6   ✅ 100% (db, minio, redis, app, caddy, frontend)
 Domaines SSL:        4/4   ✅ 100% (prod/staging × app/api)  
-Réseau partagé:      1/1   ✅ 100% (rexel-net)
+Réseau partagé:      1/1   ✅ 100% (kesimarket-net)
 Déploiements:        2/2   ✅ 100% (backend, frontend)
 ```
 

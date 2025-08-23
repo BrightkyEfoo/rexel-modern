@@ -6,7 +6,7 @@ Voici un **plan complet et détaillé** pour transformer ton projet en une archi
 
 ## 1.1. **Structure de dossiers (Clean Architecture, SOLID, DRY, POO)**
 ```
-rexel-modern-backend/
+kesimarket-modern-backend/
 │
 ├── app/
 │   ├── Controllers/Http/         # Contrôleurs REST (API)
@@ -98,7 +98,7 @@ rexel-modern-backend/
 # 4. **Plan d’implémentation étape par étape**
 
 ## **Étape 1 : Initialisation du projet**
-- Créer le projet AdonisJS (`npx create-adonis-ts-app rexel-modern-backend`).
+- Créer le projet AdonisJS (`npx create-adonis-ts-app kesimarket-modern-backend`).
 - Installer les dépendances (PostgreSQL, MinIO, etc.).
 - Configurer `.env` (DB, MinIO).
 

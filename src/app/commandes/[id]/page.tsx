@@ -33,7 +33,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 // import { useOrder } from '@/lib/query/hooks';
-import { useAuthUser } from "@/lib/auth/auth-hooks";
+import { useAuth } from "@/lib/auth/nextauth-hooks";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { appConfig } from '@/lib/config/app';
@@ -41,7 +41,7 @@ import { appConfig } from '@/lib/config/app';
 export default function OrderDetailPage() {
   const params = useParams();
   const orderId = params.id as string;
-  const { user, isAuthenticated } = useAuthUser();
+  const { user, isAuthenticated } = useAuth();
   // const { data: order, isLoading, error } = useOrder(orderId);
 
   const [activeTab, setActiveTab] = useState<
@@ -353,12 +353,12 @@ export default function OrderDetailPage() {
                         </div>
                         <div className="text-sm text-gray-600 mt-1">
                           Quantité: {item.quantity} • Prix unitaire:{" "}
-                          {item.price.toFixed(2)} €
+                          {item.price?.toFixed(2)} €
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-[#162e77]">
-                          {item.totalPrice.toFixed(2)} €
+                          {item.totalPrice?.toFixed(2)} €
                         </div>
                         {orderData.status === "delivered" && (
                           <Button variant="outline" size="sm" className="mt-2">

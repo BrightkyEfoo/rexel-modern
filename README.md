@@ -1,4 +1,4 @@
-# 🚀 Rexel Modern - Frontend
+# 🚀 KesiMarket Modern - Frontend
 
 Application e-commerce moderne développée avec **Next.js 15**, **TypeScript** et **TailwindCSS**.
 
@@ -11,7 +11,7 @@ flowchart TD
     Internet[🌐 Internet]
     
     subgraph VPS[🖥️ VPS Production]
-        subgraph Network[Docker Network: rexel-net]
+        subgraph Network[Docker Network: kesimarket-net]
             Caddy[🔄 Caddy Reverse Proxy<br/>Backend Stack]
             Frontend[⚛️ Frontend<br/>Next.js 15]
             Backend[🔧 Backend<br/>AdonisJS 6]
@@ -79,20 +79,20 @@ NEXTAUTH_SECRET=your_secret_here
 
 ```bash
 # Build l'image Docker
-docker build -t rexel-frontend .
+docker build -t kesimarket-frontend .
 
 # Run en local
-docker run -p 3000:3000 rexel-frontend
+docker run -p 3000:3000 kesimarket-frontend
 ```
 
 ### Production avec Réseau Partagé
 
 ```bash
 # 1. Créer le réseau partagé
-docker network create rexel-net
+docker network create kesimarket-net
 
 # 2. Déployer le backend avec Caddy
-cd ../rexel-modern-backend
+cd ../kesimarket-modern-backend
 docker-compose -f docker-compose.prod.yml up -d
 
 # 3. Déployer le frontend  
@@ -122,7 +122,7 @@ VPS_USER=ubuntu
 VPS_SSH_PRIVATE_KEY=your_private_key
 
 # Application
-NEXT_PUBLIC_APP_NAME=Rexel Modern
+NEXT_PUBLIC_APP_NAME=KesiMarket Modern
 NEXT_PUBLIC_API_URL=https://api.kesimarket.com
 NEXTAUTH_URL=https://kesimarket.com
 NEXTAUTH_SECRET=your_secret
@@ -255,7 +255,7 @@ npm run type-check
 - [📋 Architecture Partagée](./DEPLOYMENT-SHARED.md)
 - [🔧 Configuration GitHub Actions](./GITHUB-SETUP.md)
 - [⚙️ Variables d'Environnement](./env.production.example)
-- [🧩 Backend API](../rexel-modern-backend/README.md)
+- [🧩 Backend API](../kesimarket-modern-backend/README.md)
 
 ## 🚧 Développement
 

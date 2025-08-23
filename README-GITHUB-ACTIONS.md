@@ -1,6 +1,6 @@
 # 🚀 GitHub Actions - Guide de Démarrage Rapide
 
-Configuration de déploiement automatique pour Rexel Modern Frontend via GitHub Actions.
+Configuration de déploiement automatique pour KesiMarket Modern Frontend via GitHub Actions.
 
 ## 🎯 Aperçu Rapide
 
@@ -26,8 +26,8 @@ graph LR
 
 ```bash
 # Cloner et configurer
-git clone https://github.com/votre-username/rexel-modern.git
-cd rexel-modern
+git clone https://github.com/votre-username/kesimarket-modern.git
+cd kesimarket-modern
 
 # Générer les secrets
 ./scripts/setup-github-secrets.sh
@@ -55,7 +55,7 @@ NEXTAUTH_SECRET=votre-secret-genere
 ACME_EMAIL=admin@votredomaine.com
 
 # Application
-NEXT_PUBLIC_APP_NAME=Rexel Modern
+NEXT_PUBLIC_APP_NAME=KesiMarket Modern
 NEXT_PUBLIC_SITE_URL=https://app.votredomaine.com
 ```
 
@@ -263,7 +263,7 @@ curl https://app.votredomaine.com/api/health
 
 # Ou rollback manuel
 ssh ubuntu@votre-serveur
-cd ~/rexel-modern/frontend
+cd ~/kesimarket-modern/frontend
 ./docker-prod.sh rollback
 ```
 
@@ -348,4 +348,4 @@ docs(readme): add deployment instructions
 
 ---
 
-**🎉 Votre frontend Rexel Modern est maintenant configuré pour un déploiement automatique professionnel avec GitHub Actions !** 
+**🎉 Votre frontend KesiMarket Modern est maintenant configuré pour un déploiement automatique professionnel avec GitHub Actions !** 

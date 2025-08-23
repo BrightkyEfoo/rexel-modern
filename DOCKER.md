@@ -1,6 +1,6 @@
-# 🐳 Docker Configuration - Rexel Modern Frontend
+# 🐳 Docker Configuration - KesiMarket Modern Frontend
 
-Documentation complète de la configuration Docker pour le frontend Rexel Modern.
+Documentation complète de la configuration Docker pour le frontend KesiMarket Modern.
 
 ## 📁 Architecture
 
@@ -48,8 +48,8 @@ FROM base AS runner              # Image finale de production
 #### Frontend App
 ```yaml
 app:
-  image: rexel-frontend-prod:latest
-  container_name: rexel-frontend-prod
+  image: kesimarket-frontend-prod:latest
+  container_name: kesimarket-frontend-prod
   restart: unless-stopped
   healthcheck:
     test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
@@ -62,7 +62,7 @@ app:
 ```yaml
 caddy:
   image: caddy:2-alpine
-  container_name: rexel-frontend-caddy-prod
+  container_name: kesimarket-frontend-caddy-prod
   restart: unless-stopped
   ports:
     - '80:80'
@@ -82,7 +82,7 @@ volumes:
 
 ```yaml
 networks:
-  rexel-frontend-network:
+  kesimarket-frontend-network:
     driver: bridge
 ```
 
@@ -121,12 +121,12 @@ yourdomain.com {
 
 ```bash
 # Build local
-docker build -t rexel-frontend-prod:latest .
+docker build -t kesimarket-frontend-prod:latest .
 
 # Build avec arguments
 docker build \
   --build-arg NODE_IMAGE=node:20-alpine \
-  -t rexel-frontend-prod:latest .
+  -t kesimarket-frontend-prod:latest .
 
 # Build pour production
 ./docker-prod.sh build
@@ -136,10 +136,10 @@ docker build \
 
 ```bash
 # Vérifier la taille de l'image
-docker images rexel-frontend-prod
+docker images kesimarket-frontend-prod
 
 # Analyser les layers
-docker history rexel-frontend-prod:latest
+docker history kesimarket-frontend-prod:latest
 ```
 
 ### Multi-Platform Build
@@ -148,7 +148,7 @@ docker history rexel-frontend-prod:latest
 # Build pour plusieurs architectures
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -t rexel-frontend-prod:latest .
+  -t kesimarket-frontend-prod:latest .
 ```
 
 ## 🔧 Variables d'Environnement
@@ -230,10 +230,10 @@ docker-compose logs -f
 
 ```bash
 # Application container
-docker exec -it rexel-frontend-prod sh
+docker exec -it kesimarket-frontend-prod sh
 
 # Caddy container  
-docker exec -it rexel-frontend-caddy-prod sh
+docker exec -it kesimarket-frontend-caddy-prod sh
 ```
 
 ### Debug Mode
@@ -254,10 +254,10 @@ docker-compose \
 
 ```bash
 # Scan de sécurité avec Docker Scout
-docker scout cves rexel-frontend-prod:latest
+docker scout cves kesimarket-frontend-prod:latest
 
 # Scan avec Trivy
-trivy image rexel-frontend-prod:latest
+trivy image kesimarket-frontend-prod:latest
 ```
 
 ### Utilisateur Non-Root
@@ -281,7 +281,7 @@ USER nextjs
 echo "my_secret" | docker secret create nextauth_secret -
 
 # Variables d'environnement sécurisées
-docker run --env-file .env.production rexel-frontend-prod
+docker run --env-file .env.production kesimarket-frontend-prod
 ```
 
 ## 📈 Performance
@@ -290,7 +290,7 @@ docker run --env-file .env.production rexel-frontend-prod
 
 ```bash
 # Utilisation ressources
-docker stats rexel-frontend-prod
+docker stats kesimarket-frontend-prod
 
 # Taille image
 docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
@@ -329,9 +329,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build Docker image
-        run: docker build -t rexel-frontend-prod:latest .
+        run: docker build -t kesimarket-frontend-prod:latest .
       - name: Run tests
-        run: docker run --rm rexel-frontend-prod:latest npm test
+        run: docker run --rm kesimarket-frontend-prod:latest npm test
 ```
 
 ### Automatisation

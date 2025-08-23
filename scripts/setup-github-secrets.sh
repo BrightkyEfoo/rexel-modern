@@ -18,7 +18,7 @@ ENV_FILE_STAGING="env.staging.example"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-echo -e "${BLUE}🚀 GitHub Secrets Setup pour Rexel Modern Frontend${NC}"
+echo -e "${BLUE}🚀 GitHub Secrets Setup pour KesiMarket Modern Frontend${NC}"
 echo "=================================="
 
 # Vérifier que gh CLI est installé
@@ -349,7 +349,7 @@ main() {
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: $0 [production|staging|both|repository]"
     echo ""
-    echo "Script de configuration des secrets GitHub pour Rexel Modern Frontend"
+    echo "Script de configuration des secrets GitHub pour KesiMarket Modern Frontend"
     echo "Configure automatiquement les variables d'environnement pour:"
     echo "• Next.js (NEXTAUTH_SECRET, NEXT_PUBLIC_*, NODE_ENV)"
     echo "• Domaines (FRONTEND_DOMAIN, NEXTAUTH_URL, API_URL)"

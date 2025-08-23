@@ -1,7 +1,7 @@
-# Project Brief - Rexel Modern
+# Project Brief - KesiMarket Modern
 
 ## Vue d'ensemble
-Rexel Modern est une application e-commerce moderne développée avec Next.js et AdonisJS, destinée à remplacer l'ancien système avec une architecture clean et moderne.
+KesiMarket Modern est une application e-commerce moderne développée avec Next.js et AdonisJS, destinée à remplacer l'ancien système avec une architecture clean et moderne.
 
 ## Objectifs principaux
 1. **Frontend Next.js** : Interface utilisateur moderne et responsive

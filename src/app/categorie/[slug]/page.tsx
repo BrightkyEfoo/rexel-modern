@@ -21,7 +21,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import type { SearchFilters } from "@/lib/api/types";
-import { useAuthUser } from "@/lib/auth/auth-hooks";
+import { useAuth } from "@/lib/auth/nextauth-hooks";
 import {
   useCategoryBySlug,
   useProductsByCategorySlug,
@@ -52,7 +52,7 @@ const AVAILABILITY_OPTIONS: { value: AvailabilityOption; label: string }[] = [
 export default function CategoryPage() {
   const params = useParams();
   const categorySlug = params.slug as string;
-  const { user, isAuthenticated } = useAuthUser();
+  const { user, isAuthenticated } = useAuth();
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
@@ -238,11 +238,11 @@ export default function CategoryPage() {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Filters Sidebar */}
             <div className="lg:w-1/4">
-              {/* Mobile Filter Button */}
-              <div className="lg:hidden mb-4">
+              {/* Mobile Filter Button - Sticky */}
+              <div className="lg:hidden mb-4 sticky z-40 bg-background/95 backdrop-blur-sm pb-4" style={{ top: '180px' }}>
                 <Sheet open={showFilters} onOpenChange={setShowFilters}>
                   <SheetTrigger asChild>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full shadow-sm">
                       <Filter className="w-4 h-4 mr-2" />
                       Filtres
                     </Button>
@@ -263,16 +263,18 @@ export default function CategoryPage() {
                 </Sheet>
               </div>
 
-              {/* Desktop Filters */}
-              <div className="hidden lg:block">
-                <FilterContent
-                  categoryData={category}
-                  filters={filters}
-                  priceRange={priceRange}
-                  onFilterChange={updateFilters}
-                  onPriceChange={handlePriceRangeChange}
-                  onClearFilters={handleClearFilters}
-                />
+              {/* Desktop Filters - Sticky */}
+              <div className="hidden lg:block sticky max-h-[calc(100vh-180px)] overflow-y-auto" style={{ top: '180px' }}>
+                <div className="bg-background/95 backdrop-blur-sm rounded-lg border border-border/50 p-4 shadow-sm">
+                  <FilterContent
+                    categoryData={category}
+                    filters={filters}
+                    priceRange={priceRange}
+                    onFilterChange={updateFilters}
+                    onPriceChange={handlePriceRangeChange}
+                    onClearFilters={handleClearFilters}
+                  />
+                </div>
               </div>
             </div>
 
@@ -288,42 +290,44 @@ export default function CategoryPage() {
                 </p>
               </div>
 
-              {/* View Controls */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-4">
-                  <Button
-                    variant={viewMode === "grid" ? "default" : "outline"}
-                    size="icon"
-                    onClick={() => setViewMode("grid")}
-                  >
-                    <Grid3X3 className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === "list" ? "default" : "outline"}
-                    size="icon"
-                    onClick={() => setViewMode("list")}
-                  >
-                    <List className="w-4 h-4" />
-                  </Button>
-                </div>
+              {/* View Controls - Sticky */}
+              <div className="sticky z-30 bg-background/95 backdrop-blur-sm border border-border/50 rounded-lg p-4 mb-6 shadow-sm" style={{ top: '180px' }}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <Button
+                      variant={viewMode === "grid" ? "default" : "outline"}
+                      size="icon"
+                      onClick={() => setViewMode("grid")}
+                    >
+                      <Grid3X3 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === "list" ? "default" : "outline"}
+                      size="icon"
+                      onClick={() => setViewMode("list")}
+                    >
+                      <List className="w-4 h-4" />
+                    </Button>
+                  </div>
 
-                <Select
-                  value={filters.sortBy}
-                  onValueChange={(value: SortOption) =>
-                    updateFilters({ sortBy: value })
-                  }
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Trier par" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SORT_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <Select
+                    value={filters.sortBy}
+                    onValueChange={(value: SortOption) =>
+                      updateFilters({ sortBy: value })
+                    }
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Trier par" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SORT_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Products Grid */}

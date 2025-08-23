@@ -25,13 +25,13 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useFavorites, useRemoveFromFavorites, useAddToCart } from '@/lib/query/hooks';
-import { useAuthUser } from '@/lib/auth/auth-hooks';
+import { useAuth } from '@/lib/auth/nextauth-hooks';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import type { Favorite } from '@/lib/api/types';
 
 export default function FavoritesPage() {
-  const { user, isAuthenticated } = useAuthUser();
+  const { user, isAuthenticated } = useAuth();
   const { data: favorites, isLoading, error } = useFavorites();
   const removeFromFavoritesMutation = useRemoveFromFavorites();
   const addToCartMutation = useAddToCart();

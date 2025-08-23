@@ -1,4 +1,4 @@
-# 🔐 Configuration GitHub Secrets - Rexel Modern Frontend
+# 🔐 Configuration GitHub Secrets - KesiMarket Modern Frontend
 
 Ce guide explique comment configurer les secrets GitHub nécessaires pour le déploiement automatique du frontend avec **GitHub CLI** (automatique) ou manuellement.
 
@@ -71,7 +71,7 @@ ACME_EMAIL                  # Email pour certificats SSL
 
 #### 📱 Variables d'Application
 ```bash
-NEXT_PUBLIC_APP_NAME        # "Rexel Modern" → "Rexel Modern Staging"
+NEXT_PUBLIC_APP_NAME        # "KesiMarket Modern" → "KesiMarket Modern Staging"
 NEXT_PUBLIC_APP_VERSION     # Version de l'application
 NEXT_PUBLIC_API_VERSION     # Version de l'API
 NEXT_PUBLIC_DEFAULT_LOCALE  # Langue par défaut
@@ -138,13 +138,13 @@ Créer les environments **production** et **staging** :
 
 ```bash
 # Générer clé SSH pour GitHub Actions
-ssh-keygen -t ed25519 -C "github-actions-frontend" -f ~/.ssh/github_actions_rexel_frontend
+ssh-keygen -t ed25519 -C "github-actions-frontend" -f ~/.ssh/github_actions_kesimarket_frontend
 
 # Copier la clé publique sur le serveur
-ssh-copy-id -i ~/.ssh/github_actions_rexel_frontend.pub ubuntu@votre-serveur
+ssh-copy-id -i ~/.ssh/github_actions_kesimarket_frontend.pub ubuntu@votre-serveur
 
 # Récupérer la clé privée pour GitHub Secret
-cat ~/.ssh/github_actions_rexel_frontend
+cat ~/.ssh/github_actions_kesimarket_frontend
 ```
 
 ### Configuration Serveur
@@ -154,7 +154,7 @@ cat ~/.ssh/github_actions_rexel_frontend
 cat ~/.ssh/authorized_keys
 
 # Tester la connexion depuis votre machine
-ssh -i ~/.ssh/github_actions_rexel_frontend ubuntu@votre-serveur
+ssh -i ~/.ssh/github_actions_kesimarket_frontend ubuntu@votre-serveur
 ```
 
 ## 🔍 Validation et Tests
@@ -189,7 +189,7 @@ gh run list
 gh run view <run-id>
 
 # Tester SSH manuellement
-ssh -i ~/.ssh/github_actions_rexel_frontend ubuntu@votre-serveur
+ssh -i ~/.ssh/github_actions_kesimarket_frontend ubuntu@votre-serveur
 ```
 
 ## 📋 Customisation du Script

@@ -1,4 +1,4 @@
-# Rexel Modern Frontend - Production Makefile
+# KesiMarket Modern Frontend - Production Makefile
 # Simplified commands for Docker deployment
 
 .PHONY: help build deploy start stop restart status logs backup update clean github-setup
@@ -6,7 +6,7 @@
 # Variables
 COMPOSE_FILE := docker-compose.prod.yml
 ENV_FILE := .env.production
-IMAGE_NAME := rexel-frontend-prod:latest
+IMAGE_NAME := kesimarket-frontend-prod:latest
 
 # Couleurs pour l'affichage
 BLUE := \033[0;34m
@@ -18,7 +18,7 @@ NC := \033[0m # No Color
 # Commande par défaut
 help: ## Afficher l'aide
 	@echo ""
-	@echo "$(BLUE)🚀 Rexel Modern Frontend - Production Commands$(NC)"
+	@echo "$(BLUE)🚀 KesiMarket Modern Frontend - Production Commands$(NC)"
 	@echo ""
 	@echo "$(YELLOW)🎯 RECOMMANDÉ: Utiliser GitHub Actions pour le déploiement$(NC)"
 	@echo "   Push sur main → Déploiement automatique"
@@ -127,7 +127,7 @@ health: ## Vérifier la santé de l'application
 	@curl -s https://localhost/api/health | jq '.' 2>/dev/null || echo "$(RED)❌ HTTPS inaccessible$(NC)"
 	@echo ""
 	@echo "$(BLUE)📊 Container Health:$(NC)"
-	@docker ps -f name=rexel-frontend --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+	@docker ps -f name=kesimarket-frontend --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
 # Sauvegarde et mise à jour
 backup: ## Créer une sauvegarde
@@ -173,11 +173,11 @@ clean-all: ## Nettoyage complet (images, volumes, networks)
 # Debug et développement
 shell-app: ## Shell dans le conteneur de l'application
 	@echo "$(BLUE)🐚 Shell dans le conteneur app...$(NC)"
-	docker exec -it rexel-frontend-prod sh
+	docker exec -it kesimarket-frontend-prod sh
 
 shell-caddy: ## Shell dans le conteneur Caddy
 	@echo "$(BLUE)🐚 Shell dans le conteneur Caddy...$(NC)"
-	docker exec -it rexel-frontend-caddy-prod sh
+	docker exec -it kesimarket-frontend-caddy-prod sh
 
 debug: ## Démarrer en mode debug (sans daemon)
 	@echo "$(BLUE)🐛 Mode debug (Ctrl+C pour arrêter)...$(NC)"
@@ -210,7 +210,7 @@ test-github: ## Tester les workflows GitHub localement (nécessite act)
 
 # Informations
 info: ## Afficher les informations du système
-	@echo "$(BLUE)📋 Rexel Modern Frontend - Informations$(NC)"
+	@echo "$(BLUE)📋 KesiMarket Modern Frontend - Informations$(NC)"
 	@echo "=============================================="
 	@echo ""
 	@echo "$(BLUE)🏗️  Configuration:$(NC)"
@@ -224,7 +224,7 @@ info: ## Afficher les informations du système
 	@echo ""
 	@echo "$(BLUE)📊 État actuel:$(NC)"
 	@echo "   Image size: $$(docker images $(IMAGE_NAME) --format 'table {{.Size}}' 2>/dev/null | tail -n +2 || echo 'N/A')"
-	@echo "   Containers: $$(docker ps --filter 'name=rexel-frontend' -q | wc -l) running"
+	@echo "   Containers: $$(docker ps --filter 'name=kesimarket-frontend' -q | wc -l) running"
 	@echo ""
 	@echo "$(BLUE)🚀 Méthodes de déploiement:$(NC)"
 	@echo "   $(GREEN)Recommandé:$(NC) GitHub Actions (automatique)"

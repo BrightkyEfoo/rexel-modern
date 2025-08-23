@@ -4,7 +4,8 @@ import './globals.css';
 import ClientBody from './ClientBody';
 import { QueryProvider } from '@/lib/query/provider';
 import { CartProvider } from '@/lib/providers/cart-provider';
-import { SessionProvider } from '@/lib/providers/session-provider';
+import { SessionProvider as CartSessionProvider } from '@/lib/providers/session-provider';
+import { NextAuthProvider } from '@/lib/providers/nextauth-provider';
 import { appConfig } from '@/lib/config/app';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -27,14 +28,16 @@ export default function RootLayout({
   return (
     <html lang="fr" className={inter.variable}>
       <ClientBody>
-        <QueryProvider>
-          <SessionProvider>
-            <CartProvider>
-              {children}
-              <Toaster />
-            </CartProvider>
-          </SessionProvider>
-        </QueryProvider>
+        <NextAuthProvider>
+          <QueryProvider>
+            <CartSessionProvider>
+              <CartProvider>
+                {children}
+                <Toaster />
+              </CartProvider>
+            </CartSessionProvider>
+          </QueryProvider>
+        </NextAuthProvider>
       </ClientBody>
     </html>
   );

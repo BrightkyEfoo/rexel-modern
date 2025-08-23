@@ -1,4 +1,4 @@
-# Todos - Rexel Modern
+# Todos - KesiMarket Modern
 
 ## Architecture et Setup
 - [x] Installer les dépendances TanStack Query, Zod, Axios
@@ -16,7 +16,7 @@
 ## Sections principales
 - [x] Hero section avec carousel
 - [x] Grille catégories de produits (14 catégories)
-- [x] Section statistiques Rexel
+- [x] Section statistiques KesiMarket
 - [x] Marques partenaires
 - [x] Services et solutions (Open, Freshmile, Esabora, Safir, R+)
 - [x] Outils (Paniers simplifiés, Configurateurs, Showroom 3D, Reconnaissance tableau)
