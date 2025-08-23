@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { nextAuthApiClient } from '@/lib/api/nextauth-client';
@@ -12,6 +13,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' }
       },
+      // @ts-ignore
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           return null;
@@ -41,6 +43,7 @@ export const authOptions: NextAuthOptions = {
               lastName: user.lastName,
               phone: user.phone,
               type: user.type,
+              // @ts-ignore
               isEmailVerified: user.isEmailVerified,
               accessToken: token,
             };

@@ -1,23 +1,32 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Lock, Mail, ArrowRight, AlertCircle, CheckCircle2, User, Building2, Phone } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { FormField } from '@/components/ui/form-field';
-import { FormCheckbox } from '@/components/ui/form-checkbox';
-import { PhoneField } from '@/components/ui/phone-field';
-import { useRegister, useAuth } from '@/lib/auth/nextauth-hooks';
-import { registerSchema, type RegisterFormData } from '@/lib/validations/auth';
-import { appConfig } from '@/lib/config/app';
-import { Logo } from '@/components/ui/logo';
-import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect';
-import { useToast } from '@/hooks/use-toast';
-import { preserveRedirectUrl } from '@/lib/utils/auth-redirect';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Lock,
+  Mail,
+  ArrowRight,
+  AlertCircle,
+  CheckCircle2,
+  User,
+  Building2,
+  Phone,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FormField } from "@/components/ui/form-field";
+import { FormCheckbox } from "@/components/ui/form-checkbox";
+import { PhoneField } from "@/components/ui/phone-field";
+import { useRegister, useAuth } from "@/lib/auth/nextauth-hooks";
+import { registerSchema, type RegisterFormData } from "@/lib/validations/auth";
+import { appConfig } from "@/lib/config/app";
+import { Logo } from "@/components/ui/logo";
+import { useAuthRedirect } from "@/lib/hooks/useAuthRedirect";
+import { useToast } from "@/hooks/use-toast";
+import { preserveRedirectUrl } from "@/lib/utils/auth-redirect";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -36,10 +45,10 @@ export default function RegisterPage() {
     formState: { errors, isValid },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    mode: 'onChange',
+    mode: "onChange",
   });
 
-  const password = watch('password');
+  const password = watch("password");
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -53,55 +62,59 @@ export default function RegisterPage() {
 
     try {
       const response = await registerMutation.mutateAsync(registerData);
-      
+
       // Inscription réussie - rediriger vers la page de connexion
       toast({
         title: "Inscription réussie",
-        description: "Votre compte a été créé. Veuillez vous connecter pour continuer.",
+        description:
+          "Votre compte a été créé. Veuillez vous connecter pour continuer.",
       });
-      
+
       // Rediriger vers la page de connexion en préservant l'URL de redirection
-      const loginPath = preserveRedirectUrl(searchParams, '/auth/login', {
-        email: registerData.email
+      const loginPath = preserveRedirectUrl(searchParams, "/auth/login", {
+        email: registerData.email,
       });
       router.push(loginPath);
-      
     } catch (error: unknown) {
       if (
         error &&
-        typeof error === 'object' &&
-        'type' in error &&
-        error.type === 'VERIFICATION_REQUIRED'
+        typeof error === "object" &&
+        "type" in error &&
+        error.type === "VERIFICATION_REQUIRED"
       ) {
         // Compte créé mais nécessite vérification - rediriger vers connexion
         const verificationError = error as {
-          type: 'VERIFICATION_REQUIRED';
+          type: "VERIFICATION_REQUIRED";
           userId: number;
           email: string;
         };
-        
+
         toast({
           title: "Inscription réussie",
-          description: "Votre compte a été créé. Veuillez vous connecter pour continuer.",
+          description:
+            "Votre compte a été créé. Veuillez vous connecter pour continuer.",
         });
-        
+
         // Rediriger vers la page de connexion
-        const loginPath = preserveRedirectUrl(searchParams, '/auth/login', {
-          email: verificationError.email
+        const loginPath = preserveRedirectUrl(searchParams, "/auth/login", {
+          email: verificationError.email,
         });
         router.push(loginPath);
       } else {
         // Erreur d'inscription
         toast({
           title: "Erreur d'inscription",
-          description: "Une erreur est survenue lors de l'inscription. Veuillez réessayer.",
+          description:
+            "Une erreur est survenue lors de l'inscription. Veuillez réessayer.",
           variant: "destructive",
         });
       }
     }
   };
 
-  const getPasswordStrength = (password: string): { strength: number; label: string; color: string } => {
+  const getPasswordStrength = (
+    password: string
+  ): { strength: number; label: string; color: string } => {
     let strength = 0;
     if (password.length >= 8) strength++;
     if (/[a-z]/.test(password)) strength++;
@@ -109,17 +122,29 @@ export default function RegisterPage() {
     if (/\d/.test(password)) strength++;
     if (/[^a-zA-Z\d]/.test(password)) strength++;
 
-    const strengthLabels = ['Très faible', 'Faible', 'Moyen', 'Fort', 'Très fort'];
-    const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
+    const strengthLabels = [
+      "Très faible",
+      "Faible",
+      "Moyen",
+      "Fort",
+      "Très fort",
+    ];
+    const strengthColors = [
+      "bg-red-500",
+      "bg-orange-500",
+      "bg-yellow-500",
+      "bg-blue-500",
+      "bg-green-500",
+    ];
 
     return {
       strength,
       label: strengthLabels[Math.min(strength, 4)],
-      color: strengthColors[Math.min(strength, 4)]
+      color: strengthColors[Math.min(strength, 4)],
     };
   };
 
-  const passwordStrength = getPasswordStrength(password || '');
+  const passwordStrength = getPasswordStrength(password || "");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-muted to-background flex items-center justify-center p-4">
@@ -129,12 +154,18 @@ export default function RegisterPage() {
           <Link href="/" className="inline-flex items-center space-x-2 mb-8">
             <Logo variant="light" size="md" showText={false} />
             <div className="text-left">
-              <div className="text-xl font-bold text-primary">{appConfig.name}</div>
-              <div className="text-xs text-muted-foreground">{appConfig.country}</div>
+              <div className="text-xl font-bold text-primary">
+                {appConfig.name}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {appConfig.country}
+              </div>
             </div>
           </Link>
 
-          <h2 className="text-2xl font-bold text-center mb-2">Créer un compte</h2>
+          <h2 className="text-2xl font-bold text-center mb-2">
+            Créer un compte
+          </h2>
           <p className="text-muted-foreground text-center mb-6">
             Rejoignez la communauté KesiMarket et profitez d'avantages exclusifs
           </p>
@@ -148,7 +179,7 @@ export default function RegisterPage() {
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  {registerMutation.error.message}
+                  {(registerMutation.error as any).message}
                 </AlertDescription>
               </Alert>
             )}
@@ -219,7 +250,7 @@ export default function RegisterPage() {
                   showOperator={true}
                   showExamples={true}
                   helperText="Format camerounais uniquement"
-                  {...register('phone')}
+                  {...register("phone")}
                 />
               </div>
             </div>
@@ -248,10 +279,14 @@ export default function RegisterPage() {
                     <div className="flex-1 bg-muted rounded-full h-2">
                       <div
                         className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
-                        style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
+                        style={{
+                          width: `${(passwordStrength.strength / 5) * 100}%`,
+                        }}
                       />
                     </div>
-                    <span className="text-xs text-muted-foreground">{passwordStrength.label}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {passwordStrength.label}
+                    </span>
                   </div>
                 </div>
               )}
@@ -269,7 +304,9 @@ export default function RegisterPage() {
               required
               icon={Lock}
               showPasswordToggle
-              onTogglePassword={() => setShowConfirmPassword(!showConfirmPassword)}
+              onTogglePassword={() =>
+                setShowConfirmPassword(!showConfirmPassword)
+              }
               showPassword={showConfirmPassword}
             />
 
@@ -281,12 +318,18 @@ export default function RegisterPage() {
               disabled={registerMutation.isPending}
               label={
                 <>
-                  J'accepte les{' '}
-                  <Link href="/conditions-utilisation" className="text-primary hover:text-primary/80 font-medium">
+                  J'accepte les{" "}
+                  <Link
+                    href="/conditions-utilisation"
+                    className="text-primary hover:text-primary/80 font-medium"
+                  >
                     conditions d'utilisation
-                  </Link>{' '}
-                  et la{' '}
-                  <Link href="/politique-confidentialite" className="text-primary hover:text-primary/80 font-medium">
+                  </Link>{" "}
+                  et la{" "}
+                  <Link
+                    href="/politique-confidentialite"
+                    className="text-primary hover:text-primary/80 font-medium"
+                  >
                     politique de confidentialité
                   </Link>
                 </>
@@ -316,9 +359,9 @@ export default function RegisterPage() {
           {/* Login Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Déjà un compte ?{' '}
+              Déjà un compte ?{" "}
               <Link
-                href={preserveRedirectUrl(searchParams, '/auth/login')}
+                href={preserveRedirectUrl(searchParams, "/auth/login")}
                 className="font-medium text-primary hover:text-primary/80"
               >
                 Se connecter
@@ -329,23 +372,33 @@ export default function RegisterPage() {
 
         {/* Benefits */}
         <div className="bg-card rounded-2xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold mb-4">Les avantages de votre compte KesiMarket</h3>
+          <h3 className="text-lg font-semibold mb-4">
+            Les avantages de votre compte KesiMarket
+          </h3>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-muted-foreground">Prix préférentiels</span>
+              <span className="text-sm text-muted-foreground">
+                Prix préférentiels
+              </span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-muted-foreground">Suivi de commandes</span>
+              <span className="text-sm text-muted-foreground">
+                Suivi de commandes
+              </span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-muted-foreground">Support prioritaire</span>
+              <span className="text-sm text-muted-foreground">
+                Support prioritaire
+              </span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-muted-foreground">Offres exclusives</span>
+              <span className="text-sm text-muted-foreground">
+                Offres exclusives
+              </span>
             </div>
           </div>
         </div>

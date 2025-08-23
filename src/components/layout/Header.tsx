@@ -232,9 +232,9 @@ export function Header({ className }: HeaderProps) {
                 <>
                   <Link href="/favoris" className="relative group">
                     <Heart className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                    {favoritesCount?.data?.count > 0 && (
+                    {(favoritesCount?.data?.count || 0) > 0 && (
                       <Badge variant="default" className="absolute -top-2 -right-2 w-5 h-5 justify-center p-0">
-                        {favoritesCount.data.count > 99 ? '99+' : favoritesCount.data.count}
+                        {(favoritesCount?.data?.count || 0) > 99 ? '99+' : favoritesCount?.data?.count || 0}
                       </Badge>
                     )}
                   </Link>

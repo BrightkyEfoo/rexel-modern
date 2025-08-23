@@ -1,35 +1,34 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { ScrollToTop } from '@/components/ui/scroll-to-top';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Header } from '@/components/layout/Header';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollToTop } from '@/components/ui/scroll-to-top';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  CheckCircle,
-  Clock,
-  MapPin,
-  Phone,
-  Mail,
-  Star,
-  PlayCircle,
-  Download,
-  Calendar,
-  FileText,
-  Users,
+import { Service } from '@/types/services';
+import {
   Award,
+  Calendar,
+  CheckCircle,
   ChevronDown,
   ChevronUp,
-  Send
+  Clock,
+  FileText,
+  Mail,
+  MapPin,
+  Phone,
+  PlayCircle,
+  Send,
+  Star,
+  Users
 } from 'lucide-react';
-import { Service } from '@/types/services';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 // Service temporaire pour démonstration (en production, viendrait de l'API)
 const mockService: Service = {
@@ -275,7 +274,7 @@ export default function DynamicServicePage() {
             <h1 className="text-2xl font-bold mb-4">Service non trouvé</h1>
             <p className="text-muted-foreground mb-8">Le service demandé n'existe pas ou n'est plus disponible.</p>
             <Button asChild>
-              <a href="/services">Retour aux services</a>
+              <Link href="/services">Retour aux services</Link>
             </Button>
           </div>
         </div>

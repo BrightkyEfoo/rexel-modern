@@ -3,6 +3,7 @@
 import { useAuth } from '@/lib/auth/nextauth-hooks';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { useLogout } from '../auth/auth-hooks';
 
 /**
  * Hook pour vérifier l'accès admin
@@ -55,7 +56,6 @@ export function useRequireAdminAuth() {
  * Hook pour la déconnexion admin (utilise NextAuth)
  */
 export function useAdminLogout() {
-  const { useLogout } = require('@/lib/auth/nextauth-hooks');
   const logoutMutation = useLogout();
   
   return {

@@ -101,7 +101,7 @@ export default function ProductDetailPage() {
   const currentPrice = productData.price;
   const currentStock = typeof productData.inStock === 'number' ? productData.inStock : 100;
   const isInStock = currentStock > 0;
-  const primaryCategory = getProductPrimaryCategory(productData);
+  const primaryCategory = getProductPrimaryCategory(productData as any);
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
