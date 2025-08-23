@@ -334,7 +334,6 @@ export default function CategoryPage() {
               <ProductGrid
                 products={productsResponse?.data || []}
                 viewMode={viewMode}
-                isAuthenticated={isAuthenticated}
                 isLoading={productsLoading}
               />
 

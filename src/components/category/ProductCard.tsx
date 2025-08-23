@@ -9,28 +9,26 @@ import { Logo } from '@/components/ui/logo';
 import { ProductCardFooter } from '@/components/ui/product-card-footer';
 import { QuantitySelector } from '@/components/ui/quantity-selector';
 import { useCartSync } from '@/lib/hooks/useCartSync';
+import { useProductFavoriteStatus } from '@/lib/hooks/useFavorites';
+import { useAuth } from '@/lib/auth/nextauth-hooks';
 import type { Product } from '@/lib/api/types';
 
 interface ProductCardProps {
   product: Product;
   viewMode?: 'grid' | 'list';
-  isAuthenticated: boolean;
-  onToggleFavorite?: (productId: string) => void;
-  isFavorite?: boolean;
 }
 
 export function ProductCard({
   product,
-  viewMode = 'grid',
-  isAuthenticated,
-  onToggleFavorite,
-  isFavorite = false
+  viewMode = 'grid'
 }: ProductCardProps) {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   
   const { addItem, updateQuantity, removeItem, items } = useCartSync();
+  const { isAuthenticated } = useAuth();
+  const favoriteState = useProductFavoriteStatus(product.id.toString());
   
   // Fonctions utilitaires pour le panier
   const isItemInCart = (productId: string) => 
@@ -118,28 +116,44 @@ export function ProductCard({
     </div>
   );
 
+  const handleToggleFavorite = async () => {
+    if (!isAuthenticated) {
+      // Rediriger vers la page de connexion
+      window.location.href = '/auth/login';
+      return;
+    }
+
+    try {
+      await favoriteState.toggle();
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
+
   const renderActions = () => (
     <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-      {onToggleFavorite && (
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-8 w-8 bg-white/90 hover:bg-white"
-          onClick={() => onToggleFavorite(product.id.toString())}
-        >
-          <Heart
-            className={`w-4 h-4 ${
-              isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'
-            }`}
-          />
-        </Button>
-      )}
       <Button
         variant="outline"
         size="icon"
         className="h-8 w-8 bg-white/90 hover:bg-white"
+        onClick={handleToggleFavorite}
+        disabled={favoriteState.isLoading}
       >
-        <Eye className="w-4 h-4 text-gray-600" />
+        <Heart
+          className={`w-4 h-4 ${
+            favoriteState.isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'
+          }`}
+        />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        className="h-8 w-8 bg-white/90 hover:bg-white"
+        asChild
+      >
+        <a href={`/produit/${product.id}`}>
+          <Eye className="w-4 h-4 text-gray-600" />
+        </a>
       </Button>
     </div>
   );
@@ -201,21 +215,22 @@ export function ProductCard({
             {/* Actions */}
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-2">
-                {onToggleFavorite && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onToggleFavorite(product.id.toString())}
-                  >
-                    <Heart
-                      className={`w-4 h-4 ${
-                        isFavorite ? 'fill-red-500 text-red-500' : 'text-muted-foreground'
-                      }`}
-                    />
-                  </Button>
-                )}
-                <Button variant="ghost" size="sm">
-                  <Eye className="w-4 h-4 text-muted-foreground" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleToggleFavorite}
+                  disabled={favoriteState.isLoading}
+                >
+                  <Heart
+                    className={`w-4 h-4 ${
+                      favoriteState.isFavorite ? 'fill-red-500 text-red-500' : 'text-muted-foreground'
+                    }`}
+                  />
+                </Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <a href={`/produit/${product.id}`}>
+                    <Eye className="w-4 h-4 text-muted-foreground" />
+                  </a>
                 </Button>
               </div>
               

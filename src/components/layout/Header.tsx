@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useAuth, useLogout } from '@/lib/auth/nextauth-hooks';
 import { useMainCategories } from '@/lib/query/hooks';
+import { useFavoritesCount } from '@/lib/hooks/useFavorites';
 import { appConfig } from '@/lib/config/app';
 import { CartPreview } from '@/components/cart/CartPreview';
 import { AuthLink } from '@/components/auth/AuthLink';
@@ -48,6 +49,7 @@ export function Header({ className }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isAuthenticated, user } = useAuth();
   const logoutMutation = useLogout();
+  const { data: favoritesCount } = useFavoritesCount();
   const { data: categoriesResponse, isLoading: categoriesLoading } = useMainCategories();
 
   // Extraire les catégories de la réponse API
@@ -193,7 +195,7 @@ export function Header({ className }: HeaderProps) {
                 <input
                   type="text"
                   placeholder="Rechercher un produit..."
-                  className="pl-10 pr-4 py-3 text-base border-2 border-border rounded-lg focus:border-primary focus:ring-0 w-full"
+                  className="pl-10 pr-4 py-3 text-base border-2 border-border rounded-lg focus:border-primary focus-visible:border-primary focus:ring-0 w-full"
                 />
               </div>
             </div>
@@ -230,7 +232,11 @@ export function Header({ className }: HeaderProps) {
                 <>
                   <Link href="/favoris" className="relative group">
                     <Heart className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <Badge variant="default" className="absolute -top-2 -right-2 w-5 h-5 justify-center p-0">3</Badge>
+                    {favoritesCount?.data?.count > 0 && (
+                      <Badge variant="default" className="absolute -top-2 -right-2 w-5 h-5 justify-center p-0">
+                        {favoritesCount.data.count > 99 ? '99+' : favoritesCount.data.count}
+                      </Badge>
+                    )}
                   </Link>
                   <CartPreview isAuthenticated={isAuthenticated} />
                   <DropdownMenu>

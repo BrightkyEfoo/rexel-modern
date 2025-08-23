@@ -33,12 +33,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useProducts, useCategories, useBrands } from '@/lib/query/hooks';
-import { useAuth } from '@/lib/auth/nextauth-hooks';
-import { Header } from '@/components/layout/Header';
+import { useRequireAdminAuth } from '@/lib/hooks/useAdminAccess';
+import { AdminHeader } from '@/components/admin/AdminHeader';
 import { Footer } from '@/components/layout/Footer';
 
 export default function AdminDashboardPage() {
-  const { user, isAuthenticated, hasRole } = useAuth();
+  const { isAuthenticated: isAdminAuthenticated, isLoading: adminAuthLoading, adminUser } = useRequireAdminAuth();
   const { data: products, isLoading: productsLoading } = useProducts({});
   const { data: categories, isLoading: categoriesLoading } = useCategories();
   const { data: brands, isLoading: brandsLoading } = useBrands();
@@ -50,30 +50,30 @@ export default function AdminDashboardPage() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
   // Redirect if not authenticated or not admin
-  // useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     window.location.href = '/auth/login';
-  //   } else if (!hasRole('admin')) {
-  //     window.location.href = '/';
-  //   }
-  // }, [isAuthenticated, hasRole]);
-
-  // if (!isAuthenticated || !hasRole('admin')) {
-  //   return null; // Will redirect
-  // }
+  // Protection par l'authentification admin
+  if (adminAuthLoading || !isAdminAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Vérification des permissions...</p>
+        </div>
+      </div>
+    );
+  }
 
   const isLoading = productsLoading || categoriesLoading || brandsLoading;
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <AdminHeader />
         <div className="container mx-auto px-4 py-8">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-64" />
+            <div className="h-8 bg-muted rounded w-64" />
             <div className="grid grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded" />
+                <div key={i} className="h-32 bg-muted rounded" />
               ))}
             </div>
           </div>
@@ -121,24 +121,24 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <AdminHeader />
 
       <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
-        <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
-          <Link href="/" className="hover:text-[#162e77]">Accueil</Link>
+        <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-8">
+          <Link href="/" className="hover:text-primary">Accueil</Link>
           <span>/</span>
-          <span className="text-gray-900">Administration</span>
+          <span className="text-foreground">Administration</span>
         </nav>
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
               Dashboard Administrateur
             </h1>
-            <p className="text-gray-600">
-              Bienvenue {user?.fullName}, gérez votre catalogue et vos commandes
+            <p className="text-muted-foreground">
+              Bienvenue {adminUser?.name || adminUser?.email}, gérez votre catalogue et vos commandes
             </p>
           </div>
 
@@ -153,8 +153,8 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="bg-white rounded-lg border border-gray-200 mb-8">
-          <div className="flex items-center space-x-8 px-6 py-4 border-b border-gray-200">
+        <div className="bg-card rounded-lg border mb-8">
+          <div className="flex items-center space-x-8 px-6 py-4 border-b">
             {[
               { id: 'overview', label: 'Vue d\'ensemble', icon: BarChart3 },
               { id: 'products', label: 'Produits', icon: Package },
@@ -167,8 +167,8 @@ export default function AdminDashboardPage() {
                 onClick={() => setActiveTab(id as any)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
                   activeTab === id
-                    ? 'bg-[#162e77] text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -187,11 +187,11 @@ export default function AdminDashboardPage() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Produits</p>
-                      <p className="text-3xl font-bold text-gray-900">{statsData.totalProducts}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Total Produits</p>
+                      <p className="text-3xl font-bold text-foreground">{statsData.totalProducts}</p>
                       <p className="text-sm text-green-600">+12% ce mois</p>
                     </div>
-                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
                       <Package className="w-6 h-6" />
                     </div>
                   </div>
@@ -202,8 +202,8 @@ export default function AdminDashboardPage() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Catégories</p>
-                      <p className="text-3xl font-bold text-gray-900">{statsData.totalCategories}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Catégories</p>
+                      <p className="text-3xl font-bold text-foreground">{statsData.totalCategories}</p>
                       <p className="text-sm text-blue-600">+2 nouvelles</p>
                     </div>
                     <div className="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
@@ -217,8 +217,8 @@ export default function AdminDashboardPage() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Marques</p>
-                      <p className="text-3xl font-bold text-gray-900">{statsData.totalBrands}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Marques</p>
+                      <p className="text-3xl font-bold text-foreground">{statsData.totalBrands}</p>
                       <p className="text-sm text-purple-600">Partenaires actifs</p>
                     </div>
                     <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
@@ -307,9 +307,9 @@ export default function AdminDashboardPage() {
                         </div>
                         <div className="flex-1">
                           <div className="font-medium text-sm">{product.name}</div>
-                          <div className="text-xs text-gray-600">{product.brand?.name}</div>
+                          <div className="text-xs text-muted-foreground">{product.brand?.name}</div>
                         </div>
-                        <div className="text-sm font-semibold text-[#162e77]">
+                        <div className="text-sm font-semibold text-primary">
                           {Number(product.price).toFixed(2)} €
                         </div>
                       </div>

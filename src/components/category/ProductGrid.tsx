@@ -5,14 +5,12 @@ import { ProductGridSkeleton } from './ProductGridSkeleton';
 interface ProductGridProps {
   products: Product[];
   viewMode: 'grid' | 'list';
-  isAuthenticated: boolean;
   isLoading?: boolean;
 }
 
 export function ProductGrid({
   products,
   viewMode,
-  isAuthenticated,
   isLoading = false
 }: ProductGridProps) {
   // Afficher les skeletons pendant le chargement
@@ -41,7 +39,6 @@ export function ProductGrid({
           key={product.id}
           product={product}
           viewMode={viewMode}
-          isAuthenticated={isAuthenticated}
         />
       ))}
     </div>

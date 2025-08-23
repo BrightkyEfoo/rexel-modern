@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X } from 'lucide-react';
 
@@ -43,6 +44,7 @@ export function AddressForm({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     reset
   } = useForm<AddressFormData>({
@@ -180,11 +182,16 @@ export function AddressForm({
 
           {/* Adresse par défaut */}
           <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="isDefault"
-              {...register('isDefault')}
-              className="rounded border-border text-primary focus:ring-primary"
+            <Controller
+              name="isDefault"
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  id="isDefault"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              )}
             />
             <Label htmlFor="isDefault" className="text-sm font-normal">
               Définir comme adresse par défaut

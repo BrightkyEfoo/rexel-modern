@@ -13,10 +13,18 @@ import {
   brandsService,
   usersService,
   cartService,
-  favoritesService,
   contentService,
   statsService,
 } from "../api/services";
+import { 
+  useFavorites as useFavoritesHook,
+  useFavoritesCount,
+  useAddToFavorites,
+  useRemoveFromFavorites,
+  useRemoveFromFavoritesByProduct,
+  useToggleFavorite,
+  useProductFavoriteStatus
+} from "../hooks/useFavorites";
 
 // Query Keys
 export const queryKeys = {
@@ -342,48 +350,18 @@ export function useMergeCart() {
   });
 }
 
-// Favorites Hooks
-export function useFavorites() {
-  return useQuery({
-    queryKey: queryKeys.favorites,
-    queryFn: () => favoritesService.getFavorites(),
-    retry: false,
-  });
-}
+// Favorites Hooks - Re-exported from dedicated hooks
+export const useFavorites = useFavoritesHook;
+export { useFavoritesCount, useAddToFavorites, useRemoveFromFavorites, useRemoveFromFavoritesByProduct, useToggleFavorite, useProductFavoriteStatus };
 
+// Hook simplifié pour vérifier si un produit est favori
 export function useIsFavorite(productId: string) {
-  return useQuery({
-    queryKey: queryKeys.isFavorite(productId),
-    queryFn: () => favoritesService.isFavorite(Number(productId)),
-    enabled: !!productId,
-    retry: false,
-  });
-}
-
-export function useAddToFavorites() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (productId: string) =>
-      favoritesService.addToFavorites(Number(productId)),
-    onSuccess: (_, productId) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.favorites });
-      queryClient.setQueryData(queryKeys.isFavorite(productId), true);
-    },
-  });
-}
-
-export function useRemoveFromFavorites() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (productId: string) =>
-      favoritesService.removeFromFavorites(Number(productId)),
-    onSuccess: (_, productId) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.favorites });
-      queryClient.setQueryData(queryKeys.isFavorite(productId), false);
-    },
-  });
+  const { isFavorite, isLoading } = useProductFavoriteStatus(productId);
+  return {
+    data: isFavorite,
+    isLoading,
+    error: null
+  };
 }
 
 // Content Hooks

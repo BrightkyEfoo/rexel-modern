@@ -18,7 +18,7 @@ import {
 export function useAddresses() {
   return useQuery({
     queryKey: ['user-addresses'],
-    queryFn: getUserAddresses,
+    queryFn: () => getUserAddresses(),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
