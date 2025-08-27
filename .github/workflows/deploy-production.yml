@@ -2,26 +2,26 @@ name: Deploy Frontend to Production
 
 on:
   push:
-    branches: [ main, master ]
-      
+    branches: [main, master]
+
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy'
+        description: "Environment to deploy"
         required: true
-        default: 'production'
+        default: "production"
         type: choice
         options:
           - production
           - staging
       rebuild_cache:
-        description: 'Rebuild Next.js cache'
+        description: "Rebuild Next.js cache"
         required: true
-        default: 'false'
+        default: "false"
         type: choice
         options:
-          - 'true'
-          - 'false'
+          - "true"
+          - "false"
 
 env:
   DOCKER_IMAGE_NAME: kesimarket-frontend-prod
@@ -64,7 +64,7 @@ jobs:
           port: 22
           script: |
             echo "=== Docker Environment Check ==="
-            
+
             # Check if Docker is installed
             if ! command -v docker &> /dev/null; then
               echo "🔧 Docker not found, installing..."
@@ -74,7 +74,7 @@ jobs:
             else
               echo "✅ Docker is installed: $(docker --version)"
             fi
-            
+
             # Check if Docker service is running
             if ! sudo systemctl is-active --quiet docker; then
               echo "🔧 Starting Docker service..."
@@ -83,7 +83,7 @@ jobs:
             else
               echo "✅ Docker service is running"
             fi
-            
+
             # Check if user is in docker group
             if ! groups $USER | grep -q '\bdocker\b'; then
               echo "🔧 Adding user to docker group..."
@@ -92,12 +92,12 @@ jobs:
             else
               echo "✅ User is in docker group"
             fi
-            
+
             # Test Docker access with retry logic
             echo "🧪 Testing Docker access..."
             max_attempts=5
             attempt=1
-            
+
             while [ $attempt -le $max_attempts ]; do
               if docker ps &> /dev/null; then
                 echo "✅ Docker access test successful!"
@@ -123,7 +123,7 @@ jobs:
               fi
               attempt=$((attempt + 1))
             done
-            
+
             # Install Docker Compose if not present
             if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
               echo "🔧 Installing Docker Compose..."
@@ -132,7 +132,7 @@ jobs:
             else
               echo "✅ Docker Compose is available"
             fi
-            
+
             # Check for shared network
             echo "🔗 Checking shared Docker network..."
             if ! docker network ls | grep -q ${{ env.NETWORK_NAME }}; then
@@ -143,7 +143,7 @@ jobs:
             else
               echo "✅ Shared network '${{ env.NETWORK_NAME }}' exists"
             fi
-            
+
             # Final verification
             echo "=== Final Docker Environment Status ==="
             docker --version || sudo docker --version
@@ -161,7 +161,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Upload source code
         uses: actions/upload-artifact@v4
         with:
@@ -179,7 +179,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: source-code
-      
+
       - name: Create production .env file
         run: |
           if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
@@ -187,42 +187,43 @@ jobs:
           # ===== ENVIRONMENT =====
           NODE_ENV=production
           NEXT_TELEMETRY_DISABLED=1
-          
+
           # ===== APPLICATION =====
           NEXT_PUBLIC_APP_NAME="${{ secrets.NEXT_PUBLIC_APP_NAME }} (Staging)"
           NEXT_PUBLIC_APP_VERSION="${{ secrets.NEXT_PUBLIC_APP_VERSION }}-staging"
-          
+
           # ===== STAGING DOMAINS & URLs =====
           NEXT_PUBLIC_API_URL=https://staging-api.kesimarket.com
           NEXTAUTH_URL=https://staging.kesimarket.com
+
           NEXT_PUBLIC_SITE_URL=https://staging.kesimarket.com
-          
+
           # ===== SECURITY =====
-          NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET_STAGING }}
-          
+          NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+
           # ===== SSL/TLS =====
           ACME_EMAIL=${{ secrets.ACME_EMAIL }}
-          
+
           # ===== API CONFIGURATION =====
           NEXT_PUBLIC_API_VERSION=${{ secrets.NEXT_PUBLIC_API_VERSION }}
-          
+
           # ===== FEATURES FLAGS =====
           NEXT_PUBLIC_ENABLE_FEATURES=${{ secrets.NEXT_PUBLIC_ENABLE_FEATURES }}
-          
+
           # ===== CDN & ASSETS =====
           NEXT_PUBLIC_CDN_URL=https://staging-cdn.kesimarket.com
           NEXT_PUBLIC_ASSETS_URL=https://staging-assets.kesimarket.com
-          
+
           # ===== FEATURE FLAGS =====
           NEXT_PUBLIC_ENABLE_PWA=${{ secrets.NEXT_PUBLIC_ENABLE_PWA }}
           NEXT_PUBLIC_ENABLE_OFFLINE=${{ secrets.NEXT_PUBLIC_ENABLE_OFFLINE }}
           NEXT_PUBLIC_ENABLE_DARK_MODE=${{ secrets.NEXT_PUBLIC_ENABLE_DARK_MODE }}
-          
+
           # ===== SEO & METADATA =====
           NEXT_PUBLIC_SITE_NAME="${{ secrets.NEXT_PUBLIC_SITE_NAME }} (Staging)"
           NEXT_PUBLIC_SITE_DESCRIPTION="${{ secrets.NEXT_PUBLIC_SITE_DESCRIPTION }}"
           NEXT_PUBLIC_DEFAULT_LOCALE=${{ secrets.NEXT_PUBLIC_DEFAULT_LOCALE }}
-          
+
           # ===== STAGING SPECIFIC =====
           NEXT_PUBLIC_DEBUG_MODE=true
           NEXT_PUBLIC_SHOW_STAGING_BANNER=true
@@ -232,76 +233,76 @@ jobs:
           # ===== ENVIRONMENT =====
           NODE_ENV=production
           NEXT_TELEMETRY_DISABLED=1
-          
+
           # ===== APPLICATION =====
           NEXT_PUBLIC_APP_NAME="${{ secrets.NEXT_PUBLIC_APP_NAME }}"
           NEXT_PUBLIC_APP_VERSION="${{ secrets.NEXT_PUBLIC_APP_VERSION }}"
-          
+
           # ===== PRODUCTION DOMAINS & URLs =====
           NEXT_PUBLIC_API_URL=https://api.kesimarket.com
           NEXTAUTH_URL=https://kesimarket.com
           NEXT_PUBLIC_SITE_URL=https://kesimarket.com
-          
+
           # ===== SECURITY =====
           NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-          
+
           # ===== SSL/TLS =====
           ACME_EMAIL=${{ secrets.ACME_EMAIL }}
-          
+
           # ===== API CONFIGURATION =====
           NEXT_PUBLIC_API_VERSION=${{ secrets.NEXT_PUBLIC_API_VERSION }}
-          
+
           # ===== ANALYTICS & MONITORING =====
           NEXT_PUBLIC_ANALYTICS_ID=${{ secrets.NEXT_PUBLIC_ANALYTICS_ID }}
           NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}
           NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
-          
+
           # ===== FEATURES FLAGS =====
           NEXT_PUBLIC_ENABLE_FEATURES=${{ secrets.NEXT_PUBLIC_ENABLE_FEATURES }}
-          
+
           # ===== CDN & ASSETS =====
           NEXT_PUBLIC_CDN_URL=https://cdn.kesimarket.com
           NEXT_PUBLIC_ASSETS_URL=https://assets.kesimarket.com
-          
+
           # ===== SOCIAL AUTH (Optional) =====
           GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}
           GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}
           GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-          
+
           # ===== PAYMENT (Optional) =====
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
           STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
-          
+
           # ===== EMAIL (Optional) =====
           SMTP_HOST=${{ secrets.SMTP_HOST }}
           SMTP_PORT=${{ secrets.SMTP_PORT }}
           SMTP_USER=${{ secrets.SMTP_USER }}
           SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
           SMTP_FROM=${{ secrets.SMTP_FROM }}
-          
+
           # ===== REDIS (Optional for caching) =====
           REDIS_URL=${{ secrets.REDIS_URL }}
-          
+
           # ===== FEATURE FLAGS =====
           NEXT_PUBLIC_ENABLE_PWA=${{ secrets.NEXT_PUBLIC_ENABLE_PWA }}
           NEXT_PUBLIC_ENABLE_OFFLINE=${{ secrets.NEXT_PUBLIC_ENABLE_OFFLINE }}
           NEXT_PUBLIC_ENABLE_DARK_MODE=${{ secrets.NEXT_PUBLIC_ENABLE_DARK_MODE }}
-          
+
           # ===== SEO & METADATA =====
           NEXT_PUBLIC_SITE_NAME="${{ secrets.NEXT_PUBLIC_SITE_NAME }}"
           NEXT_PUBLIC_SITE_DESCRIPTION="${{ secrets.NEXT_PUBLIC_SITE_DESCRIPTION }}"
           NEXT_PUBLIC_DEFAULT_LOCALE=${{ secrets.NEXT_PUBLIC_DEFAULT_LOCALE }}
           EOF
           fi
-      
+
       - name: Verify .env file created
         run: |
           echo "Checking if .env.production file exists..."
           ls -la .env.production
           echo "Environment variables count:"
           wc -l .env.production
-      
+
       - name: Generate image tag
         id: tag
         run: |
@@ -311,12 +312,12 @@ jobs:
           echo "image-tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
           echo "short-sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
           echo "timestamp=${TIMESTAMP}" >> $GITHUB_OUTPUT
-      
+
       - name: Build Docker image
         run: |
           docker build -t ${{ steps.tag.outputs.image-tag }} .
           docker tag ${{ steps.tag.outputs.image-tag }} ${{ env.DOCKER_IMAGE_NAME }}:latest
-      
+
       - name: Save Docker image to tar
         run: |
           docker save ${{ steps.tag.outputs.image-tag }} > kesimarket-frontend-prod.tar
@@ -341,7 +342,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: docker-image-prod
-      
+
       - name: Transfer Docker image and compose files to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -351,7 +352,7 @@ jobs:
           port: 22
           source: "kesimarket-frontend-prod.tar,docker-compose.prod.yml"
           target: ${{ env.VPS_DEPLOY_PATH }}/
-      
+
       - name: Create backup and organize files
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -362,15 +363,15 @@ jobs:
           script: |
             # Create images directory if it doesn't exist
             mkdir -p ${{ env.VPS_DEPLOY_PATH }}/images
-            
+
             # Backup previous image if exists
             if [ -f ${{ env.VPS_DEPLOY_PATH }}/images/kesimarket-frontend-prod-current.tar ]; then
               mv ${{ env.VPS_DEPLOY_PATH }}/images/kesimarket-frontend-prod-current.tar ${{ env.VPS_DEPLOY_PATH }}/backups/kesimarket-frontend-prod-backup-$(date +%Y%m%d-%H%M%S).tar
             fi
-            
+
             # Move new image to images directory
             mv ${{ env.VPS_DEPLOY_PATH }}/kesimarket-frontend-prod.tar ${{ env.VPS_DEPLOY_PATH }}/images/kesimarket-frontend-prod-current.tar
-            
+
             echo "✅ Files organized and ready for deployment"
 
   load-and-run:
@@ -388,7 +389,7 @@ jobs:
           port: 22
           script: |
             cd ${{ env.VPS_DEPLOY_PATH }}
-            
+
             # Detect if sudo is needed for Docker commands
             USE_SUDO=""
             if ! docker ps &> /dev/null; then
@@ -402,7 +403,7 @@ jobs:
             else
               echo "✅ Docker accessible without sudo"
             fi
-            
+
             # Verify shared network exists
             if ! ${USE_SUDO}docker network ls | grep -q ${{ env.NETWORK_NAME }}; then
               echo "❌ Shared network '${{ env.NETWORK_NAME }}' not found!"
@@ -412,22 +413,22 @@ jobs:
             else
               echo "✅ Shared network '${{ env.NETWORK_NAME }}' exists"
             fi
-            
+
             # Load the new Docker image
             ${USE_SUDO}docker load < images/kesimarket-frontend-prod-current.tar
-            
+
             # Tag the loaded image as latest for docker-compose
             IMAGE_NAME=$(${USE_SUDO}docker images --format "table {{.Repository}}:{{.Tag}}" | grep kesimarket-frontend-prod | grep -v latest | head -n 1)
             ${USE_SUDO}docker tag $IMAGE_NAME kesimarket-frontend-prod:latest
-            
+
             # Stop existing frontend service
             echo 'Stopping existing frontend service...'
             ${USE_SUDO}docker compose -f docker-compose.prod.yml down || echo 'No existing services to stop'
-            
+
             # Start frontend application
             echo 'Starting frontend application...'
             ${USE_SUDO}docker compose -f docker-compose.prod.yml up -d frontend
-            
+
             echo 'Frontend deployment completed - service is running!'
 
   cleanup:
@@ -456,14 +457,14 @@ jobs:
                 exit 1
               fi
             fi
-            
+
             # Remove dangling images
             ${USE_SUDO}docker image prune -f
-            
+
             # Keep only the 3 most recent backup images
             cd ${{ env.VPS_DEPLOY_PATH }}/backups
             ls -t kesimarket-frontend-prod-backup-*.tar 2>/dev/null | tail -n +4 | xargs -r rm -f
-            
+
             echo "✅ Cleanup completed"
 
       - name: Deployment Summary
@@ -489,4 +490,4 @@ jobs:
             echo "- API: https://api.kesimarket.com" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "ℹ️ **Note:** Reverse proxy managed by backend deployment" >> $GITHUB_STEP_SUMMARY 
+          echo "ℹ️ **Note:** Reverse proxy managed by backend deployment" >> $GITHUB_STEP_SUMMARY

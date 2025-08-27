@@ -1,23 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { AdminHeader } from '@/components/admin/AdminHeader';
+import { BrandsManagement } from '@/components/admin/brands';
+import { CategoriesManagement } from '@/components/admin/categories';
+import { OrdersTab } from '@/components/admin/orders';
+import { OverviewTab } from '@/components/admin/overview';
+import { ProductsManagement } from '@/components/admin/products';
+import { Footer } from '@/components/layout/Footer';
+import { useRequireAdminAuth } from '@/lib/hooks/useAdminAccess';
 import {
+  BarChart3,
+  Building2,
   Package,
   ShoppingCart,
-  BarChart3,
-  Tag,
-  Building2
+  Tag
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useRequireAdminAuth } from '@/lib/hooks/useAdminAccess';
-import { AdminHeader } from '@/components/admin/AdminHeader';
-import { Footer } from '@/components/layout/Footer';
-import { ProductsManagement } from '@/components/admin/products';
-import { CategoriesManagement } from '@/components/admin/categories';
-import { BrandsManagement } from '@/components/admin/brands';
-import { OverviewTab } from '@/components/admin/overview';
-import { OrdersTab } from '@/components/admin/orders';
+import Link from 'next/link';
+import { useState } from 'react';
 
 
 export default function AdminDashboardPage() {
