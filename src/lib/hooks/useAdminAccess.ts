@@ -35,9 +35,8 @@ export function useRequireAdminAuth() {
 
   useEffect(() => {
     if (needsLogin) {
-      // Rediriger vers la page de login avec return URL
-      const returnUrl = encodeURIComponent(window.location.pathname);
-      router.push(`/auth/login?returnUrl=${returnUrl}&admin=true`);
+      // Rediriger vers la page de login admin
+      router.push('/admin/login');
     } else if (needsAdminRole) {
       // Rediriger vers l'accueil si pas admin
       router.push('/?error=access_denied');

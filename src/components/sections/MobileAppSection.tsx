@@ -6,10 +6,11 @@ import { ArrowRight, Download, Smartphone, Zap, ShoppingCart, Bell, Star, Award,
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Logo } from '@/components/ui/logo';
+import { formatPrice } from '@/lib/utils/currency';
 
 export function MobileAppSection() {
   return (
-    <section className="py-16 bg-secondary relative overflow-hidden">
+    <section className="py-16 bg-secondary/70 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-primary/30 to-transparent rounded-full -translate-y-48 translate-x-48" />
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-primary/30 to-transparent rounded-full translate-y-40 -translate-x-40" />
@@ -173,7 +174,7 @@ export function MobileAppSection() {
                                 <div className="text-primary-foreground/60 text-xs">En cours de livraison</div>
                               </div>
                             </div>
-                            <div className="text-primary-foreground text-sm font-medium">1 234 €</div>
+                            <div className="text-primary-foreground text-sm font-medium">{formatPrice(1234)}</div>
                           </div>
                         </div>
                         <div className="bg-primary-foreground/10 backdrop-blur-lg rounded-lg p-3">
@@ -187,7 +188,7 @@ export function MobileAppSection() {
                                 <div className="text-primary-foreground/60 text-xs">Livré</div>
                               </div>
                             </div>
-                            <div className="text-primary-foreground text-sm font-medium">567 €</div>
+                            <div className="text-primary-foreground text-sm font-medium">{formatPrice(567)}</div>
                           </div>
                         </div>
                       </div>

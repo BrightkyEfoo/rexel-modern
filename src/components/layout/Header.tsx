@@ -1,46 +1,87 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Logo } from '@/components/ui/logo';
-import { 
-  Menu, 
-  Search, 
-  Heart, 
-  ShoppingCart, 
-  User, 
-  Grid, 
-  Sparkles, 
-  MapPin, 
+import { useState } from "react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Logo } from "@/components/ui/logo";
+import {
+  Menu,
+  Search,
+  Heart,
+  ShoppingCart,
+  User,
+  Grid,
+  Sparkles,
+  MapPin,
   Package,
   Phone,
-  Mail
-} from 'lucide-react';
-import { useAuth, useLogout } from '@/lib/auth/nextauth-hooks';
-import { useMainCategories } from '@/lib/query/hooks';
-import { useFavoritesCount } from '@/lib/hooks/useFavorites';
-import { appConfig } from '@/lib/config/app';
-import { CartPreview } from '@/components/cart/CartPreview';
-import { AuthLink } from '@/components/auth/AuthLink';
+  Mail,
+  Settings,
+} from "lucide-react";
+import { useAuth, useLogout } from "@/lib/auth/nextauth-hooks";
+import { useMainCategories } from "@/lib/query/hooks";
+import { useFavoritesCount } from "@/lib/hooks/useFavorites";
+import { appConfig } from "@/lib/config/app";
+import { CartPreview } from "@/components/cart/CartPreview";
+import { AuthLink } from "@/components/auth/AuthLink";
 
 interface HeaderProps {
   className?: string;
 }
 
-const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <Link href={href} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+const NavLink = ({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) => (
+  <Link
+    href={href}
+    className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+  >
     {children}
   </Link>
 );
 
-const MobileNavLink = ({ href, children, onNavigate }: { href: string; children: React.ReactNode; onNavigate: () => void }) => (
-  <Link href={href} onClick={onNavigate} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted transition-colors">
+const MobileNavLink = ({
+  href,
+  children,
+  onNavigate,
+}: {
+  href: string;
+  children: React.ReactNode;
+  onNavigate: () => void;
+}) => (
+  <Link
+    href={href}
+    onClick={onNavigate}
+    className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted transition-colors"
+  >
     {children}
   </Link>
 );
@@ -50,7 +91,8 @@ export function Header({ className }: HeaderProps) {
   const { isAuthenticated, user } = useAuth();
   const logoutMutation = useLogout();
   const { data: favoritesCount } = useFavoritesCount();
-  const { data: categoriesResponse, isLoading: categoriesLoading } = useMainCategories();
+  const { data: categoriesResponse, isLoading: categoriesLoading } =
+    useMainCategories();
 
   // Extraire les catégories de la réponse API
   const categories = categoriesResponse?.data || [];
@@ -89,7 +131,12 @@ export function Header({ className }: HeaderProps) {
   );
 
   return (
-    <header className={cn('bg-white border-b border-gray-200 sticky top-0 z-50', className)}>
+    <header
+      className={cn(
+        "bg-white border-b border-gray-200 sticky top-0 z-50",
+        className
+      )}
+    >
       {/* Top bar */}
       <div className="bg-primary text-primary-foreground py-2">
         <div className="container mx-auto px-4">
@@ -97,7 +144,9 @@ export function Header({ className }: HeaderProps) {
             <div className="flex items-center space-x-2 sm:space-x-4">
               <div className="flex items-center space-x-2">
                 <Phone className="w-4 h-4" />
-                <span className="text-xs sm:text-sm">{appConfig.contact.phone}</span>
+                <span className="text-xs sm:text-sm">
+                  {appConfig.contact.phone}
+                </span>
               </div>
               <div className="hidden sm:flex items-center space-x-2">
                 <Mail className="w-4 h-4" />
@@ -105,14 +154,23 @@ export function Header({ className }: HeaderProps) {
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <Link href="/points-relais" className="hidden sm:flex items-center space-x-1 text-sm hover:text-primary-foreground/80">
+              <Link
+                href="/points-relais"
+                className="hidden sm:flex items-center space-x-1 text-sm hover:text-primary-foreground/80"
+              >
                 <MapPin className="w-4 h-4" />
                 <span>Points de relais</span>
               </Link>
-              <Link href="/aide" className="text-xs sm:text-sm hover:text-primary-foreground/80">
+              <Link
+                href="/aide"
+                className="text-xs sm:text-sm hover:text-primary-foreground/80"
+              >
                 Aide
               </Link>
-              <Link href="/contact" className="text-xs sm:text-sm hover:text-primary-foreground/80">
+              <Link
+                href="/contact"
+                className="text-xs sm:text-sm hover:text-primary-foreground/80"
+              >
                 Contact
               </Link>
             </div>
@@ -128,33 +186,51 @@ export function Header({ className }: HeaderProps) {
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
-                  <Menu className="w-6 h-6" />
+                  <Logo variant="dark" size="sm" showText={false} />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="flex flex-col w-full sm:w-[320px]">
+              <SheetContent
+                side="left"
+                className="flex flex-col w-full sm:w-[320px]"
+              >
                 <SheetHeader className="border-b pb-4">
                   <SheetTitle>
                     <Link href="/" onClick={closeMobileMenu}>
-                      <Logo variant="dark" size="sm" />
+                      <Logo variant="dark" size="xxl" />
                     </Link>
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="flex-grow flex flex-col space-y-2 mt-6">
                   <MobileNavLink href="/catalogue" onNavigate={closeMobileMenu}>
                     <Grid className="w-5 h-5" />
-                    <span>Catalogue <Badge variant="secondary" className="ml-1 text-[8px] p-[0px] px-0.5">Soon</Badge></span>
+                    <span>
+                      Catalogue{" "}
+                      <Badge
+                        variant="secondary"
+                        className="ml-1 text-[8px] p-[0px] px-0.5"
+                      >
+                        Soon
+                      </Badge>
+                    </span>
                   </MobileNavLink>
-                  <MobileNavLink href="/nouveautes" onNavigate={closeMobileMenu}>
+                  <MobileNavLink
+                    href="/nouveautes"
+                    onNavigate={closeMobileMenu}
+                  >
                     <Sparkles className="w-5 h-5" />
                     <span>Nouveautés</span>
                   </MobileNavLink>
-                  <MobileNavLink href="/points-relais" onNavigate={closeMobileMenu}>
+                  <MobileNavLink
+                    href="/points-relais"
+                    onNavigate={closeMobileMenu}
+                  >
                     <MapPin className="w-5 h-5" />
                     <span>Points de relais</span>
                   </MobileNavLink>
-                  <div className="flex items-center space-x-3 p-3 rounded-lg text-muted-foreground cursor-not-allowed opacity-50">
-                    <span>Services <Badge variant="secondary" className="ml-1 text-[8px] p-[0px] px-0.5">Soon</Badge></span>
-                  </div>
+                  <MobileNavLink href="/services" onNavigate={closeMobileMenu}>
+                    <Settings className="w-5 h-5" />
+                    <span>Services</span>
+                  </MobileNavLink>
                   <MobileNavLink href="/contact" onNavigate={closeMobileMenu}>
                     <span>Contact</span>
                   </MobileNavLink>
@@ -162,21 +238,51 @@ export function Header({ className }: HeaderProps) {
                 <div className="mt-auto pt-6 border-t">
                   {isAuthenticated ? (
                     <div className="space-y-4">
-                       <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                           <User className="w-6 h-6 text-muted-foreground" />
-                         </div>
-                         <div>
-                           <p className="font-semibold">{user?.email}</p>
-                           <Link href="/commandes" onClick={closeMobileMenu} className="text-sm text-primary hover:underline">Voir mes commandes</Link>
-                         </div>
-                       </div>
-                       <Button variant="outline" className="w-full" onClick={() => { handleLogout(); closeMobileMenu(); }}>Déconnexion</Button>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                          <User className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="font-semibold">{user?.email}</p>
+                          <Link
+                            href="/commandes"
+                            onClick={closeMobileMenu}
+                            className="text-sm text-primary hover:underline"
+                          >
+                            Voir mes commandes
+                          </Link>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          handleLogout();
+                          closeMobileMenu();
+                        }}
+                      >
+                        Déconnexion
+                      </Button>
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <Button asChild className="w-full" onClick={closeMobileMenu}><AuthLink href="/auth/login">Connexion</AuthLink></Button>
-                      <Button variant="outline" asChild className="w-full" onClick={closeMobileMenu}><AuthLink href="/auth/register">Créer un compte</AuthLink></Button>
+                      <Button
+                        asChild
+                        className="w-full"
+                        onClick={closeMobileMenu}
+                      >
+                        <AuthLink href="/auth/login">Connexion</AuthLink>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        asChild
+                        className="w-full"
+                        onClick={closeMobileMenu}
+                      >
+                        <AuthLink href="/auth/register">
+                          Créer un compte
+                        </AuthLink>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -222,19 +328,27 @@ export function Header({ className }: HeaderProps) {
                   </div>
                 </DialogContent>
               </Dialog>
-                            <Link href="/nouveautes" className="hidden md:flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-primary">
+              <Link
+                href="/nouveautes"
+                className="hidden md:flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-primary"
+              >
                 <Sparkles className="w-4 h-4" />
                 <span>Nouveautés</span>
               </Link>
-              
+
               {isAuthenticated ? (
                 // Utilisateur connecté - Afficher toutes les fonctionnalités
                 <>
                   <Link href="/favoris" className="relative group">
                     <Heart className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                     {(favoritesCount?.data?.count || 0) > 0 && (
-                      <Badge variant="default" className="absolute -top-2 -right-2 w-5 h-5 justify-center p-0">
-                        {(favoritesCount?.data?.count || 0) > 99 ? '99+' : favoritesCount?.data?.count || 0}
+                      <Badge
+                        variant="default"
+                        className="absolute -top-2 -right-2 w-5 h-5 justify-center p-0"
+                      >
+                        {(favoritesCount?.data?.count || 0) > 99
+                          ? "99+"
+                          : favoritesCount?.data?.count || 0}
                       </Badge>
                     )}
                   </Link>
@@ -273,27 +387,39 @@ export function Header({ className }: HeaderProps) {
           <nav className="flex items-center space-x-8 h-12">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-primary">
+                <Button
+                  variant="ghost"
+                  className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-primary"
+                >
                   <Package className="w-4 h-4" />
                   <span>Produits</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-64 p-4">
-                <DropdownMenuLabel className="text-base font-semibold">Catégories</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-base font-semibold">
+                  Catégories
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <div className="grid grid-cols-1 gap-1 mt-2">
                   {categoriesLoading ? (
-                    <div className="py-2 px-3 text-muted-foreground">Chargement...</div>
+                    <div className="py-2 px-3 text-muted-foreground">
+                      Chargement...
+                    </div>
                   ) : categories.length > 0 ? (
                     categories.map((category) => (
                       <DropdownMenuItem key={category.id} asChild>
-                        <Link href={`/categorie/${category.slug}`} className="flex items-center py-2 px-3 rounded-md hover:bg-slate-100">
+                        <Link
+                          href={`/categorie/${category.slug}`}
+                          className="flex items-center py-2 px-3 rounded-md hover:bg-slate-100"
+                        >
                           {category.name}
                         </Link>
                       </DropdownMenuItem>
                     ))
                   ) : (
-                    <div className="py-2 px-3 text-muted-foreground">Aucune catégorie disponible</div>
+                    <div className="py-2 px-3 text-muted-foreground">
+                      Aucune catégorie disponible
+                    </div>
                   )}
                 </div>
               </DropdownMenuContent>
@@ -301,26 +427,35 @@ export function Header({ className }: HeaderProps) {
             <div className="relative group">
               <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
                 <Grid className="w-4 h-4" />
-                <span>Catalogue <Badge variant="secondary" className="ml-1 text-[8px] p-[0px] px-0.5">Soon</Badge></span>
+                <span>
+                  Catalogue{" "}
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 text-[8px] p-[0px] px-0.5"
+                  >
+                    Soon
+                  </Badge>
+                </span>
               </span>
             </div>
             <div className="relative group">
               <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
                 <span>Promotions</span>
-                <Badge variant="secondary" className="ml-1 text-[8px] p-[0px] px-0.5">Soon</Badge>
+                <Badge
+                  variant="secondary"
+                  className="ml-1 text-[8px] p-[0px] px-0.5"
+                >
+                  Soon
+                </Badge>
               </span>
             </div>
-            <div className="relative group">
-              <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
-                <span>Services <Badge variant="secondary" className="ml-1 text-[8px] p-[0px] px-0.5">Soon</Badge></span>
+            <Link href="/services" className="relative group">
+              <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:cursor-pointer">
+                <Settings className="w-4 h-4" />
+                <span>Services</span>
               </span>
-            </div>
-            <div className="relative group">
-              <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
-                <span>Solutions</span>
-                <Badge variant="secondary" className="ml-1 text-xs p-0 px-0.5">Soon</Badge>
-              </span>
-            </div>
+            </Link>
+
             <NavLink href="/contact">Contact</NavLink>
           </nav>
         </div>

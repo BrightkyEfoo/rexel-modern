@@ -41,6 +41,7 @@ import { useAuth } from '@/lib/auth/nextauth-hooks';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getProductPrimaryCategory } from '@/lib/utils/product';
+import { formatPrice } from '@/lib/utils/currency';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -342,10 +343,10 @@ export default function ProductDetailPage() {
             {/* Price */}
             <div className="space-y-2">
               <div className="text-3xl font-bold text-primary">
-                {Number(currentPrice).toFixed(2)} € HT
+                {formatPrice(currentPrice)} HT
               </div>
               <div className="text-lg text-muted-foreground">
-                {(Number(currentPrice) * 1.2).toFixed(2)} € TTC
+                {formatPrice(Number(currentPrice) * 1.2)} TTC
               </div>
               <p className="text-sm text-muted-foreground">
                 Prix dégressifs disponibles selon quantité
@@ -669,7 +670,7 @@ export default function ProductDetailPage() {
                     />
                   </div>
                   <h3 className="font-medium text-sm mb-2 line-clamp-2">{related.name}</h3>
-                  <div className="text-lg font-bold text-primary">{related.price} €</div>
+                  <div className="text-lg font-bold text-primary">{formatPrice(related.price)}</div>
                   <Button size="sm" className="w-full mt-2">
                     <Plus className="w-4 h-4 mr-2" />
                     Ajouter

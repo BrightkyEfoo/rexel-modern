@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCartStore } from '@/lib/stores/cart-store';
 import { useCartSync } from '@/lib/hooks/useCartSync';
 import { Logo } from '@/components/ui/logo';
+import { formatPrice } from '@/lib/utils/currency';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -103,15 +104,15 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
                         {item.product.salePrice ? (
                           <>
                             <span className="font-semibold text-sm text-foreground">
-                              {Number(item.product.salePrice).toFixed(2)} €
+                              {formatPrice(item.product.salePrice)}
                             </span>
                             <span className="text-xs text-muted-foreground line-through">
-                              {Number(item.product.price).toFixed(2)} €
+                              {formatPrice(item.product.price)}
                             </span>
                           </>
                         ) : (
                           <span className="font-semibold text-sm text-foreground">
-                            {Number(item.product.price).toFixed(2)} €
+                            {formatPrice(item.product.price)}
                           </span>
                         )}
                       </div>
@@ -159,7 +160,7 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-foreground">Total</span>
                   <span className="font-bold text-lg text-foreground">
-                    {totalPrice.toFixed(2)} €
+                    {formatPrice(totalPrice)}
                   </span>
                 </div>
 

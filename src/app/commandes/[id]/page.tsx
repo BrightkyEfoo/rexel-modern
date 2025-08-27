@@ -37,6 +37,7 @@ import { useAuth } from "@/lib/auth/nextauth-hooks";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { appConfig } from '@/lib/config/app';
+import { formatPrice } from "@/lib/utils/currency";
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -265,7 +266,7 @@ export default function OrderDetailPage() {
             </Badge>
             <div className="text-right">
               <div className="text-2xl font-bold text-[#162e77]">
-                {orderData.totalPrice.toFixed(2)} €
+                {formatPrice(orderData.totalPrice)}
               </div>
               <div className="text-sm text-gray-500">
                 {orderData.items.length} article
@@ -292,7 +293,7 @@ export default function OrderDetailPage() {
 
         {/* Navigation Tabs */}
         <div className="bg-white rounded-lg border border-gray-200 mb-8">
-          <div className="flex items-center space-x-8 px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center gap-8 px-6 py-4 flex-wrap">
             {[
               { id: "details", label: "Détails", icon: Package },
               { id: "tracking", label: "Suivi", icon: Truck },
@@ -353,12 +354,12 @@ export default function OrderDetailPage() {
                         </div>
                         <div className="text-sm text-gray-600 mt-1">
                           Quantité: {item.quantity} • Prix unitaire:{" "}
-                          {item.price?.toFixed(2)} €
+                          {formatPrice(item.price)}
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-[#162e77]">
-                          {item.totalPrice?.toFixed(2)} €
+                          {formatPrice(item.totalPrice)}
                         </div>
                         {orderData.status === "delivered" && (
                           <Button variant="outline" size="sm" className="mt-2">
@@ -377,21 +378,21 @@ export default function OrderDetailPage() {
                 <div className="space-y-2 max-w-md ml-auto">
                   <div className="flex justify-between">
                     <span>Sous-total</span>
-                    <span>{orderData.subtotal.toFixed(2)} €</span>
+                    <span>{formatPrice(orderData.subtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Livraison</span>
-                    <span>{orderData.shippingAmount.toFixed(2)} €</span>
+                    <span>{formatPrice(orderData.shippingAmount)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>TVA</span>
-                    <span>{orderData.taxAmount.toFixed(2)} €</span>
+                    <span>{formatPrice(orderData.taxAmount)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
                     <span className="text-[#162e77]">
-                      {orderData.totalPrice.toFixed(2)} €
+                      {formatPrice(orderData.totalPrice)}
                     </span>
                   </div>
                 </div>

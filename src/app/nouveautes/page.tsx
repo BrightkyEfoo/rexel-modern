@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ScrollToTop } from '@/components/ui/scroll-to-top';
+import { formatPrice } from '@/lib/utils/currency';
 
 export default function NouveautesPage() {
   const nouveautes = [
@@ -162,10 +163,10 @@ export default function NouveautesPage() {
                   {/* Prix */}
                   <div className="flex items-center space-x-2">
                     <span className="text-2xl font-bold text-primary">
-                      {product.price.toFixed(2)}€
+                      {formatPrice(product.price)}
                     </span>
                     <span className="text-muted-foreground line-through">
-                      {product.oldPrice.toFixed(2)}€
+                      {formatPrice(product.oldPrice)}
                     </span>
                     <Badge variant="secondary" className="text-xs">
                       -{Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)}%

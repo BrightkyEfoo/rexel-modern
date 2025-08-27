@@ -40,6 +40,7 @@ import { ShippingAddressCard } from "@/components/ui/shipping-address-card";
 import { BillingAddressCard } from "@/components/ui/billing-address-card";
 import { AddressFormData } from "@/components/ui/address-form";
 import { useAddresses, useCreateAddress } from "@/lib/hooks/useAddresses";
+import { formatPrice, getCurrencySymbol } from "@/lib/utils/currency";
 
 type CheckoutStep = "cart" | "shipping" | "payment" | "confirmation";
 
@@ -64,15 +65,6 @@ export default function CartPage() {
 
   const handleImageError = (productId: string) => {
     setImageErrors((prev) => ({ ...prev, [productId]: true }));
-  };
-
-  // Fonction utilitaire pour formater les prix
-  const formatPrice = (price: number): string => {
-    return price.toLocaleString("fr-FR", {
-      style: "currency",
-      currency: "EUR",
-      minimumFractionDigits: 2,
-    });
   };
 
   // Redirect if not authenticated
@@ -486,7 +478,7 @@ export default function CartPage() {
                     </div>
                     {promoDiscount > 0 && (
                       <div className="text-sm text-green-600">
-                        Code appliqué : -{promoDiscount}€
+                        Code appliqué : -{formatPrice(promoDiscount)}
                       </div>
                     )}
                   </div>
@@ -673,15 +665,6 @@ function ShippingStep({
   const { data: addresses = [], isLoading: addressesLoading } = useAddresses();
   const createAddressMutation = useCreateAddress();
 
-  // Fonction utilitaire pour formater les prix
-  const formatPrice = (price: number): string => {
-    return price.toLocaleString("fr-FR", {
-      style: "currency",
-      currency: "EUR",
-      minimumFractionDigits: 2,
-    });
-  };
-
   // Gérer l'ajout d'une nouvelle adresse
   const handleAddAddress = async (
     addressData: AddressFormData,
@@ -824,14 +807,6 @@ function PaymentStep({
   onBack,
   totals,
 }: PaymentStepProps) {
-  // Fonction utilitaire pour formater les prix
-  const formatPrice = (price: number): string => {
-    return price.toLocaleString("fr-FR", {
-      style: "currency",
-      currency: "EUR",
-      minimumFractionDigits: 2,
-    });
-  };
   return (
     <div className="grid lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-6">
@@ -886,7 +861,7 @@ function PaymentStep({
                   />
                   <div className="w-5 h-5 bg-primary/10 rounded flex items-center justify-center">
                     <span className="text-xs font-semibold text-primary">
-                      €
+                      {getCurrencySymbol()}
                     </span>
                   </div>
                   <div>
@@ -1107,15 +1082,6 @@ function ConfirmationStep({
 
   const handleImageError = (productId: string) => {
     setImageErrors((prev) => ({ ...prev, [productId]: true }));
-  };
-
-  // Fonction utilitaire pour formater les prix
-  const formatPrice = (price: number): string => {
-    return price.toLocaleString("fr-FR", {
-      style: "currency",
-      currency: "EUR",
-      minimumFractionDigits: 2,
-    });
   };
 
   const orderNumber = `REX-${new Date().getFullYear()}-${Math.random()

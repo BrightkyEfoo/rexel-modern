@@ -6,6 +6,7 @@ import { ArrowRight, Clock, Percent, Star, Zap, Flame, Calendar } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { usePromotions } from '@/lib/query/hooks';
+import { formatPrice } from '@/lib/utils/currency';
 
 export function PromotionsSection() {
   const { data: promotions, isLoading, error } = usePromotions();
@@ -221,7 +222,7 @@ export function PromotionsSection() {
                 Livraison en 24h sur plus de 10 000 références
               </p>
               <Badge variant="outline" className="border-primary/20 text-primary">
-                Gratuite dès 150€
+                Gratuite dès {formatPrice(150)}
               </Badge>
             </div>
 
@@ -244,7 +245,7 @@ export function PromotionsSection() {
               </div>
               <h4 className="font-semibold text-gray-900 mb-2">Nouveau client</h4>
               <p className="text-sm text-gray-600 mb-3">
-                20€ de réduction sur votre première commande
+                {formatPrice(20)} de réduction sur votre première commande
               </p>
               <Badge variant="outline" className="border-purple-200 text-purple-700">
                 Code: BIENV202

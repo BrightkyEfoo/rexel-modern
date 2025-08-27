@@ -10,9 +10,10 @@ type AvailabilityOption = 'in_stock' | 'out_of_stock' | 'limited';
 interface UseCategoryFiltersParams {
   categorySlug: string;
   priceRange: [number, number];
+  baseUrl?: string;
 }
 
-export function useCategoryFilters({ categorySlug, priceRange }: UseCategoryFiltersParams) {
+export function useCategoryFilters({ categorySlug, priceRange, baseUrl }: UseCategoryFiltersParams) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -109,14 +110,14 @@ export function useCategoryFilters({ categorySlug, priceRange }: UseCategoryFilt
     });
 
     // Naviguer vers la nouvelle URL avec les filtres
-    const newUrl = `/categorie/${categorySlug}?${params.toString()}`;
+    const newUrl = `${baseUrl || '/categorie'}/${categorySlug}?${params.toString()}`;
     router.replace(newUrl, { scroll: false });
-  }, [categorySlug, router, searchParams]);
+  }, [categorySlug, router, searchParams, baseUrl]);
 
   // Fonction pour réinitialiser tous les filtres
   const clearFilters = useCallback(() => {
-    router.replace(`/categorie/${categorySlug}`, { scroll: false });
-  }, [categorySlug, router]);
+    router.replace(`${baseUrl || '/categorie'}/${categorySlug}`, { scroll: false });
+  }, [categorySlug, router, baseUrl]);
 
   return {
     filters,

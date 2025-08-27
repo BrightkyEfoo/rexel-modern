@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowRight, ExternalLink } from 'lucide-react';
-import { Brand } from '@/lib/api/types';
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowRight, ExternalLink } from "lucide-react";
+import { Brand } from "@/lib/api/types";
 
 interface BrandCardProps {
   brand: Brand;
@@ -13,7 +13,7 @@ export function BrandCard({ brand }: BrandCardProps) {
       <Link href={`/marques/${brand.name.toLowerCase()}`} className="block">
         <div className="relative h-16 flex items-center justify-center mb-4">
           <Image
-            src={brand.logoUrl || '/images/logo.png'}
+            src={brand.logoUrl || "/images/PNG/logo_icon.png"}
             alt={`Logo ${brand.name}`}
             width={120}
             height={60}
@@ -44,7 +44,7 @@ export function BrandCard({ brand }: BrandCardProps) {
 
         {/* Hover indicator */}
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-3 flex items-center justify-center">
-                          <span className="text-xs text-primary-dark font-medium flex items-center">
+          <span className="text-xs text-primary-dark font-medium flex items-center">
             Voir les produits
             <ArrowRight className="w-3 h-3 ml-1" />
           </span>
@@ -68,4 +68,4 @@ export function BrandCard({ brand }: BrandCardProps) {
       )}
     </div>
   );
-} 
+}

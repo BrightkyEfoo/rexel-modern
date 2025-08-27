@@ -11,6 +11,7 @@ import { QuantitySelector } from '@/components/ui/quantity-selector';
 import { useCartSync } from '@/lib/hooks/useCartSync';
 import { useProductFavoriteStatus } from '@/lib/hooks/useFavorites';
 import { useAuth } from '@/lib/auth/nextauth-hooks';
+import { formatPrice } from '@/lib/utils/currency';
 import type { Product } from '@/lib/api/types';
 
 interface ProductCardProps {
@@ -181,11 +182,11 @@ export function ProductCard({
               {/* Prix */}
               <div className="mt-2 flex items-center gap-2">
                 <span className="text-lg font-bold text-foreground">
-                  {Number(finalPrice).toFixed(2)}€
+                  {formatPrice(finalPrice)}
                 </span>
                 {hasDiscount && (
                   <span className="text-sm text-muted-foreground line-through">
-                    {Number(product.price).toFixed(2)}€
+                    {formatPrice(product.price)}
                   </span>
                 )}
               </div>
@@ -274,11 +275,11 @@ export function ProductCard({
         {/* Prix */}
         <div className="flex items-center gap-2 mb-2">
           <span className="text-lg font-bold text-foreground">
-            {Number(finalPrice).toFixed(2)}€
+            {formatPrice(finalPrice)}
           </span>
           {hasDiscount && (
             <span className="text-sm text-muted-foreground line-through">
-              {Number(product.price).toFixed(2)}€
+              {formatPrice(product.price)}
             </span>
           )}
         </div>

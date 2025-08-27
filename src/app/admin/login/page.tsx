@@ -46,20 +46,26 @@ export default function AdminLoginPage() {
       const result = await loginMutation.mutateAsync(data);
       console.log('🔍 Login result:', result);
       
-      // Attendre un petit délai pour que NextAuth mette à jour la session
-      setTimeout(() => {
-        console.log('🔍 Current user after delay:', user);
-        console.log('🔍 Is authenticated after delay:', isAuthenticated);
-        console.log('🔍 User type after delay:', user?.type);
-        console.log('🔍 Has admin role after delay:', hasRole('admin'));
-        
-        if (isAuthenticated && !hasRole('admin')) {
-          console.log('🔍 User authenticated but not admin - type:', user?.type);
-          form.setError('root', {
-            message: 'Vous n\'avez pas les permissions administrateur'
-          });
-        }
-      }, 1000);
+      // Après un login réussi, vérifier les permissions et rediriger
+      if (result?.ok) {
+        // Attendre un petit délai pour que NextAuth mette à jour la session
+        setTimeout(() => {
+          console.log('🔍 Current user after delay:', user);
+          console.log('🔍 Is authenticated after delay:', isAuthenticated);
+          console.log('🔍 User type after delay:', user?.type);
+          console.log('🔍 Has admin role after delay:', hasRole('admin'));
+          
+          if (isAuthenticated && hasRole('admin')) {
+            console.log('✅ Admin authenticated, redirecting to /admin');
+            router.push('/admin');
+          } else if (isAuthenticated && !hasRole('admin')) {
+            console.log('🔍 User authenticated but not admin - type:', user?.type);
+            form.setError('root', {
+              message: 'Vous n\'avez pas les permissions administrateur'
+            });
+          }
+        }, 1000);
+      }
       
     } catch (error) {
       console.log('🔍 Login error:', error);
@@ -72,7 +78,7 @@ export default function AdminLoginPage() {
         {/* Logo et titre */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <Logo size="lg" />
+            <Logo size="md" showText={false} />
           </div>
           <h1 className="text-2xl font-bold text-foreground mb-2">
             Administration
@@ -181,23 +187,20 @@ export default function AdminLoginPage() {
               </form>
             </Form>
 
-            {/* Informations de développement */}
+            {/* Informations importantes */}
             <div className="mt-6 p-3 bg-muted rounded-lg">
               <p className="text-xs text-muted-foreground text-center mb-2">
-                <strong>Développement uniquement :</strong>
+                <strong>Accès réservé aux administrateurs</strong>
               </p>
               <p className="text-xs text-muted-foreground text-center">
-                Email : <code className="bg-background px-1 rounded">admin@rexel.com</code><br />
-                Mot de passe : <code className="bg-background px-1 rounded">admin123</code>
-              </p>
-              <p className="text-xs text-muted-foreground text-center mt-1">
-                <em>Connectez-vous avec un compte ayant le rôle 'admin'</em>
+                Seuls les comptes avec des permissions administrateur<br />
+                peuvent accéder à cette interface
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Retour au site */}
+        {/* Retour au site - sans suggestion de création de compte */}
         <div className="text-center mt-6">
           <Button
             variant="ghost"

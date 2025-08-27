@@ -37,6 +37,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/lib/auth/nextauth-hooks";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { formatPrice } from "@/lib/utils/currency";
 
 export default function OrdersPage() {
   const { user, isAuthenticated } = useAuth();
@@ -331,7 +332,7 @@ export default function OrdersPage() {
                             </Badge>
                             <div className="text-right">
                               <div className="text-lg font-bold text-[#162e77]">
-                                {order.totalPrice.toFixed(2)} €
+                                {formatPrice(order.totalPrice)}
                               </div>
                               <div className="text-sm text-gray-500">
                                 {order.items.length} article
@@ -369,12 +370,12 @@ export default function OrdersPage() {
                                 </Link>
                                 <div className="text-sm text-gray-600">
                                   Quantité: {item.quantity} •{" "}
-                                  {item.price?.toFixed(2)} € / unité
+                                  {formatPrice(item.price)} / unité
                                 </div>
                               </div>
                               <div className="text-right">
                                 <div className="font-semibold text-gray-900">
-                                  {item.totalPrice?.toFixed(2)} €
+                                  {formatPrice(item.totalPrice)}
                                 </div>
                               </div>
                             </div>
@@ -437,14 +438,14 @@ export default function OrdersPage() {
                                   : order.paymentMethod}
                               </div>
                               <div>
-                                Sous-total: {order.subtotal.toFixed(2)} €
+                                Sous-total: {formatPrice(order.subtotal)}
                               </div>
                               <div>
-                                Livraison: {order.shippingAmount.toFixed(2)} €
+                                Livraison: {formatPrice(order.shippingAmount)}
                               </div>
-                              <div>TVA: {order.taxAmount.toFixed(2)} €</div>
+                              <div>TVA: {formatPrice(order.taxAmount)}</div>
                               <div className="font-semibold mt-1">
-                                Total: {order.totalPrice.toFixed(2)} €
+                                Total: {formatPrice(order.totalPrice)}
                               </div>
                             </div>
                           </div>
@@ -548,10 +549,8 @@ export default function OrdersPage() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
-                      {ordersData
-                        .reduce((sum: any, order: any) => sum + order.totalPrice, 0)
-                        .toFixed(0)}{" "}
-                      €
+                      {formatPrice(ordersData
+                        .reduce((sum: any, order: any) => sum + order.totalPrice, 0))}
                     </div>
                     <div className="text-sm text-gray-600">Total dépensé</div>
                   </div>

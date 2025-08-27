@@ -28,6 +28,7 @@ import { useAddToCart } from '@/lib/query/hooks';
 import { useAuth } from '@/lib/auth/nextauth-hooks';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { formatPrice } from '@/lib/utils/currency';
 import type { Favorite } from '@/lib/api/favorites';
 
 export default function FavoritesPage() {
@@ -396,7 +397,7 @@ function FavoritesGrid({
                     </div>
                     <div className="text-right">
                       <div className="text-xl font-bold text-primary">
-                        {Number(favorite.product.price).toFixed(2)} €
+                        {formatPrice(favorite.product.price)}
                       </div>
                     </div>
                   </div>
@@ -502,7 +503,7 @@ function FavoritesGrid({
 
             <div className="flex items-center justify-between mb-3">
               <div className="text-lg font-bold text-primary">
-                {Number(favorite.product.price).toFixed(2)} €
+                {formatPrice(favorite.product.price)}
               </div>
               <div className="text-xs text-muted-foreground">
                 Ajouté le {new Date(favorite.createdAt).toLocaleDateString('fr-FR')}

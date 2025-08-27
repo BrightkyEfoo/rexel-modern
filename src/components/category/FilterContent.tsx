@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
+import { getCurrencySymbol } from '@/lib/utils/currency';
 import type { CategoryDetail, SearchFilters } from '@/lib/api/types';
 
 type AvailabilityOption = 'in_stock' | 'out_of_stock' | 'limited';
@@ -14,7 +15,7 @@ const AVAILABILITY_OPTIONS: { value: AvailabilityOption; label: string }[] = [
 ];
 
 interface FilterContentProps {
-  categoryData: CategoryDetail;
+  categoryData: CategoryDetail | null;
   filters: SearchFilters;
   priceRange: [number, number];
   onFilterChange: (filters: Partial<SearchFilters>) => void;
@@ -42,13 +43,13 @@ export function FilterContent({
 
       {/* Price Range */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium">Prix (€)</Label>
+        <Label className="text-sm font-medium">Prix ({getCurrencySymbol()})</Label>
         <div className="px-2">
           <Slider
             value={priceRange}
             onValueChange={onPriceChange}
-            min={categoryData.filters?.priceRange?.min || 0}
-            max={categoryData.filters?.priceRange?.max || 1000}
+            min={categoryData?.filters?.priceRange?.min || 0}
+            max={categoryData?.filters?.priceRange?.max || 1000}
             step={10}
             className="w-full"
             minStepsBetweenThumbs={1}
@@ -57,20 +58,20 @@ export function FilterContent({
         <div className="flex items-center justify-between text-sm text-gray-600">
           <div className="flex flex-col items-start">
             <span className="text-xs text-gray-500">Min</span>
-            <span className="font-medium">{priceRange[0]}€</span>
+            <span className="font-medium">{priceRange[0]}{getCurrencySymbol()}</span>
           </div>
           <div className="flex flex-col items-end">
             <span className="text-xs text-gray-500">Max</span>
-            <span className="font-medium">{priceRange[1]}€</span>
+            <span className="font-medium">{priceRange[1]}{getCurrencySymbol()}</span>
           </div>
         </div>
         <div className="text-xs text-gray-500 text-center">
-          Fourchette: {priceRange[0]}€ - {priceRange[1]}€
+          Fourchette: {priceRange[0]}{getCurrencySymbol()} - {priceRange[1]}{getCurrencySymbol()}
         </div>
       </div>
 
       {/* Brands */}
-      {categoryData.filters?.brands && (
+      {categoryData?.filters?.brands && (
         <div className="space-y-3">
           <Label className="text-sm font-medium">Marques</Label>
           <div className="space-y-2">

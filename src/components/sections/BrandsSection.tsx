@@ -47,7 +47,7 @@ export function BrandsSection() {
   }
 
   return (
-    <section className="py-16 bg-secondary">
+    <section className="py-16 bg-secondary/70">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
@@ -76,19 +76,19 @@ export function BrandsSection() {
         </div>
 
         {/* Trust indicators */}
-        <div className="mt-16 pt-12 border-t border-border">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-primary">500+</div>
-              <div className="text-sm text-muted-foreground">Marques partenaires</div>
+        <div className="mt-16 pt-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center items-center justify-center">
+            <div className="space-y-2 w-fit mx-auto p-6 rounded-lg bg-primary">
+              <div className="text-4xl font-bold text-secondary">500+</div>
+              <div className="text-sm text-primary-foreground">Marques partenaires</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-primary">70+</div>
-              <div className="text-sm text-muted-foreground">Années d'expérience</div>
+            <div className="space-y-2 w-fit mx-auto p-6 rounded-lg bg-primary">
+              <div className="text-4xl font-bold text-secondary">70+</div>
+              <div className="text-sm text-primary-foreground">Années d'expérience</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-primary">99%</div>
-              <div className="text-sm text-muted-foreground">Disponibilité produits</div>
+            <div className="space-y-2 w-fit mx-auto p-6 rounded-lg bg-primary">
+              <div className="text-4xl font-bold text-secondary">99%</div>
+              <div className="text-sm text-primary-foreground">Disponibilité produits</div>
             </div>
           </div>
         </div>

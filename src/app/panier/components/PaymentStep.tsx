@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, ArrowRight, CreditCard, Check, Shield, Package } from "lucide-react";
 import Link from "next/link";
 import { PaymentStepProps } from "../types";
-import { formatPrice } from "../utils";
+import { formatPrice, getCurrencySymbol } from "@/lib/utils/currency";
 
 export function PaymentStep({
   paymentMethod,
@@ -74,7 +74,7 @@ export function PaymentStep({
                     className="text-primary"
                   />
                   <div className="w-5 h-5 bg-primary/10 rounded flex items-center justify-center">
-                    <span className="text-xs font-semibold text-primary">€</span>
+                    <span className="text-xs font-semibold text-primary">{getCurrencySymbol()}</span>
                   </div>
                   <div>
                     <div className="font-semibold">Virement bancaire</div>

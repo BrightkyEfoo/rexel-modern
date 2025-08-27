@@ -12,8 +12,6 @@ export function useAuth() {
   const isLoading = status === "loading";
   const isAuthenticated = status === "authenticated" && !!session;
 
-  console.log("session", session);
-
   return {
     user: session?.user || null,
     session,

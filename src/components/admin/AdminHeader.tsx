@@ -19,7 +19,7 @@ export function AdminHeader({ className }: AdminHeaderProps) {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo et titre */}
         <div className="flex items-center space-x-4">
-          <Logo size="md" />
+          <Logo size="md" showText={false} />
           <div className="hidden md:block">
             <h1 className="text-lg font-semibold text-foreground">Administration</h1>
             <p className="text-sm text-muted-foreground">Panel de gestion</p>

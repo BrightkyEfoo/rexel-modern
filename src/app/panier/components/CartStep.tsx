@@ -27,7 +27,7 @@ import {
   useRemoveFromCart,
 } from "@/lib/query/hooks";
 import { CartStepProps } from "../types";
-import { formatPrice } from "../utils";
+import { formatPrice } from "@/lib/utils/currency";
 
 interface CartStepInternalProps extends CartStepProps {
   promoCode: string;
@@ -262,7 +262,7 @@ export function CartStep({
               </div>
               {promoDiscount > 0 && (
                 <div className="text-sm text-green-600">
-                  Code appliqué : -{promoDiscount}€
+                  Code appliqué : -{formatPrice(promoDiscount)}
                 </div>
               )}
             </div>
