@@ -330,6 +330,7 @@ jobs:
           path: |
             kesimarket-frontend-prod.tar
             docker-compose.prod.yml
+            .env.production
           retention-days: 7
 
   transfer-image:
@@ -350,7 +351,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           port: 22
-          source: "kesimarket-frontend-prod.tar,docker-compose.prod.yml"
+          source: "kesimarket-frontend-prod.tar,docker-compose.prod.yml,.env.production"
           target: ${{ env.VPS_DEPLOY_PATH }}/
 
       - name: Create backup and organize files
