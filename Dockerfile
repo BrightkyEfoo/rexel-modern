@@ -40,8 +40,6 @@ COPY --from=production-deps --chown=nextjs:nodejs /app/node_modules /app/node_mo
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone /app/
 COPY --from=build --chown=nextjs:nodejs /app/.next/static /app/.next/static
 COPY --from=build --chown=nextjs:nodejs /app/public /app/public
-# Copy environment file
-COPY --from=build --chown=nextjs:nodejs /app/.env.production /app/.env.production 2>/dev/null || echo "No .env.production file to copy"
 
 USER nextjs
 
