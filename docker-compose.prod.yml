@@ -12,6 +12,8 @@ services:
     image: kesimarket-frontend-prod:latest
     container_name: kesimarket-frontend-prod
     restart: unless-stopped
+    env_file:
+      - .env.production
     environment:
       NODE_ENV: production
       PORT: 3000
