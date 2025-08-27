@@ -20,9 +20,6 @@ WORKDIR /app
 COPY --from=deps /app/node_modules /app/node_modules
 COPY . .
 
-# Copy environment file if it exists
-COPY .env.production .env.production 2>/dev/null || echo "No .env.production file found"
-
 # Build Next.js application
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
