@@ -203,15 +203,7 @@ export function Header({ className }: HeaderProps) {
                 <nav className="flex-grow flex flex-col space-y-2 mt-6">
                   <MobileNavLink href="/catalogue" onNavigate={closeMobileMenu}>
                     <Grid className="w-5 h-5" />
-                    <span>
-                      Catalogue{" "}
-                      <Badge
-                        variant="secondary"
-                        className="ml-1 text-[8px] p-[0px] px-0.5"
-                      >
-                        Soon
-                      </Badge>
-                    </span>
+                    <span>Catalogue</span>
                   </MobileNavLink>
                   <MobileNavLink
                     href="/nouveautes"
@@ -425,18 +417,12 @@ export function Header({ className }: HeaderProps) {
               </DropdownMenuContent>
             </DropdownMenu>
             <div className="relative group">
-              <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
-                <Grid className="w-4 h-4" />
-                <span>
-                  Catalogue{" "}
-                  <Badge
-                    variant="secondary"
-                    className="ml-1 text-[8px] p-[0px] px-0.5"
-                  >
-                    Soon
-                  </Badge>
+              <Link href="/catalogue">
+                <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-pointer">
+                  <Grid className="w-4 h-4" />
+                  <span>Catalogue </span>
                 </span>
-              </span>
+              </Link>
             </div>
             <div className="relative group">
               <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
