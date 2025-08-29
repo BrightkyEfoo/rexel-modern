@@ -22,7 +22,6 @@ export function useAuthRedirect() {
     }
 
     localStorage.setItem(REDIRECT_URL_KEY, currentPath);
-    console.log('🔗 URL sauvegardée pour redirection:', currentPath);
   };
 
   // Récupérer l'URL de redirection sauvegardée
@@ -33,7 +32,6 @@ export function useAuthRedirect() {
     // Priorité au paramètre URL, puis à l'URL sauvegardée
     const redirectUrl = redirectParam || savedUrl || '/';
     
-    console.log('🔗 URL de redirection récupérée:', redirectUrl);
     return redirectUrl;
   };
 
@@ -44,7 +42,6 @@ export function useAuthRedirect() {
     // Nettoyer l'URL sauvegardée
     localStorage.removeItem(REDIRECT_URL_KEY);
     
-    console.log('🔗 Redirection après auth vers:', redirectUrl);
     router.push(redirectUrl);
   };
 

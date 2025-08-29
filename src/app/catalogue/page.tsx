@@ -56,11 +56,7 @@ export default function CataloguePage() {
     useProducts(filters);
 
   // Récupérer les filtres globaux pour le catalogue
-  const { data: globalFiltersResponse } =
-    useGlobalFilters();
-
-  console.log("productsResponse ", productsResponse);
-  console.log("globalFiltersResponse ", globalFiltersResponse);
+  const { data: globalFiltersResponse } = useGlobalFilters();
 
   // Créer les données de catégorie pour les filtres (structure attendue par FilterContent)
   const categoryDataForFilters = useMemo(() => {

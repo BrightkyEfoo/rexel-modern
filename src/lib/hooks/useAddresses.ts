@@ -34,8 +34,6 @@ export function useCreateAddress() {
     onSuccess: (newAddress) => {
       // Invalider tous les caches d'adresses
       queryClient.invalidateQueries({ queryKey: ['user-addresses'] });
-      
-      console.log('Adresse ajoutée avec succès');
     },
     onError: (error: any) => {
       console.error('Erreur lors de la création de l\'adresse:', error);
@@ -56,8 +54,6 @@ export function useUpdateAddress() {
     onSuccess: (updatedAddress) => {
       // Invalider tous les caches d'adresses
       queryClient.invalidateQueries({ queryKey: ['user-addresses'] });
-      
-      console.log('Adresse mise à jour avec succès');
     },
     onError: (error: any) => {
       console.error('Erreur lors de la mise à jour de l\'adresse:', error);
@@ -77,8 +73,6 @@ export function useDeleteAddress() {
     onSuccess: (_, deletedId) => {
       // Invalider tous les caches d'adresses
       queryClient.invalidateQueries({ queryKey: ['user-addresses'] });
-      
-      console.log('Adresse supprimée avec succès');
     },
     onError: (error: any) => {
       console.error('Erreur lors de la suppression de l\'adresse:', error);
@@ -99,8 +93,6 @@ export function useSetDefaultAddress() {
     onSuccess: (updatedAddress, { type }) => {
       // Invalider tous les caches d'adresses
       queryClient.invalidateQueries({ queryKey: ['user-addresses'] });
-      
-      console.log(`Adresse définie comme adresse de ${type === 'shipping' ? 'livraison' : 'facturation'} par défaut`);
     },
     onError: (error: any) => {
       console.error('Erreur lors de la définition de l\'adresse par défaut:', error);

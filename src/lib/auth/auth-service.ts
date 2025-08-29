@@ -74,8 +74,6 @@ export class AuthService {
         };
       }>('/opened/auth/register', userData);
 
-      console.log('response', response)
-
       if (response.data.data.requiresVerification) {
         // Retourner les informations pour la vérification
         throw {

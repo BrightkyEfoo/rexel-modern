@@ -1,16 +1,16 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { authService } from './auth-service';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { authService } from "./auth-service";
 import type {
   LoginCredentials,
   RegisterData,
   User,
-  AuthResponse
-} from '../api/types';
+  AuthResponse,
+} from "../api/types";
 
 // Query Keys
 export const authKeys = {
-  currentUser: ['auth', 'currentUser'] as const,
-  isAuthenticated: ['auth', 'isAuthenticated'] as const,
+  currentUser: ["auth", "currentUser"] as const,
+  isAuthenticated: ["auth", "isAuthenticated"] as const,
 } as const;
 
 // Current user hook
@@ -41,7 +41,8 @@ export function useLogin() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (credentials: LoginCredentials) => authService.login(credentials),
+    mutationFn: (credentials: LoginCredentials) =>
+      authService.login(credentials),
     onSuccess: (data: AuthResponse) => {
       // Update auth status
       queryClient.setQueryData(authKeys.isAuthenticated, true);
@@ -54,27 +55,20 @@ export function useLogin() {
       // Clear auth data on error
       queryClient.setQueryData(authKeys.isAuthenticated, false);
       queryClient.removeQueries({ queryKey: authKeys.currentUser });
-    }
+    },
   });
 }
 
 // Register mutation
 export function useRegister() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (userData: RegisterData) => {
-      console.log('🚀 Frontend register mutation called:', { email: userData.email });
       return authService.register(userData);
     },
-    onSuccess: (data: AuthResponse) => {
-      // Note: Pour le register, on ne met pas à jour les données d'auth
-      // car l'utilisateur doit d'abord vérifier son email
-      console.log('✅ Registration successful, need OTP verification');
-    },
+
     onError: (error) => {
       // Ne pas invalider les queries sur erreur de register
-      console.error('❌ Registration error:', error);
+      console.error("❌ Registration error:", error);
     },
     // Empêcher les appels multiples rapprochés
     retry: false,
@@ -96,10 +90,10 @@ export function useLogout() {
       queryClient.clear();
 
       // Redirect to home page
-      if (typeof window !== 'undefined') {
-        window.location.href = '/';
+      if (typeof window !== "undefined") {
+        window.location.href = "/";
       }
-    }
+    },
   });
 }
 
@@ -108,38 +102,45 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (userData: Partial<User>) => authService.updateProfile(userData),
+    mutationFn: (userData: Partial<User>) =>
+      authService.updateProfile(userData),
     onSuccess: (updatedUser: User) => {
       // Update current user data
       queryClient.setQueryData(authKeys.currentUser, updatedUser);
-    }
+    },
   });
 }
 
 // Change password mutation
 export function useChangePassword() {
   return useMutation({
-    mutationFn: ({ currentPassword, newPassword }: {
+    mutationFn: ({
+      currentPassword,
+      newPassword,
+    }: {
       currentPassword: string;
       newPassword: string;
-    }) => authService.changePassword(currentPassword, newPassword)
+    }) => authService.changePassword(currentPassword, newPassword),
   });
 }
 
 // Request password reset mutation
 export function useRequestPasswordReset() {
   return useMutation({
-    mutationFn: (email: string) => authService.requestPasswordReset(email)
+    mutationFn: (email: string) => authService.requestPasswordReset(email),
   });
 }
 
 // Reset password mutation
 export function useResetPassword() {
   return useMutation({
-    mutationFn: ({ token, newPassword }: {
+    mutationFn: ({
+      token,
+      newPassword,
+    }: {
       token: string;
       newPassword: string;
-    }) => authService.resetPassword(token, newPassword)
+    }) => authService.resetPassword(token, newPassword),
   });
 }
 
@@ -152,14 +153,14 @@ export function useVerifyEmail() {
     onSuccess: () => {
       // Refresh current user data
       queryClient.invalidateQueries({ queryKey: authKeys.currentUser });
-    }
+    },
   });
 }
 
 // Resend verification email mutation
 export function useResendVerificationEmail() {
   return useMutation({
-    mutationFn: () => authService.resendVerificationEmail()
+    mutationFn: () => authService.resendVerificationEmail(),
   });
 }
 
@@ -174,7 +175,7 @@ export function useAuthUser() {
     isAuthenticated: isAuthenticated || false,
     error,
     hasRole: (role: string) => authService.hasRole(role),
-    hasAnyRole: (roles: string[]) => authService.hasAnyRole(roles)
+    hasAnyRole: (roles: string[]) => authService.hasAnyRole(roles),
   };
 }
 
@@ -192,6 +193,6 @@ export function useRequireAuth(requiredRoles?: string[]) {
     isLoading,
     hasAccess: isAuthenticated && hasRequiredRole,
     needsAuth: !isAuthenticated,
-    needsRole: isAuthenticated && !hasRequiredRole
+    needsRole: isAuthenticated && !hasRequiredRole,
   };
 }

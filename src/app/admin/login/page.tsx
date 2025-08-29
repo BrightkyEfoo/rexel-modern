@@ -1,74 +1,79 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Logo } from '@/components/ui/logo';
-import { Shield, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
-import { useLogin, useAuth } from '@/lib/auth/nextauth-hooks';
-import { adminLoginSchema, type AdminLoginFormData } from '@/lib/validations/admin';
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Logo } from "@/components/ui/logo";
+import { Shield, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
+import { useLogin, useAuth } from "@/lib/auth/nextauth-hooks";
+import {
+  adminLoginSchema,
+  type AdminLoginFormData,
+} from "@/lib/validations/admin";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
-  
+
   // Hooks NextAuth
   const { user, isAuthenticated, hasRole } = useAuth();
   const loginMutation = useLogin();
-  
+
   // React Hook Form avec validation Zod
   const form = useForm<AdminLoginFormData>({
     resolver: zodResolver(adminLoginSchema),
     defaultValues: {
-      email: '',
-      password: ''
-    }
+      email: "",
+      password: "",
+    },
   });
 
   // Vérifier si l'utilisateur est déjà connecté et admin
   useEffect(() => {
-    console.log('🔍 Effect - isAuthenticated:', isAuthenticated, 'hasRole admin:', hasRole('admin'), 'user:', user);
-    if (isAuthenticated && hasRole('admin')) {
-      console.log('✅ Redirecting to admin dashboard');
-      router.push('/admin');
+    if (isAuthenticated && hasRole("admin")) {
+      router.push("/admin");
     }
   }, [isAuthenticated, hasRole, router, user]);
 
   const onSubmit = async (data: AdminLoginFormData) => {
     try {
       const result = await loginMutation.mutateAsync(data);
-      console.log('🔍 Login result:', result);
-      
+
       // Après un login réussi, vérifier les permissions et rediriger
       if (result?.ok) {
         // Attendre un petit délai pour que NextAuth mette à jour la session
         setTimeout(() => {
-          console.log('🔍 Current user after delay:', user);
-          console.log('🔍 Is authenticated after delay:', isAuthenticated);
-          console.log('🔍 User type after delay:', user?.type);
-          console.log('🔍 Has admin role after delay:', hasRole('admin'));
-          
-          if (isAuthenticated && hasRole('admin')) {
-            console.log('✅ Admin authenticated, redirecting to /admin');
-            router.push('/admin');
-          } else if (isAuthenticated && !hasRole('admin')) {
-            console.log('🔍 User authenticated but not admin - type:', user?.type);
-            form.setError('root', {
-              message: 'Vous n\'avez pas les permissions administrateur'
+          if (isAuthenticated && hasRole("admin")) {
+            router.push("/admin");
+          } else if (isAuthenticated && !hasRole("admin")) {
+            form.setError("root", {
+              message: "Vous n'avez pas les permissions administrateur",
             });
           }
         }, 1000);
       }
-      
     } catch (error) {
-      console.log('🔍 Login error:', error);
+      console.log("🔍 Login error:", error);
     }
   };
 
@@ -98,17 +103,20 @@ export default function AdminLoginPage() {
               Veuillez vous connecter avec vos identifiants administrateur
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 {(loginMutation.error || form.formState.errors.root) && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      {form.formState.errors.root?.message || 
-                       loginMutation.error?.message || 
-                       'Erreur lors de la connexion'}
+                      {form.formState.errors.root?.message ||
+                        loginMutation.error?.message ||
+                        "Erreur lors de la connexion"}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -193,7 +201,8 @@ export default function AdminLoginPage() {
                 <strong>Accès réservé aux administrateurs</strong>
               </p>
               <p className="text-xs text-muted-foreground text-center">
-                Seuls les comptes avec des permissions administrateur<br />
+                Seuls les comptes avec des permissions administrateur
+                <br />
                 peuvent accéder à cette interface
               </p>
             </div>
@@ -204,7 +213,7 @@ export default function AdminLoginPage() {
         <div className="text-center mt-6">
           <Button
             variant="ghost"
-            onClick={() => router.push('/')}
+            onClick={() => router.push("/")}
             className="text-muted-foreground hover:text-foreground"
           >
             ← Retour au site

@@ -130,9 +130,6 @@ export const authOptions: NextAuthOptions = {
 
   events: {
     async signOut(message) {
-      // Nettoyer les données côté serveur si nécessaire
-      // Note: Le token sera dans message.token
-      console.log('User signed out:', message);
     }
   },
 

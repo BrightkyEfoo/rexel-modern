@@ -179,7 +179,7 @@ export function CategoryFormDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit, (e) => console.log("e", e))}
+            onSubmit={form.handleSubmit(onSubmit)}
             className="max-h-[90vh] overflow-scroll"
           >
             <DialogHeader className="sticky top-0 z-10 pb-4 border-b bg-background">

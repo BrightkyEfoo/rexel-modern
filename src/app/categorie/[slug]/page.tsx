@@ -137,8 +137,6 @@ export default function CategoryPage() {
 
   const category = categoryResponse.data as CategoryDetail;
 
-  console.log("hasProducts", productsResponse);
-
   return (
     <div className="min-h-screen bg-background">
       <Header />

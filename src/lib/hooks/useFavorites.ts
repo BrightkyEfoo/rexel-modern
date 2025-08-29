@@ -120,7 +120,6 @@ export function useToggleFavorite() {
 export function useProductFavoriteStatus(productId?: string) {
   const { data: favoritesData } = useFavorites();
 
-  console.log("favoritesData", favoritesData);
   const toggleMutation = useToggleFavorite();
 
   // Chercher si le produit est dans les favoris

@@ -4,6 +4,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { nextAuthApiClient } from "@/lib/api/nextauth-client";
 import type { RegisterData } from "@/lib/api/types";
+import type { LoginFormData } from "@/lib/validations/auth";
 
 // Hook pour obtenir l'état d'authentification
 export function useAuth() {
@@ -37,31 +38,85 @@ export function useLogin() {
       email: string;
       password: string;
     }) => {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
+      sessionStorage.setItem("temp_password", password);
+      try {
+        // Appeler directement l'API backend
+        const response = await nextAuthApiClient.post<{
+          message: string;
+          data: {
+            user?: {
+              id: number;
+              firstName: string;
+              lastName: string;
+              fullName: string;
+              email: string;
+              company?: string;
+              phone?: string;
+              type: string;
+              isVerified: boolean;
+              emailVerifiedAt?: string;
+            };
+            token?: string;
+            userId?: number;
+            email?: string;
+            requiresVerification?: boolean;
+          };
+        }>("/opened/auth/login", {
+          email,
+          password,
+        });
 
-      if (result?.error) {
-        // Gérer les erreurs spéciales
-        try {
-          const errorData = JSON.parse(result.error);
-          if (errorData.type === "VERIFICATION_REQUIRED") {
+        // Si la vérification est requise, sauvegarder le mot de passe et lancer une erreur spéciale
+        if (response.data.data.requiresVerification) {
+          // Sauvegarder temporairement le mot de passe pour la vérification OTP
+
+          throw {
+            type: "VERIFICATION_REQUIRED",
+            message: response.data.message,
+            userId: response.data.data.userId!,
+            email: response.data.data.email!,
+          };
+        }
+
+        // Si la connexion est réussie, utiliser NextAuth pour créer la session
+        if (response.data.data.user && response.data.data.token) {
+          const result = await signIn("credentials", {
+            email,
+            password,
+            redirect: false,
+          });
+
+          if (result?.error) {
+            throw new Error(result.error);
+          }
+        }
+
+        return response.data;
+      } catch (error: any) {
+        // Si c'est déjà une erreur de vérification, la relancer
+        if (
+          error.type === "VERIFICATION_REQUIRED" ||
+          error.code === "VERIFICATION_REQUIRED"
+        ) {
+          throw { ...error, type: "VERIFICATION_REQUIRED" };
+        }
+
+        // Pour les autres erreurs, essayer de les parser
+        if (error.response?.data) {
+          const errorData = error.response.data;
+          if (errorData.data?.requiresVerification) {
             throw {
               type: "VERIFICATION_REQUIRED",
               message: errorData.message,
-              userId: errorData.userId,
-              email: errorData.email,
+              userId: errorData.data.userId,
+              email: errorData.data.email,
             };
           }
-        } catch (parseError) {
-          // Si ce n'est pas du JSON, c'est une erreur normale
+          throw new Error(errorData.message || "Erreur de connexion");
         }
-        throw new Error(result.error);
-      }
 
-      return result;
+        throw error;
+      }
     },
     onSuccess: () => {
       // Invalider toutes les queries pour forcer un rafraîchissement
@@ -105,7 +160,6 @@ export function useLogout() {
 export function useRegister() {
   return useMutation({
     mutationFn: async (userData: RegisterData) => {
-      console.log("🚀 Frontend register mutation called:", {
         email: userData.email,
       });
 
@@ -141,14 +195,63 @@ export function useRegister() {
 }
 
 // Hook pour la vérification OTP
-export function useVerifyOtp() {
+export function useVerifyOtp(redirectAfterAuth: () => void) {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async ({ userId, otp }: { userId: number; otp: string }) => {
-      const response = await nextAuthApiClient.post("/opened/auth/verify-otp", {
+      const response = await nextAuthApiClient.post<{
+        message: string;
+        data: {
+          user: {
+            id: number;
+            firstName: string;
+            lastName: string;
+            fullName: string;
+            email: string;
+            company?: string;
+            phone?: string;
+            type: string;
+            isVerified: boolean;
+            emailVerifiedAt?: string;
+          };
+          token: string;
+        };
+      }>("/opened/auth/verify-otp", {
         userId,
         otp,
       });
+
       return response.data;
+    },
+    onSuccess: async (data) => {
+      // Après vérification réussie, connecter l'utilisateur via NextAuth
+      if (data.data.user) {
+        try {
+          // Récupérer le mot de passe temporairement sauvegardé
+          const tempPassword = sessionStorage.getItem("temp_password");
+
+          // Utiliser NextAuth pour créer la session avec le mot de passe original
+          const result = await signIn("credentials", {
+            email: data.data.user.email,
+            password: tempPassword || "", // Utiliser le mot de passe sauvegardé
+            redirect: false,
+          });
+
+          // Nettoyer le mot de passe temporaire
+          sessionStorage.removeItem("temp_password");
+
+          if (result?.error) {
+            console.error("NextAuth signIn error:", result.error);
+          }
+        } catch (error) {
+          console.error("Error signing in with NextAuth:", error);
+        }
+      }
+
+      // Invalider toutes les queries pour forcer un rafraîchissement
+      queryClient.invalidateQueries();
+      redirectAfterAuth();
     },
   });
 }

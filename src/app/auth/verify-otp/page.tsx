@@ -1,23 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { OTPInput } from '@/components/ui/otp-input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Logo } from '@/components/ui/logo';
-import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect';
+import { OTPInput } from '@/components/ui/otp-input';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, RefreshCw } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+import { useResendOtp, useVerifyOtp } from '@/lib/auth/nextauth-hooks';
+import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect';
 import { otpSchema, type OtpFormData } from '@/lib/validations/auth';
-import { apiClient } from '@/lib/api/client';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2, Mail, RefreshCw } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 export default function VerifyOTPPage() {
   const router = useRouter();
@@ -45,74 +44,9 @@ export default function VerifyOTPPage() {
 
   const otp = watch('otp');
 
-  // Mutation pour vérifier l'OTP
-  const verifyOtpMutation = useMutation({
-    mutationFn: async (data: OtpFormData) => {
-      const response = await apiClient.post<{
-        message: string;
-        data: {
-          user: any;
-          token: string;
-        };
-      }>('/opened/auth/verify-otp', data);
-      return response.data;
-    },
-    onSuccess: (data) => {
-      // Sauvegarder le token
-      localStorage.setItem('kesimarket_access_token', data.data.token);
-      localStorage.setItem('kesimarket_user', JSON.stringify(data.data.user));
-      
-      // Vérification réussie - rediriger vers la page précédente
-      toast({
-        title: "Compte vérifié",
-        description: "Votre compte a été vérifié avec succès. Bienvenue !",
-      });
-      
-      // Rediriger vers la page sauvegardée ou l'accueil
-      redirectAfterAuth();
-    },
-    onError: (err: any) => {
-      const errorMessage = err.response?.data?.message || 'Code de vérification invalide';
-      setError(errorMessage);
-      setValue('otp', '');
-      
-      toast({
-        title: "Code invalide",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    },
-  });
+  const verifyOtpMutation = useVerifyOtp(redirectAfterAuth);
 
-  // Mutation pour renvoyer l'OTP
-  const resendOtpMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiClient.post('/opened/auth/resend-otp', {
-        userId: parseInt(userId!),
-      });
-      return response.data;
-    },
-    onSuccess: () => {
-      setCountdown(60); // 1 minute de cooldown
-      setValue('otp', '');
-      setError('');
-      
-      toast({
-        title: "Code renvoyé",
-        description: "Un nouveau code de vérification vous a été envoyé par email.",
-      });
-    },
-    onError: (err: any) => {
-      const errorMessage = err.response?.data?.message || 'Erreur lors du renvoi du code';
-      setError(errorMessage);
-      
-      toast({
-        title: "Erreur",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    },
-  });
+  const resendOtpMutation = useResendOtp();
 
   useEffect(() => {
     if (!userId || !email) {
@@ -143,7 +77,9 @@ export default function VerifyOTPPage() {
 
   const handleResendOTP = () => {
     if (!userId || countdown > 0) return;
-    resendOtpMutation.mutate();
+    resendOtpMutation.mutate({
+      userId: parseInt(userId),
+    });
   };
 
   if (!userId || !email) {

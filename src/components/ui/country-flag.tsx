@@ -25,9 +25,6 @@ export function CountryFlag({
 
   const countryName = country?.name;
 
-  console.log("countryCode", countryCode);
-  console.log("countryName", countryName);
-  
   if (!doesItHaveFlag) {
     return null;
   }

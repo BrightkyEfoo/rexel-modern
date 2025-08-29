@@ -12,14 +12,6 @@ export function useAdminAuth() {
     adminUser: authStatus?.user || null,
     isLoading,
     logout: () => logoutMutation.mutate(),
-    checkAuthentication: () => {
-      // Cette fonction est maintenant gérée par React Query
-      console.log('checkAuthentication appelée - maintenant gérée par React Query');
-    },
-    requireAuth: () => {
-      // Cette fonction est maintenant gérée par useRequireAdminAuth
-      console.log('requireAuth appelée - maintenant gérée par useRequireAdminAuth');
-    }
   };
 }
 

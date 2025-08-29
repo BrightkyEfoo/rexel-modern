@@ -76,21 +76,19 @@ export default function LoginPage() {
         error.type === 'VERIFICATION_REQUIRED'
       ) {
         // Compte non vérifié - rediriger vers OTP (pas de redirection vers previous URL)
-        const verificationError = error as {
-          type: 'VERIFICATION_REQUIRED';
-          userId: number;
-          email: string;
-        };
+        const verificationError = error as any
         
         toast({
           title: "Vérification requise",
           description: "Votre compte doit être vérifié. Un code vous a été envoyé par email.",
           variant: "default",
         });
+
+        console.log('verificationError', verificationError)
         
         const params = new URLSearchParams({
-          userId: verificationError.userId.toString(),
-          email: verificationError.email,
+          userId: verificationError.data?.userId.toString() || "",
+          email: verificationError.data?.email || "",
         });
         router.push(`/auth/verify-otp?${params.toString()}`);
       } else {

@@ -341,7 +341,6 @@ export function useMergeCart() {
 
   return useMutation({
     mutationFn: () => {
-      console.log('🔄 Executing cart merge...');
       
       // Vérifier qu'on a un token avant d'appeler
       const token = typeof window !== 'undefined' 
@@ -349,20 +348,17 @@ export function useMergeCart() {
         : null;
       
       if (!token) {
-        console.log('🚫 No auth token, skipping merge');
         throw new Error('User not authenticated');
       }
       
       return cartService.mergeCart();
     },
     onSuccess: (data) => {
-      console.log('✅ Cart merge successful:', data);
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
       queryClient.invalidateQueries({ queryKey: queryKeys.cartCount });
     },
     onError: (error) => {
       console.error('❌ Cart merge failed:', error);
-      // Ne pas rediriger ici, laisser l'interceptor gérer
     },
   });
 }

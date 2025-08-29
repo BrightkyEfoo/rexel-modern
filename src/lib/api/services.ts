@@ -49,8 +49,6 @@ export class ProductsService {
     categorySlug: string,
     filters?: SearchFilters
   ): Promise<PaginatedResponse<Product>> {
-    console.log("categorySlug", categorySlug);
-    console.log("filters", filters);
     const params = this.buildCategorySearchParams(filters);
     const response = await apiClient.get(
       `/opened/products/category/${categorySlug}`,
@@ -80,7 +78,6 @@ export class ProductsService {
     };
 
     // Retourner la structure PaginatedResponse standard
-    console.log("response", response);
     return {
       data: resp.data,
       meta: resp.meta,

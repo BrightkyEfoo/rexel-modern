@@ -1,23 +1,26 @@
-import axios, { AxiosInstance, AxiosError, AxiosResponse } from 'axios';
-import { getSession } from 'next-auth/react';
-import type { Session } from 'next-auth';
+import axios, { AxiosInstance, AxiosError, AxiosResponse } from "axios";
+import { getSession } from "next-auth/react";
+import type { Session } from "next-auth";
 
 interface ApiError {
   message: string;
   code: string;
   status: number;
+  data?: any;
   details?: Record<string, unknown>;
 }
 
 export class NextAuthApiClient {
   private instance: AxiosInstance;
 
-  constructor(baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333') {
+  constructor(
+    baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333"
+  ) {
     this.instance = axios.create({
       baseURL,
       timeout: 30000,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -28,42 +31,45 @@ export class NextAuthApiClient {
     // Request interceptor
     this.instance.interceptors.request.use(
       async (config) => {
-        const url = config.url || '';
+        const url = config.url || "";
 
         // Handle /secured routes - require authentication
-        if (url.startsWith('/secured')) {
+        if (url.startsWith("/secured")) {
           const session = await getSession();
-          
+
           if (!session?.accessToken) {
-            console.warn('🚫 No auth token for secured route:', url);
-            return Promise.reject(new Error('No authentication token'));
+            console.warn("🚫 No auth token for secured route:", url);
+            return Promise.reject(new Error("No authentication token"));
           }
 
           // Add auth token
           config.headers.Authorization = `Bearer ${session.accessToken}`;
           // Replace with correct backend prefix
-          config.url = url.replace('/secured', '/api/v1/secured');
+          config.url = url.replace("/secured", "/api/v1/secured");
         }
 
         // Handle /opened routes - add correct prefix and session ID
-        if (url.startsWith('/opened')) {
-          config.url = url.replace('/opened', '/api/v1/opened');
-          
+        if (url.startsWith("/opened")) {
+          config.url = url.replace("/opened", "/api/v1/opened");
+
           // Add session ID for cart functionality
-          const sessionId = typeof window !== 'undefined' 
-            ? localStorage.getItem('cart-session-id') 
-            : null;
-          
+          const sessionId =
+            typeof window !== "undefined"
+              ? localStorage.getItem("cart-session-id")
+              : null;
+
           if (sessionId) {
-            config.headers['x-session-id'] = sessionId;
+            config.headers["x-session-id"] = sessionId;
           }
         }
 
-        console.debug(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+        console.debug(
+          `🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`
+        );
         return config;
       },
       (error) => {
-        console.error('❌ Request error:', error);
+        console.error("❌ Request error:", error);
         return Promise.reject(this.transformError(error));
       }
     );
@@ -71,18 +77,22 @@ export class NextAuthApiClient {
     // Response interceptor
     this.instance.interceptors.response.use(
       (response) => {
-        console.debug(`✅ API Response: ${response.status} ${response.config.url}`);
+        console.debug(
+          `✅ API Response: ${response.status} ${response.config.url}`
+        );
         return response;
       },
       async (error) => {
         console.error(
-          `❌ API Error: ${error.response?.status || 'NETWORK'} ${error.config?.url}`,
+          `❌ API Error: ${error.response?.status || "NETWORK"} ${
+            error.config?.url
+          }`,
           error.response?.data
         );
 
         // Handle 401 errors - NextAuth will handle session refresh
         if (error.response?.status === 401) {
-          console.warn('🚫 401 Unauthorized - session may be expired');
+          console.warn("🚫 401 Unauthorized - session may be expired");
           // NextAuth will handle the session refresh automatically
         }
 
@@ -93,26 +103,29 @@ export class NextAuthApiClient {
 
   private transformError(error: AxiosError): ApiError {
     const apiError: ApiError = {
-      message: 'Une erreur inattendue s\'est produite',
-      code: 'UNKNOWN_ERROR',
+      message: "Une erreur inattendue s'est produite",
+      code: "UNKNOWN_ERROR",
       status: 500,
     };
 
     if (error.response) {
       const data = error.response.data as
-        | { message?: string; code?: string; details?: unknown }
+        | { message?: string; code?: string; details?: unknown; data?: any }
         | undefined;
+
+      console.log("error data", data);
       apiError.status = error.response.status;
+      apiError.data = data?.data;
       apiError.message = data?.message || error.message;
-      apiError.code = data?.code || 'SERVER_ERROR';
+      apiError.code = data?.code || data?.data?.code || "SERVER_ERROR";
       apiError.details = data?.details as Record<string, unknown> | undefined;
     } else if (error.request) {
-      apiError.message = 'Erreur de connexion réseau';
-      apiError.code = 'NETWORK_ERROR';
+      apiError.message = "Erreur de connexion réseau";
+      apiError.code = "NETWORK_ERROR";
       apiError.status = 0;
     } else {
       apiError.message = error.message;
-      apiError.code = 'REQUEST_ERROR';
+      apiError.code = "REQUEST_ERROR";
     }
 
     return apiError;
@@ -123,15 +136,27 @@ export class NextAuthApiClient {
     return this.instance.get(url, config);
   }
 
-  async post<T>(url: string, data?: any, config?: any): Promise<AxiosResponse<T>> {
+  async post<T>(
+    url: string,
+    data?: any,
+    config?: any
+  ): Promise<AxiosResponse<T>> {
     return this.instance.post(url, data, config);
   }
 
-  async put<T>(url: string, data?: any, config?: any): Promise<AxiosResponse<T>> {
+  async put<T>(
+    url: string,
+    data?: any,
+    config?: any
+  ): Promise<AxiosResponse<T>> {
     return this.instance.put(url, data, config);
   }
 
-  async patch<T>(url: string, data?: any, config?: any): Promise<AxiosResponse<T>> {
+  async patch<T>(
+    url: string,
+    data?: any,
+    config?: any
+  ): Promise<AxiosResponse<T>> {
     return this.instance.patch(url, data, config);
   }
 
@@ -142,7 +167,7 @@ export class NextAuthApiClient {
   // Health check
   async healthCheck(): Promise<boolean> {
     try {
-      await this.get('/health');
+      await this.get("/health");
       return true;
     } catch {
       return false;
