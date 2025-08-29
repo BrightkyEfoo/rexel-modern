@@ -1,15 +1,10 @@
 import { CartTotals } from './types';
+import { formatPrice } from '@/lib/utils/currency';
 
 /**
  * Fonction utilitaire pour formater les prix en français
  */
-export const formatPrice = (price: number): string => {
-  return price.toLocaleString("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: 2,
-  });
-};
+export { formatPrice };
 
 /**
  * Calcule les totaux du panier en fonction des items et des options

@@ -1,4 +1,5 @@
 import { apiClient } from "./client";
+import { nextAuthApiClient } from "./nextauth-client";
 import type {
   Product,
   Category,
@@ -51,9 +52,12 @@ export class ProductsService {
     console.log("categorySlug", categorySlug);
     console.log("filters", filters);
     const params = this.buildCategorySearchParams(filters);
-    const response = await apiClient.get(`/opened/products/category/${categorySlug}`, {
-      params,
-    });
+    const response = await apiClient.get(
+      `/opened/products/category/${categorySlug}`,
+      {
+        params,
+      }
+    );
 
     const resp = response as {
       data: Product[];
@@ -73,7 +77,7 @@ export class ProductsService {
       message: string;
       status: number;
       timestamp: string;
-    }
+    };
 
     // Retourner la structure PaginatedResponse standard
     console.log("response", response);
@@ -95,6 +99,24 @@ export class ProductsService {
     return apiClient.getPaginated<Product>("/opened/products", {
       params: { search: query, page, per_page: perPage },
     });
+  }
+
+  async getSimilarProducts(slug: string): Promise<ApiResponse<Product[]>> {
+    return apiClient.get<Product[]>(`/opened/products/${slug}/similar`);
+  }
+
+  async getGlobalFilters(): Promise<
+    ApiResponse<{
+      brands: Array<{ id: number; name: string; productCount: number }>;
+      priceRange: { min: number; max: number };
+      specifications: Array<{ name: string; values: string[] }>;
+    }>
+  > {
+    return apiClient.get<{
+      brands: Array<{ id: number; name: string; productCount: number }>;
+      priceRange: { min: number; max: number };
+      specifications: Array<{ name: string; values: string[] }>;
+    }>("/opened/products/global-filters");
   }
 
   // Admin endpoints (secured)
@@ -126,15 +148,14 @@ export class ProductsService {
     if (filters.page) params.page = filters.page;
     if (filters.limit) params.per_page = filters.limit;
 
-    // Note: priceRange, availability, sortBy not implemented in backend yet
-    // if (filters.priceRange) {
-    //   params.price_gte = filters.priceRange.min;
-    //   params.price_lte = filters.priceRange.max;
-    // }
-    // if (filters.sortBy) {
-    //   params._sort = filters.sortBy;
-    //   params._order = filters.sortOrder || 'asc';
-    // }
+    if (filters.priceRange) {
+      params.price_gte = filters.priceRange.min;
+      params.price_lte = filters.priceRange.max;
+    }
+    if (filters.sortBy) {
+      params._sort = filters.sortBy;
+      params._order = filters.sortOrder || "asc";
+    }
 
     return params;
   }
@@ -413,11 +434,16 @@ export class FilesService {
     if (fileableType) formData.append("fileable_type", fileableType);
     if (fileableId) formData.append("fileable_id", fileableId.toString());
 
-    return apiClient.post<File>("/secured/files/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    return nextAuthApiClient
+      .post<{ data: File }>("/secured/upload/file", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((response) => ({
+        ...response,
+        data: response.data.data,
+      }));
   }
 
   async uploadFiles(
@@ -432,22 +458,29 @@ export class FilesService {
     if (fileableType) formData.append("fileable_type", fileableType);
     if (fileableId) formData.append("fileable_id", fileableId.toString());
 
-    return apiClient.post<File[]>("/secured/files/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    return nextAuthApiClient
+      .post<{ uploaded: File[] }>("/secured/upload/files", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((response) => ({
+        ...response,
+        data: response.data.uploaded,
+      }));
   }
 
   async getEntityFiles(
     fileableType: string,
     fileableId: number
   ): Promise<ApiResponse<File[]>> {
-    return apiClient.get<File[]>(`/opened/files/${fileableType}/${fileableId}`);
+    return nextAuthApiClient.get<File[]>(
+      `/opened/files/${fileableType}/${fileableId}`
+    );
   }
 
   async deleteFile(fileId: number): Promise<ApiResponse<void>> {
-    return apiClient.delete<void>(`/secured/files/${fileId}`);
+    return nextAuthApiClient.delete<void>(`/secured/files/${fileId}`);
   }
 }
 

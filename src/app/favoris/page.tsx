@@ -367,7 +367,7 @@ function FavoritesGrid({
                   <div className="flex items-start justify-between">
                     <div>
                       <Link
-                        href={`/produit/${favorite.productId}`}
+                        href={`/produit/${favorite.product.slug}`}
                         className="font-semibold text-foreground hover:text-primary"
                       >
                         {favorite.product.name}
@@ -442,7 +442,7 @@ function FavoritesGrid({
       {favorites.map((favorite) => (
         <Card key={favorite.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
           <div className="relative">
-            <Link href={`/produit/${favorite.productId}`}>
+            <Link href={`/produit/${favorite.product.slug}`}>
               <div className="aspect-square bg-muted p-4">
                 {imageErrors[favorite.product.id] || !favorite.product.imageUrl ? (
                   <div className="w-full h-full flex items-center justify-center bg-muted">
@@ -483,7 +483,7 @@ function FavoritesGrid({
           </div>
 
           <CardContent className="p-4">
-            <Link href={`/produit/${favorite.productId}`} className="hover:text-primary">
+            <Link href={`/produit/${favorite.product.slug}`} className="hover:text-primary">
               <h3 className="font-semibold text-foreground mb-2 line-clamp-2">
                 {favorite.product.name}
               </h3>

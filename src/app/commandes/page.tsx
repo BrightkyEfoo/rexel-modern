@@ -363,7 +363,7 @@ export default function OrdersPage() {
                               </div>
                               <div className="flex-1">
                                 <Link
-                                  href={`/produit/${item.productId}`}
+                                  href={`/produit/${item.slug}`}
                                   className="font-medium text-gray-900 hover:text-[#162e77]"
                                 >
                                   {item.product.name}

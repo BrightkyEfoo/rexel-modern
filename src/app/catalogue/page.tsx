@@ -20,13 +20,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import type { SearchFilters } from "@/lib/api/types";
 import { useAuth } from "@/lib/auth/nextauth-hooks";
-import { useProducts } from "@/lib/query/hooks";
 import { useCategoryFilters } from "@/lib/hooks/useCategoryFilters";
+import { useGlobalFilters, useProducts } from "@/lib/query/hooks";
 import { Filter, Grid3X3, List } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 type SortOption = "popularity" | "price" | "name" | "newest";
 type AvailabilityOption = "in_stock" | "out_of_stock" | "limited";
@@ -38,11 +37,6 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "newest", label: "Plus récent" },
 ];
 
-const AVAILABILITY_OPTIONS: { value: AvailabilityOption; label: string }[] = [
-  { value: "in_stock", label: "En stock" },
-  { value: "limited", label: "Stock limité" },
-  { value: "out_of_stock", label: "Rupture de stock" },
-];
 
 export default function CataloguePage() {
   const { user, isAuthenticated } = useAuth();
@@ -59,7 +53,48 @@ export default function CataloguePage() {
   });
 
   // Get data - utiliser useProducts pour récupérer tous les produits
-  const { data: productsResponse, isLoading: productsLoading } = useProducts(filters);
+  const { data: productsResponse, isLoading: productsLoading } =
+    useProducts(filters);
+
+  // Récupérer les filtres globaux pour le catalogue
+  const { data: globalFiltersResponse, isLoading: globalFiltersLoading } = useGlobalFilters();
+
+  console.log("productsResponse ", productsResponse);
+  console.log("globalFiltersResponse ", globalFiltersResponse);
+
+  // Créer les données de catégorie pour les filtres (structure attendue par FilterContent)
+  const categoryDataForFilters = useMemo(() => {
+    if (!globalFiltersResponse?.data) return null;
+    
+    return {
+      id: 0, // ID fictif pour le catalogue global
+      name: "Catalogue complet",
+      slug: "catalogue",
+      description: "Tous nos produits",
+      isActive: true,
+      sortOrder: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      subcategories: [],
+      featuredProducts: [],
+      filters: {
+        brands: globalFiltersResponse.data.brands.map(brand => ({
+          id: brand.id,
+          name: brand.name,
+          slug: brand.name.toLowerCase().replace(/\s+/g, '-'),
+          description: '',
+          logoUrl: '',
+          websiteUrl: '',
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          productCount: brand.productCount
+        })) || [],
+        priceRange: globalFiltersResponse.data.priceRange || { min: 0, max: 1000 },
+        specifications: globalFiltersResponse.data.specifications || []
+      }
+    };
+  }, [globalFiltersResponse]);
 
   // Handle price range changes avec debounce automatique
   const handlePriceRangeChange = (newRange: [number, number]) => {
@@ -115,7 +150,8 @@ export default function CataloguePage() {
             Catalogue complet
           </h1>
           <p className="text-gray-600 mb-6">
-            Découvrez notre gamme complète de produits électriques et solutions professionnelles
+            Découvrez notre gamme complète de produits électriques et solutions
+            professionnelles
           </p>
 
           {/* Compteur de produits seulement s'il y en a */}
@@ -132,7 +168,10 @@ export default function CataloguePage() {
             {/* Filters Sidebar */}
             <div className="lg:w-1/4">
               {/* Mobile Filter Button - Sticky */}
-              <div className="lg:hidden mb-4 sticky z-40 bg-background/95 backdrop-blur-sm pb-4" style={{ top: '180px' }}>
+              <div
+                className="lg:hidden mb-4 sticky z-40 bg-background/95 backdrop-blur-sm pb-4"
+                style={{ top: "180px" }}
+              >
                 <Sheet open={showFilters} onOpenChange={setShowFilters}>
                   <SheetTrigger asChild>
                     <Button variant="outline" className="w-full shadow-sm">
@@ -144,23 +183,19 @@ export default function CataloguePage() {
                     <SheetHeader>
                       <SheetTitle>Filtres</SheetTitle>
                     </SheetHeader>
-                    <FilterContent
-                      categoryData={null} // Pas de catégorie spécifique pour le catalogue
-                      filters={filters}
-                      priceRange={priceRange}
-                      onFilterChange={updateFilters}
-                      onPriceChange={handlePriceRangeChange}
-                      onClearFilters={handleClearFilters}
-                    />
+                   
                   </SheetContent>
                 </Sheet>
               </div>
 
               {/* Desktop Filters - Sticky */}
-              <div className="hidden lg:block sticky max-h-[calc(100vh-180px)] overflow-y-auto" style={{ top: '180px' }}>
+              <div
+                className="hidden lg:block sticky max-h-[calc(100vh-180px)] overflow-y-auto"
+                style={{ top: "180px" }}
+              >
                 <div className="bg-background/95 backdrop-blur-sm rounded-lg border border-border/50 p-4 shadow-sm">
                   <FilterContent
-                    categoryData={null} // Pas de catégorie spécifique pour le catalogue
+                    categoryData={categoryDataForFilters}
                     filters={filters}
                     priceRange={priceRange}
                     onFilterChange={updateFilters}
@@ -184,7 +219,10 @@ export default function CataloguePage() {
               </div>
 
               {/* View Controls - Sticky */}
-              <div className="sticky z-30 bg-background/95 backdrop-blur-sm border border-border/50 rounded-lg p-4 mb-6 shadow-sm" style={{ top: '180px' }}>
+              <div
+                className="sticky z-30 bg-background/95 backdrop-blur-sm border border-border/50 rounded-lg p-4 mb-6 shadow-sm"
+                style={{ top: "180px" }}
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <Button

@@ -26,7 +26,7 @@ import {
   useProductFavoriteStatus
 } from "../hooks/useFavorites";
 
-// Query Keys
+  // Query Keys
 export const queryKeys = {
   // Products
   products: ["products"] as const,
@@ -37,6 +37,7 @@ export const queryKeys = {
     ["products", "category-slug", categorySlug] as const,
   featuredProducts: ["products", "featured"] as const,
   searchProducts: (query: string) => ["products", "search", query] as const,
+  similarProducts: (slug: string) => ["products", "similar", slug] as const,
 
   // Categories
   categories: ["categories"] as const,
@@ -117,6 +118,22 @@ export function useSearchProducts(query: string) {
     queryKey: queryKeys.searchProducts(query),
     queryFn: () => productsService.searchProducts(query),
     enabled: !!query && query.length > 2,
+  });
+}
+
+export function useSimilarProducts(slug: string) {
+  return useQuery({
+    queryKey: queryKeys.similarProducts(slug),
+    queryFn: () => productsService.getSimilarProducts(slug),
+    enabled: !!slug,
+  });
+}
+
+export function useGlobalFilters() {
+  return useQuery({
+    queryKey: ["products", "global-filters"],
+    queryFn: () => productsService.getGlobalFilters(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 

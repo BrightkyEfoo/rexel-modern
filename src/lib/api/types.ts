@@ -230,12 +230,26 @@ export interface ProductVariant {
 export interface ProductReview {
   id: string;
   userId: number;
-  userName: string;
+  userName?: string;
   rating: number;
   title: string;
   comment: string;
   createdAt: string;
   verified: boolean;
+  helpfulCount: number;
+  user?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  votes?: {
+    id: number;
+    userId: number;
+    reviewId: number;
+    isHelpful: boolean;
+    createdAt: string;
+  }[];
 }
 
 export interface ProductDetail extends Product {

@@ -12,6 +12,7 @@ export interface Favorite {
     name: string;
     description: string;
     price: string;
+    slug: string;
     salePrice?: string;
     imageUrl?: string;
     availability: 'in_stock' | 'out_of_stock';

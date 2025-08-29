@@ -10,6 +10,10 @@ const nextConfig = {
       "images.unsplash.com",
       "ext.same-assets.com",
       "ugc.same-assets.com",
+      "minio.kesimarket.com",
+      "kesimarket.com",
+      "assets.kesimarket.com",
+      "purecatamphetamine.github.io",
     ],
     remotePatterns: [
       {
@@ -32,12 +36,37 @@ const nextConfig = {
         hostname: "ugc.same-assets.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "minio.kesimarket.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "kesimarket.com",
+      },
+      {
+        protocol: "https",
+        hostname: "assets.kesimarket.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "purecatamphetamine.github.io",
+        pathname: "/**",
+      },
     ],
   },
 
   // Environment variables for client-side
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
+
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "50mb",
+    },
   },
 };
 

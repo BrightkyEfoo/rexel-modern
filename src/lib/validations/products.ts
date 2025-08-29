@@ -31,6 +31,32 @@ export const productSchema = z.object({
     alt: z.string().optional(),
     isMain: z.boolean().default(false),
   })).optional(),
+  // Gestion des fichiers
+  files: z.array(z.object({
+    url: z.string().url("URL de fichier invalide"),
+    filename: z.string(),
+    originalName: z.string(),
+    size: z.number().positive(),
+    mimeType: z.string(),
+  })).optional(),
+  // Informations additionnelles
+  additionalInfo: z.object({
+    title: z.string().optional(),
+    subtitle: z.string().optional(),
+    sections: z.array(z.object({
+      type: z.enum(['list', 'text', 'table', 'steps', 'warnings', 'tips']),
+      title: z.string().optional(),
+      subtitle: z.string().optional(),
+      items: z.array(z.object({
+        text: z.string(),
+        icon: z.string().optional(),
+        color: z.enum(['success', 'warning', 'error', 'info', 'default']).optional(),
+      })).optional(),
+      content: z.string().optional(),
+      iconList: z.array(z.string()).optional(),
+      order: z.number().optional(),
+    })),
+  }).optional(),
 });
 
 export const updateProductSchema = productSchema.partial();

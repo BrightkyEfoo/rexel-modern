@@ -117,7 +117,7 @@ export function CartStep({
                     <div className="flex items-start justify-between">
                       <div>
                         <Link
-                          href={`/produit/${item.productId}`}
+                          href={`/produit/${item.product.slug}`}
                           className="font-semibold text-foreground hover:text-primary"
                         >
                           {item.product.name}

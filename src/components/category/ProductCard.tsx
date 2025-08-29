@@ -13,6 +13,7 @@ import { useProductFavoriteStatus } from '@/lib/hooks/useFavorites';
 import { useAuth } from '@/lib/auth/nextauth-hooks';
 import { formatPrice } from '@/lib/utils/currency';
 import type { Product } from '@/lib/api/types';
+import Link from 'next/link';
 
 interface ProductCardProps {
   product: Product;
@@ -152,7 +153,7 @@ export function ProductCard({
         className="h-8 w-8 bg-white/90 hover:bg-white"
         asChild
       >
-        <a href={`/produit/${product.id}`}>
+        <a href={`/produit/${product.slug}`}>
           <Eye className="w-4 h-4 text-gray-600" />
         </a>
       </Button>
@@ -172,9 +173,9 @@ export function ProductCard({
           {/* Content */}
           <div className="flex-1 flex flex-col">
             <div className="flex-1">
-              <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+              <Link href={`/produit/${product.slug}`} className="hover:text-primary hover:underline underline-offset-2 font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
                 {product.name}
-              </h3>
+              </Link>
               <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
                 {product.shortDescription || product.description}
               </p>
@@ -229,7 +230,7 @@ export function ProductCard({
                   />
                 </Button>
                 <Button variant="ghost" size="sm" asChild>
-                  <a href={`/produit/${product.id}`}>
+                  <a href={`/produit/${product.slug}`}>
                     <Eye className="w-4 h-4 text-muted-foreground" />
                   </a>
                 </Button>
@@ -264,9 +265,9 @@ export function ProductCard({
 
       {/* Content avec padding en bas pour le footer sticky */}
       <CardContent className="p-4 flex-1 pb-20">
-        <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors mb-2">
+        <Link href={`/produit/${product.slug}`} className="hover:text-primary hover:underline underline-offset-2 font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors mb-2">
           {product.name}
-        </h3>
+        </Link>
         
         <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
           {product.shortDescription || product.description}

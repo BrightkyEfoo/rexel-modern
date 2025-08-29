@@ -117,7 +117,7 @@ export function useToggleFavorite() {
  * Hook utilitaire pour gérer les favoris sur les cartes produits
  * Utilise la liste des favoris pour déterminer le statut
  */
-export function useProductFavoriteStatus(productId: string) {
+export function useProductFavoriteStatus(productId?: string) {
   const { data: favoritesData } = useFavorites();
 
   console.log("favoritesData", favoritesData);
@@ -133,7 +133,7 @@ export function useProductFavoriteStatus(productId: string) {
 
   const toggle = async () => {
     try {
-      await toggleMutation.mutateAsync(productId);
+      await toggleMutation.mutateAsync(productId || "");
     } catch (error) {
       console.error("Error toggling favorite:", error);
       throw error;

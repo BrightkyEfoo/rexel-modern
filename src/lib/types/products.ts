@@ -15,6 +15,7 @@ export interface Product {
   brandId?: number;
   fabricationCountryCode?: string;
   specifications?: Record<string, any>;
+  additionalInfo?: Record<string, any>;
   createdAt: string;
   updatedAt: string;
   
