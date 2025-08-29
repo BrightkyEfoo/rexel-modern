@@ -160,9 +160,6 @@ export function useLogout() {
 export function useRegister() {
   return useMutation({
     mutationFn: async (userData: RegisterData) => {
-        email: userData.email,
-      });
-
       const response = await nextAuthApiClient.post<{
         message: string;
         data: {

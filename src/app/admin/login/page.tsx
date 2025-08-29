@@ -60,6 +60,7 @@ export default function AdminLoginPage() {
       const result = await loginMutation.mutateAsync(data);
 
       // Après un login réussi, vérifier les permissions et rediriger
+      // @ts-expect-error - ok is not defined in the result type
       if (result?.ok) {
         // Attendre un petit délai pour que NextAuth mette à jour la session
         setTimeout(() => {
