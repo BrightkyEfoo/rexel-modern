@@ -244,7 +244,7 @@ export default function RegisterPage() {
               <div>
                 <PhoneField
                   label="Téléphone"
-                  placeholder="+237 6XX XX XX XX ou 6XX XX XX XX"
+                  placeholder="6 12 34 56 78"
                   error={errors.phone}
                   disabled={registerMutation.isPending}
                   showOperator={true}

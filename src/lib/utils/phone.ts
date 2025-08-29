@@ -111,13 +111,3 @@ export function getCameroonOperator(phone: string): string {
   return 'Autre';
 }
 
-/**
- * Exemples de numéros valides pour l'aide utilisateur
- */
-export const CAMEROON_PHONE_EXAMPLES = [
-  '+237 6 77 88 99 00',
-  '+237 6 55 66 77 88',
-  '6 77 88 99 00',
-  '6 99 88 77 66',
-  '7 11 22 33 44'
-];
