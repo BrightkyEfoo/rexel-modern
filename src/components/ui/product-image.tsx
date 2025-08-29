@@ -65,7 +65,7 @@ export function ProductImage({
         src={src}
         alt={alt}
         className={cn(
-          "w-full h-full object-cover rounded-lg transition-opacity",
+          "w-full h-full object-cover rounded-lg transition-opacity bg-muted",
           isLoading ? "opacity-0" : "opacity-100"
         )}
         onLoad={() => setIsLoading(false)}
