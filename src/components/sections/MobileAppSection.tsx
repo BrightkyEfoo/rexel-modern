@@ -103,10 +103,16 @@ export function MobileAppSection() {
           </div>
 
           <div className="relative">
-            <div className="relative mx-auto w-80 h-96">
-              {/* Phone mockup */}
-              <div className="absolute inset-0 bg-gradient-to-br from-foreground to-foreground/90 rounded-[3rem] p-2 shadow-2xl">
+            <div className="relative mx-auto w-[231px] h-[500px]">
+              {/* Phone mockup - redesigned with realistic proportions */}
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 rounded-[3rem] p-2 shadow-2xl">
+                {/* Phone frame with realistic details */}
                 <div className="w-full h-full bg-background rounded-[2.5rem] overflow-hidden relative">
+                  {/* Dynamic Island */}
+                  <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-16 h-6 bg-slate-800 rounded-full z-10 flex items-center justify-center">
+                    <div className="w-12 h-3 bg-slate-900 rounded-full"></div>
+                  </div>
+                  
                   {/* Screen content */}
                   <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80 p-4">
                     {/* Status bar */}
@@ -121,33 +127,33 @@ export function MobileAppSection() {
 
                     {/* App header */}
                     <div className="text-center mb-6">
-                      <div className="w-16 h-16 bg-primary-foreground rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <Logo variant="light" size="md" showText={false} />
+                      <div className="w-12 h-12 bg-primary-foreground rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <Logo variant="light" size="sm" showText={false} />
                       </div>
-                      <h3 className="text-primary-foreground font-bold text-lg">KesiMarket</h3>
-                      <p className="text-primary-foreground/80 text-sm">2M+ références</p>
+                      <h3 className="text-primary-foreground font-bold text-sm">KesiMarket</h3>
+                      <p className="text-primary-foreground/80 text-xs">2M+ références</p>
                     </div>
 
                     {/* Quick actions */}
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="bg-primary-foreground/10 backdrop-blur-lg rounded-xl p-4">
-                        <div className="flex items-center space-x-3 overflow-hidden">
-                          <div className="w-10 h-10 bg-primary-foreground/20 rounded-lg flex items-center justify-center shrink-0">
-                            <ShoppingCart className="w-5 h-5 text-primary-foreground" />
+                    <div className="grid grid-cols-1 gap-3 mb-6">
+                      <div className="bg-primary-foreground/10 backdrop-blur-lg rounded-xl p-3">
+                        <div className="flex items-center space-x-2 overflow-hidden">
+                          <div className="w-8 h-8 bg-primary-foreground/20 rounded-lg flex items-center justify-center shrink-0">
+                            <ShoppingCart className="w-4 h-4 text-primary-foreground" />
                           </div>
                           <div>
-                            <div className="text-primary-foreground font-medium">Commander</div>
+                            <div className="text-primary-foreground font-medium text-xs">Commander</div>
                             <div className="text-primary-foreground/60 text-xs">Produits</div>
                           </div>
                         </div>
                       </div>
-                      <div className="bg-primary-foreground/10 backdrop-blur-lg rounded-xl p-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-primary-foreground/20 rounded-lg flex items-center justify-center">
-                            <CreditCard className="w-5 h-5 text-primary-foreground" />
+                      <div className="bg-primary-foreground/10 backdrop-blur-lg rounded-xl p-3">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-8 h-8 bg-primary-foreground/20 rounded-lg flex items-center justify-center">
+                            <CreditCard className="w-4 h-4 text-primary-foreground" />
                           </div>
                           <div>
-                            <div className="text-primary-foreground font-medium">Payer</div>
+                            <div className="text-primary-foreground font-medium text-xs">Payer</div>
                             <div className="text-primary-foreground/60 text-xs">Factures</div>
                           </div>
                         </div>
@@ -157,45 +163,53 @@ export function MobileAppSection() {
                     {/* Recent orders */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-primary-foreground font-medium">Commandes récentes</h4>
-                        <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/20">
+                        <h4 className="text-primary-foreground font-medium text-xs">Commandes récentes</h4>
+                        <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/20 h-6 px-2 text-xs">
                           Voir tout
                         </Button>
                       </div>
                       <div className="space-y-2">
-                        <div className="bg-primary-foreground/10 backdrop-blur-lg rounded-lg p-3">
+                        <div className="bg-primary-foreground/10 backdrop-blur-lg rounded-lg p-2">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-primary-foreground/20 rounded-lg flex items-center justify-center">
-                                <Gift className="w-4 h-4 text-primary-foreground" />
+                            <div className="flex items-center space-x-2">
+                              <div className="w-6 h-6 bg-primary-foreground/20 rounded-lg flex items-center justify-center">
+                                <Gift className="w-3 h-3 text-primary-foreground" />
                               </div>
                               <div>
-                                <div className="text-primary-foreground text-sm font-medium">CMD-2024-001</div>
+                                <div className="text-primary-foreground text-xs font-medium">CMD-2024-001</div>
                                 <div className="text-primary-foreground/60 text-xs">En cours de livraison</div>
                               </div>
                             </div>
-                            <div className="text-primary-foreground text-sm font-medium">{formatPrice(1234)}</div>
+                            <div className="text-primary-foreground text-xs font-medium">{formatPrice(1234)}</div>
                           </div>
                         </div>
-                        <div className="bg-primary-foreground/10 backdrop-blur-lg rounded-lg p-3">
+                        <div className="bg-primary-foreground/10 backdrop-blur-lg rounded-lg p-2">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-primary-foreground/20 rounded-lg flex items-center justify-center">
-                                <Box className="w-4 h-4 text-primary-foreground" />
+                            <div className="flex items-center space-x-2">
+                              <div className="w-6 h-6 bg-primary-foreground/20 rounded-lg flex items-center justify-center">
+                                <Box className="w-3 h-3 text-primary-foreground" />
                               </div>
                               <div>
-                                <div className="text-primary-foreground text-sm font-medium">CMD-2024-002</div>
+                                <div className="text-primary-foreground text-xs font-medium">CMD-2024-002</div>
                                 <div className="text-primary-foreground/60 text-xs">Livré</div>
                               </div>
                             </div>
-                            <div className="text-primary-foreground text-sm font-medium">{formatPrice(567)}</div>
+                            <div className="text-primary-foreground text-xs font-medium">{formatPrice(567)}</div>
                           </div>
                         </div>
                       </div>
                     </div>
+
+                    {/* Bottom navigation indicator */}
+                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
+                      <div className="w-16 h-1 bg-primary-foreground/30 rounded-full"></div>
+                    </div>
                   </div>
                 </div>
               </div>
+              
+              {/* Phone shadow */}
+              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-48 h-8 bg-black/20 rounded-full blur-xl"></div>
             </div>
           </div>
         </div>
