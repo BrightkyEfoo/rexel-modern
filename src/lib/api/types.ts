@@ -5,6 +5,12 @@ export interface ApiResponse<T> {
   message?: string;
   status?: number;
   timestamp?: string;
+  meta?: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+  };
 }
 
 export interface PaginatedResponse<T> {
@@ -65,6 +71,7 @@ export interface Product {
   isActive: boolean;
   categoryId?: number;
   brandId?: number;
+  fabricationCountryCode?: string; // Code pays ISO (ex: 'FR', 'DE', 'IT')
   createdAt: string;
   updatedAt: string;
   

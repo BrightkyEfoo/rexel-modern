@@ -21,14 +21,13 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useAuth } from "@/lib/auth/nextauth-hooks";
-import { useCategoryFilters } from "@/lib/hooks/useCategoryFilters";
-import { useGlobalFilters, useProducts } from "@/lib/query/hooks";
+import { useProducts, useGlobalFilters } from "@/lib/query/hooks";
+import { useFilters } from "@/lib/hooks/useFilters";
 import { Filter, Grid3X3, List } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type SortOption = "popularity" | "price" | "name" | "newest";
-type AvailabilityOption = "in_stock" | "out_of_stock" | "limited";
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "popularity", label: "Popularité" },
@@ -37,17 +36,17 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "newest", label: "Plus récent" },
 ];
 
-
 export default function CataloguePage() {
   const { user, isAuthenticated } = useAuth();
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
+
+  // Initialiser la fourchette de prix avec les données des filtres globaux
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
 
   // Utiliser le hook personnalisé pour gérer les filtres avec URL et debounce
-  const { filters, updateFilters, clearFilters } = useCategoryFilters({
-    categorySlug: "", // Utiliser "catalogue" comme slug pour différencier
+  const { filters, updateFilters, clearFilters } = useFilters({
     priceRange,
     baseUrl: "/catalogue",
   });
@@ -57,7 +56,8 @@ export default function CataloguePage() {
     useProducts(filters);
 
   // Récupérer les filtres globaux pour le catalogue
-  const { data: globalFiltersResponse, isLoading: globalFiltersLoading } = useGlobalFilters();
+  const { data: globalFiltersResponse } =
+    useGlobalFilters();
 
   console.log("productsResponse ", productsResponse);
   console.log("globalFiltersResponse ", globalFiltersResponse);
@@ -65,7 +65,7 @@ export default function CataloguePage() {
   // Créer les données de catégorie pour les filtres (structure attendue par FilterContent)
   const categoryDataForFilters = useMemo(() => {
     if (!globalFiltersResponse?.data) return null;
-    
+
     return {
       id: 0, // ID fictif pour le catalogue global
       name: "Catalogue complet",
@@ -78,28 +78,43 @@ export default function CataloguePage() {
       subcategories: [],
       featuredProducts: [],
       filters: {
-        brands: globalFiltersResponse.data.brands.map(brand => ({
-          id: brand.id,
-          name: brand.name,
-          slug: brand.name.toLowerCase().replace(/\s+/g, '-'),
-          description: '',
-          logoUrl: '',
-          websiteUrl: '',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          productCount: brand.productCount
-        })) || [],
-        priceRange: globalFiltersResponse.data.priceRange || { min: 0, max: 1000 },
-        specifications: globalFiltersResponse.data.specifications || []
-      }
+        brands:
+          globalFiltersResponse.data.brands.map((brand) => ({
+            id: brand.id,
+            name: brand.name,
+            slug: brand.name.toLowerCase().replace(/\s+/g, "-"),
+            description: "",
+            logoUrl: "",
+            websiteUrl: "",
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            productCount: brand.productCount,
+          })) || [],
+        priceRange: globalFiltersResponse.data.priceRange || {
+          min: 0,
+          max: 1000,
+        },
+        specifications: globalFiltersResponse.data.specifications || [],
+      },
     };
+  }, [globalFiltersResponse]);
+
+  // Synchroniser la fourchette de prix avec les filtres globaux
+  useEffect(() => {
+    if (globalFiltersResponse?.data?.priceRange) {
+      setPriceRange([
+        globalFiltersResponse.data.priceRange.min,
+        globalFiltersResponse.data.priceRange.max,
+      ]);
+    }
   }, [globalFiltersResponse]);
 
   // Handle price range changes avec debounce automatique
   const handlePriceRangeChange = (newRange: [number, number]) => {
     setPriceRange(newRange);
-    // Le debounce est géré automatiquement dans useCategoryFilters
+    // Mettre à jour les filtres avec la nouvelle fourchette de prix
+    updateFilters({ priceRange: { min: newRange[0], max: newRange[1] } });
   };
 
   const hasProducts =
@@ -183,7 +198,6 @@ export default function CataloguePage() {
                     <SheetHeader>
                       <SheetTitle>Filtres</SheetTitle>
                     </SheetHeader>
-                   
                   </SheetContent>
                 </Sheet>
               </div>

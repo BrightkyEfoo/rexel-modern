@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Logo } from '@/components/ui/logo';
 import { ProductCardFooter } from '@/components/ui/product-card-footer';
 import { QuantitySelector } from '@/components/ui/quantity-selector';
+import { CountryFlag } from '@/components/ui/country-flag';
 import { useCartSync } from '@/lib/hooks/useCartSync';
 import { useProductFavoriteStatus } from '@/lib/hooks/useFavorites';
 import { useAuth } from '@/lib/auth/nextauth-hooks';
@@ -100,18 +101,18 @@ export function ProductCard({
   const renderBadges = () => (
     <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
       {hasDiscount && (
-        <Badge variant="destructive" className="text-xs font-semibold">
+        <Badge variant="destructive" className="text-xs font-semibold w-fit">
           -{discountPercentage}%
         </Badge>
       )}
       {product.isFeatured && (
-        <Badge variant="secondary" className="text-xs font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200">
+        <Badge variant="secondary" className="w-fit text-xs font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200">
           <Star className="w-3 h-3 mr-1" />
           Vedette
         </Badge>
       )}
       {isOutOfStock && (
-        <Badge variant="outline" className="text-xs font-semibold bg-gray-100 text-gray-600">
+        <Badge variant="outline" className="w-fit text-xs font-semibold bg-gray-100 text-gray-600">
           Rupture
         </Badge>
       )}
@@ -176,6 +177,22 @@ export function ProductCard({
               <Link href={`/produit/${product.slug}`} className="hover:text-primary hover:underline underline-offset-2 font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
                 {product.name}
               </Link>
+              
+              {/* Marque et pays de fabrication */}
+              <div className="flex items-center gap-2 mt-1">
+                {product.brand && (
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {product.brand.name}
+                  </span>
+                )}
+                {product.fabricationCountryCode && (
+                  <CountryFlag 
+                    countryCode={product.fabricationCountryCode} 
+                    size="md"
+                  />
+                )}
+              </div>
+              
               <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
                 {product.shortDescription || product.description}
               </p>
@@ -268,6 +285,21 @@ export function ProductCard({
         <Link href={`/produit/${product.slug}`} className="hover:text-primary hover:underline underline-offset-2 font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors mb-2">
           {product.name}
         </Link>
+        
+        {/* Marque et pays de fabrication */}
+        <div className="flex items-center justify-between gap-2 mb-2">
+          {product.brand && (
+            <Badge variant="outline" className="w-fit text-xs font-semibold bg-gray-100 text-gray-600">
+              {product.brand.name}
+            </Badge>
+          )}
+          {product.fabricationCountryCode && (
+            <CountryFlag 
+              countryCode={product.fabricationCountryCode} 
+              size="md"
+            />
+          )}
+        </div>
         
         <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
           {product.shortDescription || product.description}

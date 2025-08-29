@@ -144,17 +144,32 @@ export class ProductsService {
 
     if (filters.query) params.search = filters.query;
     if (filters.categories?.length) params.categoryId = filters.categories[0]; // Backend expects single categoryId
-    if (filters.brands?.length) params.brandId = filters.brands[0]; // Backend expects single brandId
+    if (filters.brands?.length) params.brand_ids = filters.brands.join(","); // Backend expects single brandId
+    if (filters.inStock) params.in_stock = filters.inStock ? "true" : "false";
     if (filters.page) params.page = filters.page;
     if (filters.limit) params.per_page = filters.limit;
+    if (filters.sortBy) params.sort_by = filters.sortBy;
+    if (filters.sortOrder) params.sort_order = filters.sortOrder;
 
+    // Gestion des filtres de prix
     if (filters.priceRange) {
-      params.price_gte = filters.priceRange.min;
-      params.price_lte = filters.priceRange.max;
+      if (filters.priceRange.min) params.min_price = filters.priceRange.min;
+      if (filters.priceRange.max) params.max_price = filters.priceRange.max;
     }
-    if (filters.sortBy) {
-      params._sort = filters.sortBy;
-      params._order = filters.sortOrder || "asc";
+
+    // Gestion de la disponibilité
+    if (filters.availability?.length) {
+      const availabilityMap = {
+        in_stock: "true",
+        out_of_stock: "false",
+        limited: "limited",
+      };
+      const availabilityValues = filters.availability
+        .map((av) => availabilityMap[av])
+        .filter(Boolean);
+      if (availabilityValues.length > 0) {
+        params.in_stock = availabilityValues.join(",");
+      }
     }
 
     return params;

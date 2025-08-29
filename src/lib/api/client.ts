@@ -96,7 +96,7 @@ export class ApiClient {
 
           if (!token) {
             // Ne pas rediriger automatiquement, laisser le composant gérer
-            console.warn('🚫 No auth token for secured route:', url);
+            console.warn("🚫 No auth token for secured route:", url);
             return Promise.reject(new Error("No authentication token"));
           }
 
@@ -109,12 +109,13 @@ export class ApiClient {
         // Handle /opened routes - add correct prefix and session ID
         if (url.startsWith("/opened")) {
           config.url = url.replace("/opened", "/api/v1/opened");
-          
+
           // Add session ID for cart functionality
-          const sessionId = typeof window !== "undefined" 
-            ? localStorage.getItem("cart-session-id") 
-            : null;
-          
+          const sessionId =
+            typeof window !== "undefined"
+              ? localStorage.getItem("cart-session-id")
+              : null;
+
           if (sessionId) {
             config.headers["x-session-id"] = sessionId;
           }
@@ -372,8 +373,11 @@ export class ApiClient {
     const { retries, retryDelay, ...axiosConfig } = config;
 
     const operation = async () => {
-      const response: AxiosResponse<T, unknown> =
-        await this.instance.post(url, data, axiosConfig);
+      const response: AxiosResponse<T, unknown> = await this.instance.post(
+        url,
+        data,
+        axiosConfig
+      );
       return response;
     };
 
@@ -466,8 +470,8 @@ export class ApiClient {
     const { page = 1, limit = 20, params = {}, ...restConfig } = config;
 
     const paginationParams = {
-      _page: page,
-      _limit: limit,
+      page: page,
+      limit: limit,
       ...params,
     };
 
@@ -476,17 +480,13 @@ export class ApiClient {
       params: paginationParams,
     });
 
-    // Simulate pagination for json-server
-    const total = Number(response.data.length) || 0;
-    const totalPages = Math.ceil(total / limit);
-
     return {
       data: response.data,
-      meta: {
-        total,
-        per_page: limit,
-        current_page: page,
-        last_page: totalPages,
+      meta: response.meta ?? {
+        total: 0,
+        per_page: 0,
+        current_page: 0,
+        last_page: 0,
       },
     };
   }
