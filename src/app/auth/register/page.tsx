@@ -320,7 +320,7 @@ export default function RegisterPage() {
                 <>
                   J'accepte les{" "}
                   <Link
-                    href="/conditions-utilisation"
+                    href="/cgv"
                     className="text-primary hover:text-primary/80 font-medium"
                   >
                     conditions d'utilisation

@@ -968,7 +968,7 @@ function PaymentStep({
               <label htmlFor="terms" className="text-sm text-gray-700">
                 J'accepte les{" "}
                 <Link
-                  href="/conditions-generales"
+                  href="/cgv"
                   className="text-primary hover:underline"
                 >
                   conditions générales de vente
