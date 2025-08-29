@@ -41,14 +41,44 @@ export function ProductFiles({ files, className = "" }: ProductFilesProps) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
   }
 
-  const handleDownload = (file: ProductFile) => {
-    const link = document.createElement('a')
-    link.href = file.url
-    link.download = file.originalName || file.filename
-    link.target = '_blank'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  const handleDownload = async (file: ProductFile) => {
+    try {
+      // Récupérer le fichier avec fetch
+      const response = await fetch(file.url)
+      if (!response.ok) {
+        throw new Error(`Erreur lors du téléchargement: ${response.status}`)
+      }
+      
+      // Créer un blob à partir de la réponse
+      const blob = await response.blob()
+      
+      // Créer un URL pour le blob
+      const blobUrl = window.URL.createObjectURL(blob)
+      
+      // Créer un lien temporaire pour le téléchargement
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.download = file.originalName || file.filename
+      link.style.display = 'none'
+      
+      // Ajouter le lien au DOM, cliquer dessus, puis le supprimer
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Nettoyer l'URL du blob
+      window.URL.revokeObjectURL(blobUrl)
+    } catch (error) {
+      console.error('Erreur lors du téléchargement:', error)
+      // Fallback: essayer le téléchargement direct
+      const link = document.createElement('a')
+      link.href = file.url
+      link.download = file.originalName || file.filename
+      link.target = '_blank'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
   }
 
   if (documentFiles.length === 0) {

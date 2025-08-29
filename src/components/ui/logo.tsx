@@ -50,7 +50,7 @@ export function Logo({
   const shouldShowText = showText && !logoSrc.includes("full_logo");
 
   return (
-    <div className={`flex items-center space-x-3 ${className}`}>
+    <div className={`flex items-center justify-center space-x-3 ${className}`}>
       <div className={`relative ${sizeClasses[size]}`}>
         <Image
           src={showText ? logoSrc : iconSrc}
