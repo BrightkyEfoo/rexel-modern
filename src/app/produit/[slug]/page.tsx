@@ -22,6 +22,7 @@ import {
   useProduct,
   useSimilarProducts,
 } from "@/lib/query/hooks";
+import { useCartSync } from "@/lib/hooks/useCartSync";
 import { formatPrice } from "@/lib/utils/currency";
 import { getProductPrimaryCategory } from "@/lib/utils/product";
 import {
@@ -53,7 +54,7 @@ export default function ProductDetailPage() {
 
   const { data: product, isLoading, error } = useProduct(productSlug);
   const productId = product?.data?.id;
-  const addToCartMutation = useAddToCart();
+  const { addItem, items } = useCartSync();
   const { data: cart } = useCart();
   const favoriteState = useProductFavoriteStatus(productId?.toString());
   const { data: similarProducts, isLoading: similarProductsLoading } =
@@ -109,7 +110,7 @@ export default function ProductDetailPage() {
   const productData = product.data;
   const currentPrice = productData.price;
   const currentStock =
-    typeof productData.inStock === "number" ? productData.inStock : 100;
+    typeof productData.inStock === "number" ? productData.inStock : productData.stockQuantity;
   const isInStock = currentStock > 0;
   const primaryCategory = getProductPrimaryCategory(productData as any);
 
@@ -119,17 +120,23 @@ export default function ProductDetailPage() {
       return;
     }
 
-    if (!productId) {
+    if (!productId || !product?.data) {
       return;
     }
 
     try {
-      await addToCartMutation.mutateAsync({
-        productId: productId.toString(),
-        quantity,
+      await addItem(product.data, quantity);
+      toast({
+        title: "Produit ajouté au panier",
+        description: `${product.data.name} a été ajouté au panier`,
       });
     } catch (error) {
       console.error("Error adding to cart:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ajouter le produit au panier",
+        variant: "destructive",
+      });
     }
   };
 
@@ -400,17 +407,17 @@ export default function ProductDetailPage() {
               </div>
 
               <div className="flex space-x-3">
-                <Button
-                  onClick={handleAddToCart}
-                  disabled={!isInStock || addToCartMutation.isPending}
-                  className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold h-12"
-                >
-                  {addToCartMutation.isPending ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Ajout...</span>
-                    </div>
-                  ) : (
+                                  <Button
+                    onClick={handleAddToCart}
+                    disabled={!isInStock}
+                    className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold h-12"
+                  >
+                    {items.some(item => item.product.id === productId) ? (
+                      <div className="flex items-center space-x-2">
+                        <Check className="w-4 h-4" />
+                        <span>Ajouté au panier</span>
+                      </div>
+                    ) : (
                     <div className="flex items-center space-x-2">
                       <ShoppingCart className="w-5 h-5" />
                       <span>Ajouter au panier</span>

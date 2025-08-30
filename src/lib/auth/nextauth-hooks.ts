@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { nextAuthApiClient } from "@/lib/api/nextauth-client";
 import type { RegisterData } from "@/lib/api/types";
 import type { LoginFormData } from "@/lib/validations/auth";
+import { clearUserData } from "@/lib/hooks/useAuthRedirect";
 
 // Hook pour obtenir l'état d'authentification
 export function useAuth() {
@@ -147,6 +148,9 @@ export function useLogout() {
     onSuccess: () => {
       // Nettoyer toutes les données en cache
       queryClient.clear();
+
+      // Nettoyer toutes les données utilisateur
+      clearUserData();
 
       // Rediriger vers la page d'accueil
       if (typeof window !== "undefined") {

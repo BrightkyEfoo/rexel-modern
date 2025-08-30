@@ -12,25 +12,28 @@ export interface CartItem {
 export interface CartStore {
   items: CartItem[];
   isOpen: boolean;
-  
-  // Actions
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   toggleCart: () => void;
   setCartOpen: (isOpen: boolean) => void;
-  
-  // Actions pour la gestion de l'authentification
-  onUserLogin: () => void;
-  onUserLogout: () => void;
-  
-  // Computed values
   getTotalItems: () => number;
   getTotalPrice: () => number;
   getItemQuantity: (productId: string) => number;
   isItemInCart: (productId: string) => boolean;
+  onUserLogin: () => void;
+  onUserLogout: () => void;
 }
+
+// Fonction utilitaire pour trier les items par ID
+const sortItemsById = (items: CartItem[]): CartItem[] => {
+  return [...items].sort((a, b) => {
+    const idA = parseInt(a.id, 10);
+    const idB = parseInt(b.id, 10);
+    return idA - idB;
+  });
+};
 
 export const useCartStore = create<CartStore>()(
   persist(
@@ -44,12 +47,13 @@ export const useCartStore = create<CartStore>()(
           
           if (existingItem) {
             // Mettre à jour la quantité si l'item existe déjà
+            const updatedItems = state.items.map(item =>
+              item.id === product.id.toString()
+                ? { ...item, quantity: item.quantity + quantity }
+                : item
+            );
             return {
-              items: state.items.map(item =>
-                item.id === product.id.toString()
-                  ? { ...item, quantity: item.quantity + quantity }
-                  : item
-              ),
+              items: sortItemsById(updatedItems),
             };
           } else {
             // Ajouter un nouvel item
@@ -59,8 +63,9 @@ export const useCartStore = create<CartStore>()(
               quantity,
               addedAt: new Date().toISOString(),
             };
+            const updatedItems = [...state.items, newItem];
             return {
-              items: [...state.items, newItem],
+              items: sortItemsById(updatedItems),
             };
           }
         });
@@ -68,7 +73,7 @@ export const useCartStore = create<CartStore>()(
 
       removeItem: (productId: string) => {
         set((state) => ({
-          items: state.items.filter(item => item.id !== productId),
+          items: sortItemsById(state.items.filter(item => item.id !== productId)),
         }));
       },
 
@@ -78,13 +83,16 @@ export const useCartStore = create<CartStore>()(
           return;
         }
         
-        set((state) => ({
-          items: state.items.map(item =>
+        set((state) => {
+          const updatedItems = state.items.map(item =>
             item.id === productId
               ? { ...item, quantity }
               : item
-          ),
-        }));
+          );
+          return {
+            items: sortItemsById(updatedItems),
+          };
+        });
       },
 
       clearCart: () => {

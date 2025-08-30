@@ -22,10 +22,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  useUpdateCartItem,
-  useRemoveFromCart,
-} from "@/lib/query/hooks";
+import { useCartSync } from "@/lib/hooks/useCartSync";
+import { SimilarProductsCard } from "@/components/cart/SimilarProductsCard";
 import { CartStepProps } from "../types";
 import { formatPrice } from "@/lib/utils/currency";
 
@@ -47,30 +45,26 @@ export function CartStep({
   onApplyPromoCode,
   deliveryMethod,
 }: CartStepInternalProps) {
-  const updateCartItemMutation = useUpdateCartItem();
-  const removeFromCartMutation = useRemoveFromCart();
+  const { updateQuantity, removeItem, isLoading } = useCartSync();
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
   const handleImageError = (productId: string) => {
     setImageErrors((prev) => ({ ...prev, [productId]: true }));
   };
 
-  const handleQuantityChange = async (itemId: string, newQuantity: number) => {
+  const handleQuantityChange = async (productId: string, newQuantity: number) => {
     if (newQuantity <= 0) return;
 
     try {
-      await updateCartItemMutation.mutateAsync({
-        itemId: Number(itemId),
-        quantity: newQuantity,
-      });
+      await updateQuantity(productId, newQuantity);
     } catch (error) {
       console.error("Error updating quantity:", error);
     }
   };
 
-  const handleRemoveItem = async (itemId: string) => {
+  const handleRemoveItem = async (productId: string) => {
     try {
-      await removeFromCartMutation.mutateAsync(Number(itemId));
+      await removeItem(productId);
     } catch (error) {
       console.error("Error removing item:", error);
     }
@@ -174,13 +168,13 @@ export function CartStep({
                             size="sm"
                             onClick={() =>
                               handleQuantityChange(
-                                item.id?.toString() || "",
+                                item.product.id.toString(),
                                 item.quantity - 1
                               )
                             }
                             disabled={
                               item.quantity <= 1 ||
-                              updateCartItemMutation.isPending
+                              isLoading
                             }
                           >
                             <Minus className="h-4 w-4" />
@@ -193,11 +187,11 @@ export function CartStep({
                             size="sm"
                             onClick={() =>
                               handleQuantityChange(
-                                item.id?.toString() || "",
+                                item.product.id.toString(),
                                 item.quantity + 1
                               )
                             }
-                            disabled={updateCartItemMutation.isPending}
+                            disabled={isLoading}
                           >
                             <Plus className="h-4 w-4" />
                           </Button>
@@ -212,9 +206,9 @@ export function CartStep({
                           variant="ghost"
                           size="sm"
                           onClick={() =>
-                            handleRemoveItem(item.id?.toString() || "")
+                            handleRemoveItem(item.product.id.toString())
                           }
-                          disabled={removeFromCartMutation.isPending}
+                          disabled={isLoading}
                           className="text-destructive hover:text-destructive/80"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -329,37 +323,12 @@ export function CartStep({
           </CardContent>
         </Card>
 
-        {/* Recommended Products */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Vous pourriez aussi aimer</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Mock recommended products */}
-              {[
-                { name: "Interrupteur va-et-vient", price: 8.9 },
-                { name: "Boîte de dérivation", price: 3.5 },
-              ].map((product, index) => (
-                <div
-                  key={index}
-                  className="flex items-center space-x-3 p-3 border rounded-lg"
-                >
-                  <div className="w-12 h-12 bg-muted rounded" />
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">{product.name}</div>
-                    <div className="text-sm text-primary font-semibold">
-                      {formatPrice(Number(product.price))}
-                    </div>
-                  </div>
-                  <Button size="sm" variant="outline">
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Recommended Products - Produits similaires */}
+        <SimilarProductsCard 
+          cartItems={cart.items} 
+          title="Vous pourriez aussi aimer"
+          maxProducts={2}
+        />
       </div>
     </div>
   );

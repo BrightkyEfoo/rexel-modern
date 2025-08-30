@@ -10,6 +10,7 @@ import { ProductCardFooter } from '@/components/ui/product-card-footer';
 import { QuantitySelector } from '@/components/ui/quantity-selector';
 import { CountryFlag } from '@/components/ui/country-flag';
 import { useCartSync } from '@/lib/hooks/useCartSync';
+import { useDebounce } from '@/lib/hooks/useDebounce';
 import { useProductFavoriteStatus } from '@/lib/hooks/useFavorites';
 import { useAuth } from '@/lib/auth/nextauth-hooks';
 import { formatPrice } from '@/lib/utils/currency';
@@ -29,9 +30,12 @@ export function ProductCard({
   const [imageLoading, setImageLoading] = useState(true);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   
-  const { addItem, updateQuantity, removeItem, items } = useCartSync();
+  const { addItem, updateQuantity, removeItem, items, isLoading } = useCartSync();
   const { isAuthenticated } = useAuth();
   const favoriteState = useProductFavoriteStatus(product.id.toString());
+  
+  // Debouncer l'ajout au panier pour éviter les clics multiples
+  const debouncedAddItem = useDebounce(addItem, 300);
   
   // Fonctions utilitaires pour le panier
   const isItemInCart = (productId: string) => 
@@ -39,7 +43,7 @@ export function ProductCard({
 
   // Gestionnaires d'événements
   const handleAddToCart = () => {
-    addItem(product, selectedQuantity);
+    debouncedAddItem(product, selectedQuantity);
   };
 
   const handleRemoveFromCart = () => {
@@ -86,7 +90,7 @@ export function ProductCard({
           </div>
         )}
         <img
-          src={product.files[0]?.url || product.imageUrl}
+          src={product.imageUrl}
           alt={product.name}
           className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${
             imageLoading ? 'opacity-0' : 'opacity-100'

@@ -208,7 +208,7 @@ export default function FavoritesPage() {
               Découvrez nos produits et ajoutez-les à vos favoris en cliquant sur le cœur
             </p>
             <Button asChild>
-              <Link href="/categories">
+              <Link href="/catalogue">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Découvrir nos produits
               </Link>

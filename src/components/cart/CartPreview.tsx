@@ -1,16 +1,21 @@
-'use client';
+"use client";
 
-import { Minus, Plus, ShoppingCart, Trash2, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useCartStore } from '@/lib/stores/cart-store';
-import { useCartSync } from '@/lib/hooks/useCartSync';
-import { Logo } from '@/components/ui/logo';
-import { formatPrice } from '@/lib/utils/currency';
-import Link from 'next/link';
-import { useState } from 'react';
+import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { useCartStore } from "@/lib/stores/cart-store";
+import { useCartSync } from "@/lib/hooks/useCartSync";
+import { SafeImage } from "@/components/ui/safe-image";
+import { formatPrice } from "@/lib/utils/currency";
+import Link from "next/link";
 
 interface CartPreviewProps {
   isAuthenticated: boolean;
@@ -18,19 +23,10 @@ interface CartPreviewProps {
 
 export function CartPreview({ isAuthenticated }: CartPreviewProps) {
   const { isOpen, setCartOpen } = useCartStore();
-  const { 
-    items, 
-    updateQuantity, 
-    removeItem, 
-    totalItems, 
-    totalPrice 
-  } = useCartSync();
-  
-  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const { items, updateQuantity, removeItem, totalItems, totalPrice } =
+    useCartSync();
 
-  const handleImageError = (productId: string) => {
-    setImageErrors(prev => ({ ...prev, [productId]: true }));
-  };
+  console.log({items});
 
   return (
     <Sheet open={isOpen} onOpenChange={setCartOpen}>
@@ -38,56 +34,60 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
         <Button variant="ghost" size="icon" className="relative">
           <ShoppingCart className="h-5 w-5" />
           {totalItems > 0 && (
-            <Badge 
+            <Badge
               className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
               variant="destructive"
             >
-              {totalItems > 99 ? '99+' : totalItems}
+              {totalItems > 99 ? "99+" : totalItems}
             </Badge>
           )}
         </Button>
       </SheetTrigger>
-      
+
       <SheetContent className="w-[400px] sm:w-[540px] flex flex-col">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
-            Panier ({totalItems} {totalItems > 1 ? 'articles' : 'article'})
+            Panier ({totalItems} {totalItems > 1 ? "articles" : "article"})
           </SheetTitle>
         </SheetHeader>
 
         <div className="flex flex-col grow mt-6">
-          {items.length === 0 ? (
+          {!items || items?.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
               <ShoppingCart className="h-16 w-16 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">Votre panier est vide</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Votre panier est vide
+              </h3>
               <p className="text-muted-foreground mb-4">
                 Découvrez nos produits et ajoutez-les à votre panier
               </p>
               <Button onClick={() => setCartOpen(false)} asChild>
-                <Link href="/">Découvrir nos produits</Link>
+                <Link href="/catalogue">Découvrir nos produits</Link>
               </Button>
             </div>
           ) : (
             <>
               {/* Items */}
               <div className="flex-1 overflow-y-auto space-y-4">
-                {items.map((item) => (
-                  <div key={item.id} className="flex gap-3 p-3 border border-border rounded-lg bg-card">
-                    {/* Image */}
+                {items.map((item: any) => (
+                  <div
+                    key={item.id}
+                    className="flex gap-3 p-3 border border-border rounded-lg bg-card"
+                  >
+                    {/* Image avec SafeImage */}
+                    
                     <div className="w-16 h-16 bg-muted rounded-md overflow-hidden flex-shrink-0">
-                      {imageErrors[item.id] || !item.product.imageUrl ? (
-                        <div className="w-full h-full flex items-center justify-center bg-muted">
-                          <Logo variant="light" size="sm" showText={false} />
-                        </div>
-                      ) : (
-                        <img
-                          src={item.product.files?.[0]?.url || item.product.imageUrl}
-                          alt={item.product.name}
-                          className="w-full h-full object-cover"
-                          onError={() => handleImageError(item.id)}
-                        />
-                      )}
+                      
+                      <SafeImage
+                        src={item.product.imageUrl || ''}
+                        alt={item.product.name}
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-cover"
+                        showLogoOnError={true}
+                        logoClassName="w-6 h-6"
+                      />
                     </div>
 
                     {/* Content */}
@@ -98,7 +98,7 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
                       <p className="text-xs text-muted-foreground mb-2">
                         SKU: {item.product.sku}
                       </p>
-                      
+
                       {/* Prix */}
                       <div className="flex items-center gap-2 mb-2">
                         {item.product.salePrice ? (
@@ -124,21 +124,27 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
                             variant="outline"
                             size="icon"
                             className="h-7 w-7"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity - 1)
+                            }
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
-                          <span className="w-8 text-center text-sm text-foreground font-medium">{item.quantity}</span>
+                          <span className="w-8 text-center text-sm text-foreground font-medium">
+                            {item.quantity}
+                          </span>
                           <Button
                             variant="outline"
                             size="icon"
                             className="h-7 w-7"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity + 1)
+                            }
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
                         </div>
-                        
+
                         <Button
                           variant="ghost"
                           size="icon"
@@ -171,22 +177,33 @@ export function CartPreview({ isAuthenticated }: CartPreviewProps) {
                       Voir le panier
                     </Link>
                   </Button>
-                  
+
                   {isAuthenticated && (
-                    <Button asChild variant="outline" className="w-full" size="lg">
-                      <Link href="/commandes" onClick={() => setCartOpen(false)}>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full"
+                      size="lg"
+                    >
+                      <Link
+                        href="/commandes"
+                        onClick={() => setCartOpen(false)}
+                      >
                         Passer commande
                       </Link>
                     </Button>
                   )}
-                  
+
                   {!isAuthenticated && (
                     <div className="text-center">
                       <p className="text-xs text-muted-foreground mb-2">
                         Connectez-vous pour passer commande
                       </p>
                       <Button asChild variant="outline" className="w-full">
-                        <Link href="/auth/login" onClick={() => setCartOpen(false)}>
+                        <Link
+                          href="/auth/login"
+                          onClick={() => setCartOpen(false)}
+                        >
                           Se connecter
                         </Link>
                       </Button>

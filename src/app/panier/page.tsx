@@ -122,6 +122,7 @@ export default function CartPage() {
   if (cartData.items.length === 0) {
     return (
       <div className="min-h-screen bg-background">
+        
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-16">
@@ -132,7 +133,7 @@ export default function CartPage() {
             <p className="text-muted-foreground mb-8">
               Découvrez nos produits et ajoutez-les à votre panier
             </p>
-            <Link href="/categories">
+            <Link href="/catalogue">
               <button className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90">
                 Découvrir nos produits
               </button>

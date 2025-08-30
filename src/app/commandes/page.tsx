@@ -111,7 +111,7 @@ export default function OrdersPage() {
         const searchLower = searchQuery.toLowerCase();
         if (
           !order.orderNumber.toLowerCase().includes(searchLower) &&
-          !order.items.some((item: any) =>
+          !order.items?.some((item: any) =>
             item.product.name.toLowerCase().includes(searchLower)
           )
         ) {
@@ -230,7 +230,7 @@ export default function OrdersPage() {
               Découvrez nos produits et passez votre première commande
             </p>
             <Button asChild>
-              <Link href="/categories">Découvrir nos produits</Link>
+              <Link href="/catalogue">Découvrir nos produits</Link>
             </Button>
           </div>
         ) : (

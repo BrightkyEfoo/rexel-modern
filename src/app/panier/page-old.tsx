@@ -220,7 +220,7 @@ export default function CartPage() {
               Découvrez nos produits et ajoutez-les à votre panier
             </p>
             <Button asChild>
-              <Link href="/categories">Découvrir nos produits</Link>
+              <Link href="/catalogue">Découvrir nos produits</Link>
             </Button>
           </div>
         </div>
@@ -447,7 +447,7 @@ export default function CartPage() {
               {/* Continue Shopping */}
               <div className="pt-6">
                 <Button variant="outline" asChild>
-                  <Link href="/categories">
+                  <Link href="/catalogue">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Continuer mes achats
                   </Link>

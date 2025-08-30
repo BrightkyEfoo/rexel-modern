@@ -1,50 +1,42 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useRef } from 'react';
 
 /**
- * Hook pour debouncer une valeur
- * Retarde la mise à jour d'une valeur jusqu'à ce qu'elle reste stable pendant un délai donné
+ * Hook pour debouncer une fonction et éviter les appels multiples rapides
+ * @param func La fonction à debouncer
+ * @param delay Le délai en millisecondes (défaut: 300ms)
+ * @returns La fonction debouncée
  */
-export function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
-  useEffect(() => {
-    // Créer un timer qui met à jour la valeur debouncée après le délai
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    // Nettoyer le timeout si value change avant la fin du délai
-    // Cela garantit que la valeur debouncée n'est mise à jour que si
-    // la valeur d'entrée reste inchangée pendant le délai spécifié
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
-}
-
-/**
- * Hook pour debouncer une fonction
- * Utile pour limiter le nombre d'appels à une fonction coûteuse
- */
-export function useDebouncedCallback<T extends (...args: any[]) => any>(
-  callback: T,
-  delay: number
+export function useDebounce<T extends (...args: any[]) => any>(
+  func: T,
+  delay: number = 300
 ): T {
-  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isProcessingRef = useRef(false);
 
-  return ((...args: Parameters<T>) => {
-    // Annuler le timer précédent
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-    }
+  const debouncedFunc = useCallback(
+    (...args: Parameters<T>) => {
+      // Si déjà en cours de traitement, ignorer
+      if (isProcessingRef.current) {
+        return;
+      }
 
-    // Créer un nouveau timer
-    const newTimer = setTimeout(() => {
-      callback(...args);
-    }, delay);
+      // Annuler le timeout précédent
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
 
-    setDebounceTimer(newTimer);
-  }) as T;
+      // Créer un nouveau timeout
+      timeoutRef.current = setTimeout(async () => {
+        isProcessingRef.current = true;
+        try {
+          await func(...args);
+        } finally {
+          isProcessingRef.current = false;
+        }
+      }, delay);
+    },
+    [func, delay]
+  ) as T;
+
+  return debouncedFunc;
 }
