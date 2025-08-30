@@ -32,8 +32,8 @@ export const formatPrice = (
   const code = getCurrencyCode();
   const decimals = options?.decimals ?? 2;
 
-  const formattedPrice = numPrice?
-    .toFixed(decimals)
+  const formattedPrice = numPrice
+    ?.toFixed(decimals)
     .replace(".00", "")
     .replace(".", ",");
 
