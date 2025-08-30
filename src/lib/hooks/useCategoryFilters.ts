@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { SearchFilters } from '@/lib/api/types';
-import { useDebounce } from './useDebounce';
+import { useDebounceValue } from './useDebounce';
 
 type SortOption = 'popularity' | 'price' | 'name' | 'newest';
 
@@ -18,7 +18,7 @@ export function useCategoryFilters({ categorySlug, priceRange, baseUrl }: UseCat
   const searchParams = useSearchParams();
 
   // Debounce price range pour éviter trop de requêtes
-  const debouncedPriceRange = useDebounce(priceRange, 500);
+  const debouncedPriceRange = useDebounceValue(priceRange, 500);
 
   // Construire les filtres à partir des paramètres d'URL
   const filters = useMemo((): SearchFilters => {

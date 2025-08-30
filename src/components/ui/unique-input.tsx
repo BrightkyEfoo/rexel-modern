@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Check, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useDebounce } from "@/lib/hooks/useDebounce";
+import { useDebounceValue } from "@/lib/hooks/useDebounce";
 
 export interface UniqueValidationResponse {
   unique: boolean;
@@ -49,7 +49,7 @@ export function UniqueInput({
   const [lastValidatedValue, setLastValidatedValue] = useState<string>(""); // Pour éviter les validations répétées
 
   // Debounce la valeur pour éviter trop de requêtes
-  const debouncedValue = useDebounce(value, debounceMs);
+  const debouncedValue = useDebounceValue(value, debounceMs);
 
   const validate = useCallback(
     async (inputValue: string) => {

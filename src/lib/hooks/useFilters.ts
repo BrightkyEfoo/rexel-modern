@@ -1,6 +1,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import { useDebounce } from "./useDebounce";
+import { useDebounceValue } from "./useDebounce";
 import type { SearchFilters } from "@/lib/api/types";
 
 interface UseFiltersParams {
@@ -13,7 +13,7 @@ export function useFilters({ baseUrl, priceRange }: UseFiltersParams) {
   const searchParams = useSearchParams();
 
   // Debounce price range pour éviter trop de requêtes
-  const debouncedPriceRange = useDebounce(priceRange, 500);
+  const debouncedPriceRange = useDebounceValue(priceRange, 500);
 
   // Construire les filtres à partir des paramètres d'URL avec useMemo
   const filters = useMemo((): SearchFilters => {
