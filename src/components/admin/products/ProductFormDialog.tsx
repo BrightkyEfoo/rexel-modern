@@ -518,7 +518,7 @@ export function ProductFormDialog({
                       name="price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Prix *</FormLabel>
+                          <FormLabel>Prix de vente *</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
@@ -537,7 +537,7 @@ export function ProductFormDialog({
                       name="salePrice"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Prix de vente</FormLabel>
+                          <FormLabel>Prix promotionnel</FormLabel>
                           <FormControl>
                             <Input
                               type="number"

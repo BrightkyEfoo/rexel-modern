@@ -176,7 +176,7 @@ export function ProductViewDialog({
                 </div>
                 {product.salePrice && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Prix de vente</span>
+                    <span className="text-muted-foreground">Prix promotionnel</span>
                     <span className="font-medium text-green-600">
                       {formatPrice(product.salePrice)}
                     </span>
