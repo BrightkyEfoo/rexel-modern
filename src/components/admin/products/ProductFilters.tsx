@@ -12,21 +12,25 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, X, Plus } from "lucide-react";
+import { Search, Filter, X, Plus, Upload } from "lucide-react";
 import type { ProductFilters } from "@/lib/types/products";
 import { useCategories, useBrands } from "@/lib/query/hooks";
 
 interface ProductFiltersProps {
   filters: ProductFilters;
-  onFiltersChange: (filters: ProductFilters) => void;
+  onFiltersChange: (filters: Partial<ProductFilters>) => void;
+  onResetFilters?: () => void;
   onCreateProduct: () => void;
+  onImportProducts: () => void;
   resultsCount?: number;
 }
 
 export function ProductFilters({
   filters,
   onFiltersChange,
+  onResetFilters,
   onCreateProduct,
+  onImportProducts,
   resultsCount,
 }: ProductFiltersProps) {
   const [searchInput, setSearchInput] = useState(filters.search || "");
@@ -45,7 +49,6 @@ export function ProductFilters({
     const timeoutId = setTimeout(() => {
       if (searchInput !== filters.search) {
         onFiltersChange({
-          ...filters,
           search: searchInput || undefined,
           page: 1, // Reset à la première page lors de la recherche
         });
@@ -53,11 +56,10 @@ export function ProductFilters({
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchInput, filters, onFiltersChange]);
+  }, [searchInput, filters.search, onFiltersChange]);
 
   const handleFilterChange = (key: keyof ProductFilters, value: any) => {
     onFiltersChange({
-      ...filters,
       [key]: value === "all" ? undefined : value,
       page: 1, // Reset à la première page lors du changement de filtre
     });
@@ -65,10 +67,22 @@ export function ProductFilters({
 
   const clearFilters = () => {
     setSearchInput("");
-    onFiltersChange({
-      page: 1,
-      per_page: filters.per_page,
-    });
+    if (onResetFilters) {
+      onResetFilters();
+    } else {
+      // Fallback si onResetFilters n'est pas fourni
+      onFiltersChange({
+        search: undefined,
+        categoryId: undefined,
+        brandId: undefined,
+        minPrice: undefined,
+        maxPrice: undefined,
+        inStock: undefined,
+        isFeatured: undefined,
+        isActive: undefined,
+        page: 1,
+      });
+    }
   };
 
   const hasActiveFilters = !!(
@@ -105,10 +119,16 @@ export function ProductFilters({
               className="pl-10"
             />
           </div>
-          <Button onClick={onCreateProduct} className="shrink-0">
-            <Plus className="w-4 h-4 mr-2" />
-            Nouveau produit
-          </Button>
+          <div className="flex gap-2 shrink-0">
+            <Button onClick={onCreateProduct}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nouveau produit
+            </Button>
+            <Button onClick={onImportProducts} variant="outline">
+              <Upload className="w-4 h-4 mr-2" />
+              Importer
+            </Button>
+          </div>
         </div>
 
         {/* Filtres */}

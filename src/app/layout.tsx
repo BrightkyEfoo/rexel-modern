@@ -6,6 +6,7 @@ import { appConfig } from "@/lib/config/app";
 import "@/lib/debug/cart-debug-utils";
 import { CartProvider } from "@/lib/providers/cart-provider";
 import { NextAuthProvider } from "@/lib/providers/nextauth-provider";
+import { NuqsProvider } from "@/lib/providers/nuqs-provider";
 import { SessionProvider as CartSessionProvider } from "@/lib/providers/session-provider";
 import { QueryProvider } from "@/lib/query/provider";
 import type { Metadata } from "next";
@@ -36,19 +37,21 @@ export default function RootLayout({
         className="antialiased bg-background text-foreground font-sans"
       >
         <Suspense fallback={<></>}>
-          <NextAuthProvider>
-            <QueryProvider>
-              <CartSessionProvider>
-                <CartProvider>
-                  <PageTracker />
-                  {children}
-                  <Toaster />
-                  <PageTrackerDebug />
-                  <CartDebugPanel />
-                </CartProvider>
-              </CartSessionProvider>
-            </QueryProvider>
-          </NextAuthProvider>
+          <NuqsProvider>
+            <NextAuthProvider>
+              <QueryProvider>
+                <CartSessionProvider>
+                  <CartProvider>
+                    <PageTracker />
+                    {children}
+                    <Toaster />
+                    <PageTrackerDebug />
+                    <CartDebugPanel />
+                  </CartProvider>
+                </CartSessionProvider>
+              </QueryProvider>
+            </NextAuthProvider>
+          </NuqsProvider>
         </Suspense>
       </body>
     </html>

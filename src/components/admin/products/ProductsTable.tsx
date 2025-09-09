@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   Table,
   TableBody,
@@ -35,13 +35,14 @@ import { ProductViewDialog } from "./ProductViewDialog";
 import { ProductDeleteDialog } from "./ProductDeleteDialog";
 import { formatPrice } from "@/lib/utils/currency";
 import { ProductImage } from "@/components/ui/product-image";
+import { ProductPagination } from "@/components/category/ProductPagination";
 import { getCountryData } from "countries-list";
 import Image from "next/image";
 import { hasFlag } from "country-flag-icons";
 
 interface ProductsTableProps {
   filters: ProductFilters;
-  onFiltersChange: (filters: ProductFilters) => void;
+  onFiltersChange: (filters: Partial<ProductFilters>) => void;
 }
 
 export function ProductsTable({
@@ -85,9 +86,19 @@ export function ProductsTable({
   };
 
   // Gestion de la pagination
-  const handlePageChange = (page: number) => {
-    onFiltersChange({ ...filters, page });
-  };
+  const handlePageChange = useCallback((page: number) => {
+    console.log('🔢 handlePageChange called with page:', page);
+    console.log('📍 Current page:', filters.page);
+    
+    // Éviter les changements inutiles si on est déjà sur la bonne page
+    if (filters.page === page) {
+      console.log('⚠️ Same page, skipping update');
+      return;
+    }
+    
+    console.log('✅ Calling onFiltersChange with page:', page);
+    onFiltersChange({ page });
+  }, [filters.page, onFiltersChange]);
 
   // Gestion du tri
   const handleSort = (column: string) => {
@@ -95,7 +106,6 @@ export function ProductsTable({
     const newOrder =
       isCurrentColumn && filters.sort_order === "asc" ? "desc" : "asc";
     onFiltersChange({
-      ...filters,
       sort_by: column,
       sort_order: newOrder,
     });
@@ -383,54 +393,21 @@ export function ProductsTable({
           </Table>
         </div>
 
-        {/* Pagination */}
+        {/* Pagination avec composant réutilisable */}
         {meta && meta.last_page > 1 && (
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
-              Page {meta.current_page} sur {meta.last_page} ({meta.total}{" "}
-              produits)
+              Page {meta.current_page} sur {meta.last_page} ({meta.total} produits)
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(meta.current_page - 1)}
-                disabled={meta.current_page <= 1}
-              >
-                Précédent
-              </Button>
-
-              {/* Numéros de page */}
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, meta.last_page) }, (_, i) => {
-                  const page = i + 1;
-                  return (
-                    <Button
-                      key={page}
-                      variant={
-                        page === meta.current_page ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() => handlePageChange(page)}
-                    >
-                      {page}
-                    </Button>
-                  );
-                })}
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(meta.current_page + 1)}
-                disabled={meta.current_page >= meta.last_page}
-              >
-                Suivant
-              </Button>
-            </div>
+            <ProductPagination
+              currentPage={meta.current_page}
+              totalPages={meta.last_page}
+              onPageChange={handlePageChange}
+            />
           </div>
         )}
       </div>
+
 
       {/* Dialogues */}
       <ProductFormDialog

@@ -72,7 +72,7 @@
 - ✅ **Cache optimisé** - Invalidation intelligente
 
 #### Services API ✅
-- ✅ **ProductsService** - CRUD + pagination + filtres (10 méthodes)
+- ✅ **ProductsService** - CRUD + pagination + filtres + importation (12 méthodes)
 - ✅ **CategoriesService** - CRUD + hiérarchie + pagination (8 méthodes)
 - ✅ **BrandsService** - CRUD + featured + pagination (6 méthodes)
 - ✅ **FilesService** - Upload/gestion fichiers (4 méthodes)
@@ -228,6 +228,61 @@ Reverse proxy:   1/1   ✅ 100%
 - **Performance optimisée** - Index sur clés et valeurs pour requêtes rapides
 - **Filtres multiples** - Support valeurs multiples (ex: couleur=rouge,bleu)
 - **Extensibilité** - Ajout de nouveaux filtres sans modifier la BD
+
+### 🆕 Système d'Importation de Produits en Masse ✅ (02/02/2025)
+**Importation CSV/Excel complète avec prévisualisation et téléchargement automatique d'images**
+
+#### Frontend - ProductImportDialog ✅
+- ✅ **Interface complète** - Dialog avec upload fichier + zone de texte pour coller CSV
+- ✅ **Configuration flexible** - Options pour activer/désactiver preview, édition, suppression
+- ✅ **Parser CSV avancé** - Papa Parse avec validation de schéma et gestion d'erreurs
+- ✅ **Prévisualisation intelligente** - Aperçu produits avec validation et sélection
+- ✅ **Notifications détaillées** - Erreurs de validation et résultats d'importation
+- ✅ **Exemple CSV intégré** - Téléchargement d'un fichier exemple avec vraies données
+- ✅ **Validation en temps réel** - Vérification des champs requis et formats
+- ✅ **Interface responsive** - Adaptation mobile et desktop
+
+#### Backend - ProductsImportController ✅
+- ✅ **Endpoint d'importation** - `POST /secured/products/import` avec gestion massive
+- ✅ **Validation stricte** - ProductImportValidator avec VineJS
+- ✅ **Gestion automatique** - Création marques/catégories si inexistantes
+- ✅ **Prévention doublons** - Vérification par SKU et nom avant création
+- ✅ **Téléchargement d'images** - Service automatique depuis URLs vers MinIO
+- ✅ **Rapports détaillés** - Résultats par produit avec erreurs et warnings
+- ✅ **Performance optimisée** - Traitement par batch avec cache des entités créées
+- ✅ **Sécurité** - Validation URLs images, timeout, vérification types de fichiers
+
+#### Service de Téléchargement d'Images ✅
+- ✅ **FileService.downloadAndSaveImage()** - Téléchargement automatique depuis URLs
+- ✅ **Validation stricte** - Vérification extensions, content-type, taille (max 10MB)
+- ✅ **Gestion d'erreurs** - Timeout 30s, retry automatique, messages détaillés
+- ✅ **Optimisation MinIO** - Upload direct vers bucket avec métadonnées complètes
+- ✅ **Sécurité** - User-Agent personnalisé, validation MIME types
+- ✅ **Logging complet** - Traçabilité des téléchargements et erreurs
+
+#### Fonctionnalités Avancées ✅
+- ✅ **Mode direct** - Import immédiat sans prévisualisation (configurable)
+- ✅ **Mode prévisualisation** - Révision et modification avant validation
+- ✅ **Sélection granulaire** - Choix des produits à importer individuellement
+- ✅ **Statistiques temps réel** - Compteurs total/valide/invalide/sélectionné
+- ✅ **Barre de progression** - Feedback visuel pendant traitement
+- ✅ **Gestion des erreurs** - Messages contextuels par ligne de CSV
+- ✅ **Support multi-formats** - CSV natif, Excel prévu (SheetJS à ajouter)
+- ✅ **Exemple pratique** - Fichier `exemple_produits.csv` avec 6 produits réels
+
+#### API Routes Importation ✅
+- ✅ `POST /secured/products/import` - Importation en masse (max 1000 produits)
+- ✅ `GET /secured/products/import/example` - Structure et exemple CSV
+- ✅ **Authentification requise** - Routes sécurisées admin uniquement
+- ✅ **Documentation API** - Schémas et exemples complets
+
+#### Schéma CSV Supporté ✅
+**Colonnes requises :** `name`, `price`, `stockQuantity`
+**Colonnes optionnelles :** `description`, `shortDescription`, `sku`, `salePrice`, `brandName`, `categoryNames`, `imageUrls`, `isFeatured`, `isActive`
+- ✅ **URLs multiples** - Images séparées par virgules (max 10 par produit)
+- ✅ **Catégories multiples** - Noms séparés par virgules, création automatique
+- ✅ **Marques automatiques** - Création si inexistante avec slug unique
+- ✅ **Validation booléenne** - Support true/false pour isFeatured/isActive
 
 ### Pages d'Authentification Thématisées (01/02/2025)
 - **Cohérence visuelle** - Utilisation exclusive des couleurs du thème Tailwind

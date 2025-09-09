@@ -4,28 +4,26 @@ import { useState } from "react";
 import { ProductFilters } from "./ProductFilters";
 import { ProductsTable } from "./ProductsTable";
 import { ProductFormDialog } from "./ProductFormDialog";
-import type { ProductFilters as ProductFiltersType } from "@/lib/types/products";
+import { ProductImportDialog } from "./ProductImportDialog";
 import { useProducts } from "@/lib/hooks/useProducts";
+import { useProductFilters } from "@/lib/hooks/useProductFilters";
 
 export function ProductsManagement() {
-  const [filters, setFilters] = useState<ProductFiltersType>({
-    page: 1,
-    per_page: 20,
-    sort_by: "created_at",
-    sort_order: "desc",
-  });
+  // Gestion des filtres avec nuqs (synchronisé avec l'URL)
+  const { filters, updateFilters, resetSearchFilters } = useProductFilters();
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
   // API
   const { data: productsResponse } = useProducts(filters);
 
-  const handleFiltersChange = (newFilters: ProductFiltersType) => {
-    setFilters(newFilters);
-  };
-
   const handleCreateProduct = () => {
     setShowCreateDialog(true);
+  };
+
+  const handleImportProducts = () => {
+    setShowImportDialog(true);
   };
 
   return (
@@ -33,15 +31,17 @@ export function ProductsManagement() {
       {/* Filtres et recherche */}
       <ProductFilters
         filters={filters}
-        onFiltersChange={handleFiltersChange}
+        onFiltersChange={updateFilters}
+        onResetFilters={resetSearchFilters}
         onCreateProduct={handleCreateProduct}
+        onImportProducts={handleImportProducts}
         resultsCount={productsResponse?.meta?.total}
       />
 
       {/* Table des produits */}
       <ProductsTable
         filters={filters}
-        onFiltersChange={handleFiltersChange}
+        onFiltersChange={updateFilters}
       />
 
       {/* Dialogue de création */}
@@ -49,6 +49,12 @@ export function ProductsManagement() {
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
         mode="create"
+      />
+
+      {/* Dialogue d'importation */}
+      <ProductImportDialog
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
       />
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { nextAuthApiClient } from "@/lib/api/nextauth-client";
 import type { 
@@ -22,8 +23,45 @@ export const productKeys = {
 
 // Hook pour récupérer les produits avec pagination et filtres
 export function useProducts(filters: ProductFilters = {}) {
+  console.log('🎯 useProducts called with filters:', filters);
+  
+  // Stabiliser les filtres pour éviter les re-renders inutiles
+  const stableFilters = useMemo(() => {
+    // Créer un objet avec seulement les valeurs définies et dans un ordre stable
+    const cleanFilters: Record<string, any> = {};
+    
+    // Utiliser des clés dans un ordre fixe pour éviter les changements de référence
+    const orderedKeys = [
+      'page', 'per_page', 'sort_by', 'sort_order', 'search', 
+      'categoryId', 'brandId', 'minPrice', 'maxPrice',
+      'inStock', 'isFeatured', 'isActive'
+    ];
+    
+    for (const key of orderedKeys) {
+      const value = filters[key as keyof ProductFilters];
+      if (value !== undefined && value !== null && value !== '') {
+        cleanFilters[key] = value;
+      }
+    }
+    
+    return cleanFilters;
+  }, [
+    filters.page, 
+    filters.per_page, 
+    filters.sort_by, 
+    filters.sort_order, 
+    filters.search,
+    filters.categoryId, 
+    filters.brandId, 
+    filters.minPrice, 
+    filters.maxPrice,
+    filters.inStock, 
+    filters.isFeatured, 
+    filters.isActive
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return useQuery({
-    queryKey: productKeys.list(filters),
+    queryKey: productKeys.list(stableFilters),
     queryFn: async (): Promise<ProductsResponse> => {
       const params = new URLSearchParams();
       
@@ -42,6 +80,10 @@ export function useProducts(filters: ProductFilters = {}) {
       return response.data;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
+    // Assurer que la requête se lance même si les données sont en cache
+    refetchOnMount: true,
+    // Éviter les requêtes multiples simultanées
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -72,8 +114,12 @@ export function useCreateProduct() {
       return response.data.data;
     },
     onSuccess: () => {
-      // Invalider toutes les listes de produits
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      // Invalider toutes les listes de produits mais préserver les filtres actuels
+      queryClient.invalidateQueries({ 
+        queryKey: productKeys.lists(),
+        // Refetch en arrière-plan pour éviter les interruptions
+        refetchType: 'active'
+      });
     },
   });
 }
@@ -92,7 +138,10 @@ export function useUpdateProduct() {
     },
     onSuccess: (data) => {
       // Invalider les listes et mettre à jour le détail
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ 
+        queryKey: productKeys.lists(),
+        refetchType: 'active'
+      });
       queryClient.setQueryData(productKeys.detail(data.id), data);
     },
   });
@@ -108,7 +157,10 @@ export function useDeleteProduct() {
     },
     onSuccess: (_, id) => {
       // Invalider les listes et supprimer le détail du cache
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      queryClient.invalidateQueries({ 
+        queryKey: productKeys.lists(),
+        refetchType: 'active'
+      });
       queryClient.removeQueries({ queryKey: productKeys.detail(id) });
     },
   });
@@ -129,7 +181,10 @@ export function useBulkDeleteProducts() {
     },
     onSuccess: () => {
       // Invalider toutes les requêtes de produits
-      queryClient.invalidateQueries({ queryKey: productKeys.all });
+      queryClient.invalidateQueries({ 
+        queryKey: productKeys.all,
+        refetchType: 'active'
+      });
     },
   });
 }

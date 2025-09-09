@@ -134,6 +134,66 @@ export class ProductsService {
     return apiClient.delete<void>(`/secured/products/${id}`);
   }
 
+  async bulkImportProducts(products: any[]): Promise<ApiResponse<{
+    total: number;
+    successful: number;
+    failed: number;
+    results: Array<{
+      success: boolean;
+      productId?: number;
+      product?: any;
+      errors: string[];
+      warnings: string[];
+      originalIndex: number;
+    }>;
+  }>> {
+    return nextAuthApiClient.post<{
+      total: number;
+      successful: number;
+      failed: number;
+      results: Array<{
+        success: boolean;
+        productId?: number;
+        product?: any;
+        errors: string[];
+        warnings: string[];
+        originalIndex: number;
+      }>;
+    }>("/secured/products/bulk-import", { products });
+  }
+
+  async getBulkImportExample(): Promise<ApiResponse<{
+    format: string;
+    separator: string;
+    encoding: string;
+    requiredColumns: string[];
+    optionalColumns: string[];
+    example: any[];
+    notes: string[];
+  }>> {
+    return nextAuthApiClient.get<{
+      format: string;
+      separator: string;
+      encoding: string;
+      requiredColumns: string[];
+      optionalColumns: string[];
+      example: any[];
+      notes: string[];
+    }>("/secured/products/bulk-import/example");
+  }
+
+  async validateBulkImportCsv(csvData: string): Promise<ApiResponse<{
+    valid: boolean;
+    message: string;
+    error?: string;
+  }>> {
+    return nextAuthApiClient.post<{
+      valid: boolean;
+      message: string;
+      error?: string;
+    }>("/secured/products/bulk-import/validate-csv", { csvData });
+  }
+
   private buildSearchParams(filters?: SearchFilters): Record<string, unknown> {
     if (!filters) return {};
 
