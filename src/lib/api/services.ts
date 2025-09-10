@@ -162,6 +162,106 @@ export class ProductsService {
     }>("/secured/products/bulk-import", { products });
   }
 
+  async startBulkImport(products: any[]): Promise<ApiResponse<{
+    importId: string;
+    total: number;
+  }>> {
+    const response = await nextAuthApiClient.post<{
+      message: string;
+      data: {
+        importId: string;
+        total: number;
+      };
+    }>("/secured/products/bulk-import/start", { products });
+    
+    console.log('🔍 Service startBulkImport response:', response);
+    
+    // Transformer la réponse pour correspondre au type attendu
+    return {
+      data: response.data.data,
+      message: response.data.message,
+      status: response.status,
+    } as ApiResponse<{
+      importId: string;
+      total: number;
+    }>;
+  }
+
+  async getImportProgress(importId: string): Promise<ApiResponse<{
+    id: string;
+    total: number;
+    processed: number;
+    successful: number;
+    failed: number;
+    status: 'processing' | 'completed' | 'failed';
+    currentProduct?: string;
+    results: Array<{
+      success: boolean;
+      productId?: number;
+      product?: any;
+      errors: string[];
+      warnings: string[];
+      originalIndex: number;
+    }>;
+    startTime: string;
+    endTime?: string;
+    percentage: number;
+    duration: number;
+  }>> {
+    const response = await nextAuthApiClient.get<{
+      data: {
+        id: string;
+        total: number;
+        processed: number;
+        successful: number;
+        failed: number;
+        status: 'processing' | 'completed' | 'failed';
+        currentProduct?: string;
+        results: Array<{
+          success: boolean;
+          productId?: number;
+          product?: any;
+          errors: string[];
+          warnings: string[];
+          originalIndex: number;
+        }>;
+        startTime: string;
+        endTime?: string;
+        percentage: number;
+        duration: number;
+      };
+    }>(`/secured/products/bulk-import/progress/${importId}`);
+    
+    console.log('🔍 Service getImportProgress response:', response);
+    
+    // Transformer la réponse pour correspondre au type attendu
+    // La réponse a une structure: { data: { data: { ... } } }
+    return {
+      data: response.data.data,
+      status: response.status,
+    } as ApiResponse<{
+      id: string;
+      total: number;
+      processed: number;
+      successful: number;
+      failed: number;
+      status: 'processing' | 'completed' | 'failed';
+      currentProduct?: string;
+      results: Array<{
+        success: boolean;
+        productId?: number;
+        product?: any;
+        errors: string[];
+        warnings: string[];
+        originalIndex: number;
+      }>;
+      startTime: string;
+      endTime?: string;
+      percentage: number;
+      duration: number;
+    }>;
+  }
+
   async getBulkImportExample(): Promise<ApiResponse<{
     format: string;
     separator: string;

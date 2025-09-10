@@ -291,7 +291,7 @@ export function ProductsTable({
                           <div className="font-medium">
                             {formatPrice(product.price)}
                           </div>
-                          {product.salePrice && (
+                          {product.salePrice && product.salePrice > 0 && (
                             <div className="text-sm text-green-600">
                               {formatPrice(product.salePrice)}
                             </div>

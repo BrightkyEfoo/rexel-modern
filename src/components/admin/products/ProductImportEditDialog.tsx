@@ -49,11 +49,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DynamicKeyValueInput } from "@/components/ui/dynamic-key-value-input";
 
+interface ImportConfig {
+  enableImages: boolean;
+  enableFiles: boolean;
+}
+
 interface ProductImportEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: any;
   onSave: (data: any) => void;
+  config?: ImportConfig;
 }
 
 export function ProductImportEditDialog({
@@ -61,6 +67,7 @@ export function ProductImportEditDialog({
   onOpenChange,
   product,
   onSave,
+  config = { enableImages: true, enableFiles: true },
 }: ProductImportEditDialogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -97,7 +104,7 @@ export function ProductImportEditDialog({
       warranty: "",
       certifications: [],
       additionalInfo: {
-        sections: []
+        sections: [],
       },
     },
   });
@@ -121,7 +128,7 @@ export function ProductImportEditDialog({
   // Fonction pour initialiser le formulaire
   const initializeForm = useCallback(() => {
     if (!product) return;
-    
+
     // Trouver la marque par nom si elle existe
     let brandId = undefined;
     if (product._importData?.brandName && brands?.data) {
@@ -164,24 +171,30 @@ export function ProductImportEditDialog({
       isActive: product.isActive ?? true,
       brandId: brandId ? String(brandId) : "",
       fabricationCountryCode: product.fabricationCountryCode || "",
-      categoryIds: categoryIds.map(id => String(id)),
+      categoryIds: categoryIds.map((id) => String(id)),
       images: [], // Les images seront gérées par URLs
       files: [], // Les fichiers seront gérés par URLs
       weight: product.weight ? String(product.weight) : "",
       dimensions: {
-        length: product.dimensions?.length ? String(product.dimensions.length) : "",
-        width: product.dimensions?.width ? String(product.dimensions.width) : "",
-        height: product.dimensions?.height ? String(product.dimensions.height) : "",
+        length: product.dimensions?.length
+          ? String(product.dimensions.length)
+          : "",
+        width: product.dimensions?.width
+          ? String(product.dimensions.width)
+          : "",
+        height: product.dimensions?.height
+          ? String(product.dimensions.height)
+          : "",
       },
       warranty: product.warranty || "",
       certifications: product.certifications || [],
       additionalInfo: {
-        sections: []
+        sections: [],
       },
       // Garder les données d'import originales
       _importData: product._importData,
     });
-    
+
     setIsFormInitialized(true);
   }, [product, brands?.data, categories?.data, form]);
 
@@ -197,11 +210,6 @@ export function ProductImportEditDialog({
     try {
       // Appeler la fonction de sauvegarde personnalisée
       onSave(data);
-
-      toast({
-        title: "Produit modifié",
-        description: "Les modifications ont été appliquées avec succès.",
-      });
 
       onOpenChange(false);
     } catch (error) {
@@ -264,7 +272,11 @@ export function ProductImportEditDialog({
                               <UniqueInput
                                 placeholder="Nom du produit"
                                 validateUnique={validateProductNameUnique}
-                                entityId={typeof product?.id === 'string' ? undefined : product?.id}
+                                entityId={
+                                  typeof product?.id === "string"
+                                    ? undefined
+                                    : product?.id
+                                }
                                 {...field}
                               />
                             </FormControl>
@@ -283,7 +295,11 @@ export function ProductImportEditDialog({
                               <UniqueInput
                                 placeholder="SKU du produit"
                                 validateUnique={validateProductSkuUnique}
-                                entityId={typeof product?.id === 'string' ? undefined : product?.id}
+                                entityId={
+                                  typeof product?.id === "string"
+                                    ? undefined
+                                    : product?.id
+                                }
                                 {...field}
                               />
                             </FormControl>
@@ -791,66 +807,71 @@ export function ProductImportEditDialog({
                 </Card>
 
                 {/* URLs d'import */}
-                {(product._importData?.imageUrls ||
-                  product._importData?.fileUrls) && (
+                {((config.enableImages && product._importData?.imageUrls) ||
+                  (config.enableFiles && product._importData?.fileUrls)) && (
                   <Card>
                     <CardHeader>
                       <CardTitle>Fichiers d'import</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {product._importData?.imageUrls && (
-                        <div>
-                          <FormLabel>Images à télécharger</FormLabel>
-                          <div className="mt-2 space-y-2">
-                            {product._importData.imageUrls
-                              .split(",")
-                              .map((url: string, idx: number) => {
-                                const trimmedUrl = url.trim();
-                                return (
-                                  <div
-                                    key={idx}
-                                    className="flex items-center gap-3 p-2 border rounded-lg"
-                                  >
-                                    <div className="flex-shrink-0">
-                                      <img
-                                        src={trimmedUrl}
-                                        alt={`Image ${idx + 1}`}
-                                        className="w-16 h-16 object-cover rounded border"
-                                        onError={(e) => {
-                                          (e.target as HTMLImageElement).style.display = "none";
-                                          const fallback = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
-                                          if (fallback) {
-                                            fallback.style.display = "flex";
-                                          }
-                                        }}
-                                      />
-                                      <div 
-                                        className="w-16 h-16 bg-gray-100 rounded border items-center justify-center" 
-                                        style={{ display: 'none' }}
-                                      >
-                                        <Package className="w-6 h-6 text-gray-400" />
+                      {config.enableImages &&
+                        product._importData?.imageUrls && (
+                          <div>
+                            <FormLabel>Images à télécharger</FormLabel>
+                            <div className="mt-2 space-y-2">
+                              {product._importData.imageUrls
+                                .split(",")
+                                .map((url: string, idx: number) => {
+                                  const trimmedUrl = url.trim();
+                                  return (
+                                    <div
+                                      key={idx}
+                                      className="flex items-center gap-3 p-2 border rounded-lg"
+                                    >
+                                      <div className="flex-shrink-0">
+                                        <img
+                                          src={trimmedUrl}
+                                          alt={`Image ${idx + 1}`}
+                                          className="w-16 h-16 object-cover rounded border"
+                                          onError={(e) => {
+                                            (
+                                              e.target as HTMLImageElement
+                                            ).style.display = "none";
+                                            const fallback = (
+                                              e.target as HTMLImageElement
+                                            ).nextElementSibling as HTMLElement;
+                                            if (fallback) {
+                                              fallback.style.display = "flex";
+                                            }
+                                          }}
+                                        />
+                                        <div
+                                          className="w-16 h-16 bg-gray-100 rounded border items-center justify-center"
+                                          style={{ display: "none" }}
+                                        >
+                                          <Package className="w-6 h-6 text-gray-400" />
+                                        </div>
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="text-sm font-medium text-gray-900">
+                                          Image {idx + 1}
+                                        </div>
+                                        <div className="text-xs text-gray-500 truncate">
+                                          {trimmedUrl}
+                                        </div>
                                       </div>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                      <div className="text-sm font-medium text-gray-900">
-                                        Image {idx + 1}
-                                      </div>
-                                      <div className="text-xs text-gray-500 truncate">
-                                        {trimmedUrl}
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
+                                  );
+                                })}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-2">
+                              Ces images seront automatiquement téléchargées et
+                              associées au produit lors de l'importation.
+                            </div>
                           </div>
-                          <div className="text-xs text-muted-foreground mt-2">
-                            Ces images seront automatiquement téléchargées et
-                            associées au produit lors de l'importation.
-                          </div>
-                        </div>
-                      )}
+                        )}
 
-                      {product._importData?.fileUrls && (
+                      {config.enableFiles && product._importData?.fileUrls && (
                         <div>
                           <FormLabel>Fichiers à télécharger</FormLabel>
                           <div className="mt-2 space-y-2">

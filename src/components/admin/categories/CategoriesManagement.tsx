@@ -45,20 +45,16 @@ import {
 } from "lucide-react";
 import type { Category, CategoryFilters } from "@/lib/types/categories";
 import { useCategoriesAdmin } from "@/lib/hooks/useCategories";
+import { useCategoryManagementFilters } from "@/lib/hooks/useCategoryManagementFilters";
 import { CategoryFormDialog } from "./CategoryFormDialog";
 import { CategoryViewDialog } from "./CategoryViewDialog";
 import { CategoryDeleteDialog } from "./CategoryDeleteDialog";
 
 export function CategoriesManagement() {
-  // États des filtres
-  const [filters, setFilters] = useState<CategoryFilters>({
-    page: 1,
-    per_page: 20,
-    sort_by: "sortOrder",
-    sort_order: "asc",
-  });
+  // États des filtres avec nuqs
+  const { categoryFilters, updateFilters, resetPagination } = useCategoryManagementFilters();
 
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState(categoryFilters.search || "");
 
   // États des dialogues
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
@@ -68,7 +64,7 @@ export function CategoriesManagement() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // API
-  const { data: categoriesResponse, isLoading, error } = useCategoriesAdmin(filters);
+  const { data: categoriesResponse, isLoading, error } = useCategoriesAdmin(categoryFilters);
 
   const categories = categoriesResponse?.data || [];
   const meta = categoriesResponse?.meta;
@@ -76,17 +72,16 @@ export function CategoriesManagement() {
   // Gestion de la recherche avec debounce
   React.useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (searchInput !== filters.search) {
-        setFilters(prev => ({
-          ...prev,
+      if (searchInput !== categoryFilters.search) {
+        updateFilters({
           search: searchInput || undefined,
           page: 1,
-        }));
+        });
       }
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchInput, filters.search]);
+  }, [searchInput, categoryFilters.search, updateFilters]);
 
   // Gestion de la sélection
   const isAllSelected = categories.length > 0 && selectedCategories.length === categories.length;
@@ -106,43 +101,44 @@ export function CategoriesManagement() {
 
   // Gestion des filtres
   const handleFilterChange = (key: keyof CategoryFilters, value: any) => {
-    setFilters(prev => ({
-      ...prev,
+    updateFilters({
       [key]: value === "all" ? undefined : value,
       page: 1,
-    }));
+    });
   };
 
   // Gestion de la pagination
   const handlePageChange = (page: number) => {
-    setFilters(prev => ({ ...prev, page }));
+    updateFilters({ page });
   };
 
   // Gestion du tri
   const handleSort = (column: string) => {
-    const isCurrentColumn = filters.sort_by === column;
-    const newOrder = isCurrentColumn && filters.sort_order === 'asc' ? 'desc' : 'asc';
-    setFilters(prev => ({
-      ...prev,
+    const isCurrentColumn = categoryFilters.sort_by === column;
+    const newOrder = isCurrentColumn && categoryFilters.sort_order === 'asc' ? 'desc' : 'asc';
+    updateFilters({
       sort_by: column,
       sort_order: newOrder,
-    }));
+    });
   };
 
   const clearFilters = () => {
     setSearchInput("");
-    setFilters({
+    updateFilters({
       page: 1,
       per_page: 20,
       sort_by: "sortOrder",
       sort_order: "asc",
+      search: undefined,
+      parentId: undefined,
+      isActive: undefined,
     });
   };
 
   const hasActiveFilters = !!(
-    filters.search ||
-    filters.parentId ||
-    filters.isActive !== undefined
+    categoryFilters.search ||
+    categoryFilters.parentId ||
+    categoryFilters.isActive !== undefined
   );
 
   const getStatusBadge = (category: Category) => {
@@ -195,7 +191,7 @@ export function CategoriesManagement() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Catégorie parente */}
             <Select
-              value={filters.parentId?.toString() || "all"}
+              value={categoryFilters.parentId?.toString() || "all"}
               onValueChange={(value) => handleFilterChange("parentId", value === "all" ? undefined : parseInt(value))}
             >
               <SelectTrigger>
@@ -214,7 +210,7 @@ export function CategoriesManagement() {
 
             {/* Statut */}
             <Select
-              value={filters.isActive === true ? "active" : filters.isActive === false ? "inactive" : "all"}
+              value={categoryFilters.isActive === true ? "active" : categoryFilters.isActive === false ? "inactive" : "all"}
               onValueChange={(value) => 
                 handleFilterChange("isActive", value === "all" ? undefined : value === "active")
               }
@@ -231,14 +227,13 @@ export function CategoriesManagement() {
 
             {/* Tri */}
             <Select
-              value={`${filters.sort_by || "sortOrder"}_${filters.sort_order || "asc"}`}
+              value={`${categoryFilters.sort_by || "sortOrder"}_${categoryFilters.sort_order || "asc"}`}
               onValueChange={(value) => {
                 const [sort_by, sort_order] = value.split("_");
-                setFilters(prev => ({
-                  ...prev,
+                updateFilters({
                   sort_by: sort_by as any,
                   sort_order: sort_order as "asc" | "desc",
-                }));
+                });
               }}
             >
               <SelectTrigger>

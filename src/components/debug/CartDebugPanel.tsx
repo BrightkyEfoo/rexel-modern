@@ -14,10 +14,19 @@ export function CartDebugPanel() {
   const [isVisible, setIsVisible] = useState(false);
   const { isAuthenticated, session } = useAuth();
   const { sessionId } = useSessionId();
-  const { items: localItems, totalItems: localTotal, totalPrice: localPrice } = useCartSync();
+  const {
+    items: localItems,
+    totalItems: localTotal,
+    totalPrice: localPrice,
+  } = useCartSync();
   const { data: backendCart, refetch: refetchBackendCart } = useCart();
-  
+
   const hasValidToken = !!session?.accessToken;
+
+  // Afficher seulement en mode développement
+  if (process.env.NODE_ENV !== "development") {
+    return null;
+  }
 
   if (!isVisible) {
     return (
@@ -112,16 +121,19 @@ export function CartDebugPanel() {
               <div className="space-y-1">
                 <div>Items: {backendCart.data?.items?.length || 0}</div>
                 <div>Total: {backendCart.data?.totalItems || 0}</div>
-                <div>Prix: {(backendCart.data?.totalPrice || 0).toFixed(2)} €</div>
-                {backendCart.data?.items && backendCart.data.items.length > 0 && (
-                  <div className="max-h-20 overflow-y-auto bg-muted p-1 rounded text-xs">
-                    {backendCart.data.items.map((item, index) => (
-                      <div key={index}>
-                        {item.product.name} (x{item.quantity})
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div>
+                  Prix: {(backendCart.data?.totalPrice || 0).toFixed(2)} €
+                </div>
+                {backendCart.data?.items &&
+                  backendCart.data.items.length > 0 && (
+                    <div className="max-h-20 overflow-y-auto bg-muted p-1 rounded text-xs">
+                      {backendCart.data.items.map((item, index) => (
+                        <div key={index}>
+                          {item.product.name} (x{item.quantity})
+                        </div>
+                      ))}
+                    </div>
+                  )}
               </div>
             ) : (
               <div className="text-muted-foreground">Non chargé</div>
@@ -132,8 +144,16 @@ export function CartDebugPanel() {
           <div className="space-y-1">
             <div className="font-semibold">Synchronisation:</div>
             <div className="flex gap-2">
-              <Badge variant={localItems.length === (backendCart?.data?.items?.length || 0) ? "default" : "destructive"}>
-                {localItems.length === (backendCart?.data?.items?.length || 0) ? "Synchronisé" : "Désynchronisé"}
+              <Badge
+                variant={
+                  localItems.length === (backendCart?.data?.items?.length || 0)
+                    ? "default"
+                    : "destructive"
+                }
+              >
+                {localItems.length === (backendCart?.data?.items?.length || 0)
+                  ? "Synchronisé"
+                  : "Désynchronisé"}
               </Badge>
             </div>
           </div>
@@ -142,7 +162,10 @@ export function CartDebugPanel() {
           <div className="space-y-1">
             <div className="font-semibold">Debug Info:</div>
             <div className="text-xs space-y-1">
-              <div>NextAuth Status: {isAuthenticated ? "authenticated" : "unauthenticated"}</div>
+              <div>
+                NextAuth Status:{" "}
+                {isAuthenticated ? "authenticated" : "unauthenticated"}
+              </div>
               <div>Token Present: {hasValidToken ? "Yes" : "No"}</div>
               <div>Session ID: {sessionId ? "Present" : "Missing"}</div>
             </div>

@@ -88,7 +88,7 @@ export function ProductFormDialog({
       applications: "",
       sku: "",
       price: 0,
-      salePrice: 0,
+      salePrice: "",
       stockQuantity: 0,
       manageStock: true,
       inStock: true,
@@ -238,7 +238,7 @@ export function ProductFormDialog({
         images: finalImages,
         files: finalFiles,
         price: data.price ? Number(data.price) : 0,
-        salePrice: data.salePrice ? Number(data.salePrice) : 0,
+        salePrice: data.salePrice ? Number(data.salePrice) : undefined,
         stockQuantity: data.stockQuantity ? Number(data.stockQuantity) : 0,
         weight: (data as any).weight ? Number((data as any).weight) : undefined,
         dimensions: {

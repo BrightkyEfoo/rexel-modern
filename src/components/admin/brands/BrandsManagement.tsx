@@ -44,20 +44,16 @@ import {
 } from "lucide-react";
 import type { Brand, BrandFilters } from "@/lib/types/brands";
 import { useBrandsAdmin } from "@/lib/hooks/useBrands";
+import { useBrandFilters } from "@/lib/hooks/useBrandFilters";
 import { BrandFormDialog } from "./BrandFormDialog";
 import { BrandViewDialog } from "./BrandViewDialog";
 import { BrandDeleteDialog } from "./BrandDeleteDialog";
 
 export function BrandsManagement() {
-  // États des filtres
-  const [filters, setFilters] = useState<BrandFilters>({
-    page: 1,
-    per_page: 20,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  // États des filtres avec nuqs
+  const { brandFilters, updateFilters, resetPagination } = useBrandFilters();
 
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState(brandFilters.search || "");
 
   // États des dialogues
   const [selectedBrands, setSelectedBrands] = useState<Brand[]>([]);
@@ -67,7 +63,7 @@ export function BrandsManagement() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // API
-  const { data: brandsResponse, isLoading, error } = useBrandsAdmin(filters);
+  const { data: brandsResponse, isLoading, error } = useBrandsAdmin(brandFilters);
 
   const brands = brandsResponse?.data || [];
   const meta = brandsResponse?.meta;
@@ -75,17 +71,16 @@ export function BrandsManagement() {
   // Gestion de la recherche avec debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (searchInput !== filters.search) {
-        setFilters(prev => ({
-          ...prev,
+      if (searchInput !== brandFilters.search) {
+        updateFilters({
           search: searchInput || undefined,
           page: 1,
-        }));
+        });
       }
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchInput, filters.search]);
+  }, [searchInput, brandFilters.search, updateFilters]);
 
   // Gestion de la sélection
   const isAllSelected = brands.length > 0 && selectedBrands.length === brands.length;
@@ -105,43 +100,44 @@ export function BrandsManagement() {
 
   // Gestion des filtres
   const handleFilterChange = (key: keyof BrandFilters, value: any) => {
-    setFilters(prev => ({
-      ...prev,
+    updateFilters({
       [key]: value === "all" ? undefined : value,
       page: 1,
-    }));
+    });
   };
 
   // Gestion de la pagination
   const handlePageChange = (page: number) => {
-    setFilters(prev => ({ ...prev, page }));
+    updateFilters({ page });
   };
 
   // Gestion du tri
   const handleSort = (column: string) => {
-    const isCurrentColumn = filters.sort_by === column;
-    const newOrder = isCurrentColumn && filters.sort_order === 'asc' ? 'desc' : 'asc';
-    setFilters(prev => ({
-      ...prev,
+    const isCurrentColumn = brandFilters.sort_by === column;
+    const newOrder = isCurrentColumn && brandFilters.sort_order === 'asc' ? 'desc' : 'asc';
+    updateFilters({
       sort_by: column,
       sort_order: newOrder,
-    }));
+    });
   };
 
   const clearFilters = () => {
     setSearchInput("");
-    setFilters({
+    updateFilters({
       page: 1,
       per_page: 20,
       sort_by: "name",
       sort_order: "asc",
+      search: undefined,
+      isActive: undefined,
+      isFeatured: undefined,
     });
   };
 
   const hasActiveFilters = !!(
-    filters.search ||
-    filters.isActive !== undefined ||
-    filters.isFeatured !== undefined
+    brandFilters.search ||
+    brandFilters.isActive !== undefined ||
+    brandFilters.isFeatured !== undefined
   );
 
   const getStatusBadge = (brand: Brand) => {
@@ -185,7 +181,7 @@ export function BrandsManagement() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Statut */}
             <Select
-              value={filters.isActive === true ? "active" : filters.isActive === false ? "inactive" : "all"}
+              value={brandFilters.isActive === true ? "active" : brandFilters.isActive === false ? "inactive" : "all"}
               onValueChange={(value) => 
                 handleFilterChange("isActive", value === "all" ? undefined : value === "active")
               }
@@ -202,7 +198,7 @@ export function BrandsManagement() {
 
             {/* Mise en avant */}
             <Select
-              value={filters.isFeatured === true ? "featured" : filters.isFeatured === false ? "not_featured" : "all"}
+              value={brandFilters.isFeatured === true ? "featured" : brandFilters.isFeatured === false ? "not_featured" : "all"}
               onValueChange={(value) => 
                 handleFilterChange("isFeatured", value === "all" ? undefined : value === "featured")
               }
@@ -219,14 +215,13 @@ export function BrandsManagement() {
 
             {/* Tri */}
             <Select
-              value={`${filters.sort_by || "name"}_${filters.sort_order || "asc"}`}
+              value={`${brandFilters.sort_by || "name"}_${brandFilters.sort_order || "asc"}`}
               onValueChange={(value) => {
                 const [sort_by, sort_order] = value.split("_");
-                setFilters(prev => ({
-                  ...prev,
+                updateFilters({
                   sort_by: sort_by as any,
                   sort_order: sort_order as "asc" | "desc",
-                }));
+                });
               }}
             >
               <SelectTrigger>

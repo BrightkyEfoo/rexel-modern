@@ -41,6 +41,7 @@ import {
   Phone,
   Mail,
   Settings,
+  File,
 } from "lucide-react";
 import { useAuth, useLogout } from "@/lib/auth/nextauth-hooks";
 import { useMainCategories } from "@/lib/query/hooks";
@@ -48,9 +49,11 @@ import { useFavoritesCount } from "@/lib/hooks/useFavorites";
 import { appConfig } from "@/lib/config/app";
 import { CartPreview } from "@/components/cart/CartPreview";
 import { AuthLink } from "@/components/auth/AuthLink";
+import { SearchBar } from "@/components/search/SearchBar";
 
 interface HeaderProps {
   className?: string;
+  withSearchBar?: boolean;
 }
 
 const NavLink = ({
@@ -86,7 +89,7 @@ const MobileNavLink = ({
   </Link>
 );
 
-export function Header({ className }: HeaderProps) {
+export function Header({ className, withSearchBar = true }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isAuthenticated, user } = useAuth();
   const logoutMutation = useLogout();
@@ -172,6 +175,13 @@ export function Header({ className }: HeaderProps) {
                 className="text-xs sm:text-sm hover:text-primary-foreground/80"
               >
                 Contact
+              </Link>
+
+              <Link
+                href="/docs/format-csv-import"
+                className="text-xs sm:text-sm hover:text-primary-foreground/80"
+              >
+                Documentation
               </Link>
             </div>
           </div>
@@ -287,39 +297,31 @@ export function Header({ className }: HeaderProps) {
             </Link>
 
             {/* Search */}
-            <div className="flex-1 hidden md:block max-w-2xl mx-8">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Rechercher un produit..."
-                  className="pl-10 pr-4 py-3 text-base border-2 border-border rounded-lg focus:border-primary focus-visible:border-primary focus:ring-0 w-full"
-                />
+            {withSearchBar && (
+              <div className="flex-1 hidden md:block max-w-2xl mx-8">
+                <SearchBar showButton={false} />
               </div>
-            </div>
+            )}
 
             {/* Actions */}
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="md:hidden">
-                    <Search className="w-6 h-6" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="p-4">
-                  <DialogHeader>
-                    <DialogTitle>Rechercher</DialogTitle>
-                  </DialogHeader>
-                  <div className="relative mt-4">
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <input
-                      type="text"
-                      placeholder="Rechercher un produit..."
-                      className="pl-10 pr-4 py-3 text-base border-2 border-border rounded-lg focus:border-primary focus:ring-0 w-full"
-                    />
-                  </div>
-                </DialogContent>
-              </Dialog>
+              {withSearchBar && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="md:hidden">
+                      <Search className="w-6 h-6" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="p-4">
+                    <DialogHeader>
+                      <DialogTitle>Rechercher</DialogTitle>
+                    </DialogHeader>
+                    <div className="mt-4">
+                      <SearchBar />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
               <Link
                 href="/nouveautes"
                 className="hidden md:flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-primary"
@@ -426,7 +428,7 @@ export function Header({ className }: HeaderProps) {
             </div>
             <div className="relative group">
               <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
-                <span>Promotions</span>
+                <span>Destockage</span>
                 <Badge
                   variant="secondary"
                   className="ml-1 text-[8px] p-[0px] px-0.5"
