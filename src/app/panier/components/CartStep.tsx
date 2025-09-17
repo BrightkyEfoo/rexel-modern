@@ -225,7 +225,7 @@ export function CartStep({
         {/* Continue Shopping */}
         <div className="pt-6">
           <Button variant="outline" asChild>
-            <Link href="/categories">
+            <Link href="/categorie">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Continuer mes achats
             </Link>

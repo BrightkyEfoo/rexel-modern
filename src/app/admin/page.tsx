@@ -5,6 +5,7 @@ import { BrandsManagement } from '@/components/admin/brands';
 import { CategoriesManagement } from '@/components/admin/categories';
 import { OrdersTab } from '@/components/admin/orders';
 import { OverviewTab } from '@/components/admin/overview';
+import { PickupPointsManagement } from '@/components/admin/pickup-points/PickupPointsManagement';
 import { ProductsManagement } from '@/components/admin/products';
 import { Footer } from '@/components/layout/Footer';
 import { useRequireAdminAuth } from '@/lib/hooks/useAdminAccess';
@@ -13,6 +14,7 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import {
   BarChart3,
   Building2,
+  MapPin,
   Package,
   ShoppingCart,
   Tag
@@ -98,6 +100,7 @@ export default function AdminDashboardPage() {
               { id: 'products', label: 'Produits', icon: Package },
               { id: 'categories', label: 'Catégories', icon: Tag },
               { id: 'brands', label: 'Marques', icon: Building2 },
+              { id: 'pickup-points', label: 'Points de Relais', icon: MapPin },
               { id: 'orders', label: 'Commandes', icon: ShoppingCart }
             ].map(({ id, label, icon: Icon }) => (
               <button
@@ -132,6 +135,11 @@ export default function AdminDashboardPage() {
         {/* Brands Tab */}
         {activeTab === 'brands' && (
           <BrandsManagement />
+        )}
+
+        {/* Pickup Points Tab */}
+        {activeTab === 'pickup-points' && (
+          <PickupPointsManagement />
         )}
 
         {/* Orders Tab */}

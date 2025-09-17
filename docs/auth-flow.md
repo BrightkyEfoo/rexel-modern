@@ -4,10 +4,10 @@
 
 ### 🔄 Flux principal
 
-1. **Utilisateur sur une page protégée** (ex: `/produits/123`)
+1. **Utilisateur sur une page protégée** (ex: `/produit/123`)
 2. **Redirection vers inscription** → `/auth/register?redirect=%2Fproduits%2F123`
 3. **Inscription réussie** → Redirection vers `/auth/login?redirect=%2Fproduits%2F123&email=user%40example.com`
-4. **Connexion réussie** → Redirection vers `/produits/123`
+4. **Connexion réussie** → Redirection vers `/produit/123`
 
 ### 🎯 Avantages
 
@@ -20,10 +20,10 @@
 
 #### Cas 1 : Inscription depuis une page produit
 ```
-/produits/abc123 
+/produit/abc123 
   → /auth/register?redirect=%2Fproduits%2Fabc123
   → /auth/login?redirect=%2Fproduits%2Fabc123&email=user%40example.com
-  → /produits/abc123 (après connexion)
+  → /produit/abc123 (après connexion)
 ```
 
 #### Cas 2 : Navigation directe vers inscription
@@ -65,13 +65,13 @@
 
 Pour tester le flux :
 
-1. **Aller sur une page** (ex: `http://localhost:3000/categories/electrique`)
+1. **Aller sur une page** (ex: `http://localhost:3000/categorie/electrique`)
 2. **Cliquer "Se connecter"** ou aller vers une zone protégée
 3. **Cliquer "Créer un compte"** sur la page de connexion
 4. **Remplir le formulaire d'inscription** et valider
 5. **Vérifier** : Redirection vers login avec email pré-rempli
 6. **Se connecter** avec le mot de passe
-7. **Vérifier** : Retour sur la page `/categories/electrique`
+7. **Vérifier** : Retour sur la page `/categorie/electrique`
 
 ### 🔍 Points de vérification
 

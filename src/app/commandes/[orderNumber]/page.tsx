@@ -1,49 +1,49 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import {
-  Package,
-  Clock,
-  Truck,
-  CheckCircle,
-  AlertCircle,
-  Download,
-  ArrowLeft,
-  MapPin,
-  DollarSign,
-  User,
-  Calendar,
-  FileText,
-  Star,
-  RotateCcw,
-  MessageCircle,
-  Phone,
-  Mail,
-  Copy,
-  ExternalLink,
-  X,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Calendar,
+  CheckCircle,
+  Clock,
+  Copy,
+  DollarSign,
+  Download,
+  ExternalLink,
+  FileText,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Package,
+  Phone,
+  RotateCcw,
+  Star,
+  Truck,
+  X,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 // import { useOrder } from '@/lib/query/hooks';
-import { useAuth } from "@/lib/auth/nextauth-hooks";
-import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { appConfig } from '@/lib/config/app';
+import { Header } from "@/components/layout/Header";
+import { useAuth } from "@/lib/auth/nextauth-hooks";
+import { appConfig } from "@/lib/config/app";
+import { useOrder } from "@/lib/hooks/useOrders";
 import { formatPrice } from "@/lib/utils/currency";
 
 export default function OrderDetailPage() {
   const params = useParams();
-  const orderId = params.id as string;
+  const orderNumber = params.orderNumber as string;
   const { user, isAuthenticated } = useAuth();
-  // const { data: order, isLoading, error } = useOrder(orderId);
+  const { data: order, isLoading, error } = useOrder(orderNumber);
 
   const [activeTab, setActiveTab] = useState<
     "details" | "tracking" | "documents" | "support"
@@ -178,7 +178,7 @@ export default function OrderDetailPage() {
     return null; // Will redirect
   }
 
-  if (false) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -193,7 +193,7 @@ export default function OrderDetailPage() {
     );
   }
 
-  if (false) {
+  if (error) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -210,7 +210,7 @@ export default function OrderDetailPage() {
     );
   }
 
-  const orderData: any = {};
+  const orderData: any = order;
   const statusConfig = getStatusConfig(orderData.status);
   const StatusIcon = statusConfig.icon;
   const timeline = getOrderTimeline(orderData);
@@ -236,12 +236,12 @@ export default function OrderDetailPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm" asChild>
+            {/* <Button variant="outline" size="sm" asChild>
               <Link href="/commandes">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Retour aux commandes
               </Link>
-            </Button>
+            </Button> */}
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
                 Commande {orderData.orderNumber}
@@ -260,13 +260,13 @@ export default function OrderDetailPage() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Badge className={`${statusConfig.color} text-lg px-4 py-2`}>
+            <Badge className={`${statusConfig.color} text-sm px-4 py-1`}>
               <StatusIcon className="w-4 h-4 mr-2" />
               {statusConfig.label}
             </Badge>
             <div className="text-right">
               <div className="text-2xl font-bold text-[#162e77]">
-                {formatPrice(orderData.totalPrice)}
+                {formatPrice(orderData.totalAmount)}
               </div>
               <div className="text-sm text-gray-500">
                 {orderData.items.length} article
@@ -382,17 +382,20 @@ export default function OrderDetailPage() {
                   </div>
                   <div className="flex justify-between">
                     <span>Livraison</span>
-                    <span>{formatPrice(orderData.shippingAmount)}</span>
+                    <span>
+                      {formatPrice(orderData.shippingAddress?.amount || "0")}
+                    </span>
                   </div>
+
                   <div className="flex justify-between">
                     <span>TVA</span>
-                    <span>{formatPrice(orderData.taxAmount)}</span>
+                    <span>{formatPrice(orderData.taxAmount || "0")}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
                     <span className="text-[#162e77]">
-                      {formatPrice(orderData.totalPrice)}
+                      {formatPrice(orderData.totalAmount)}
                     </span>
                   </div>
                 </div>
@@ -402,34 +405,36 @@ export default function OrderDetailPage() {
             {/* Addresses and Payment */}
             <div className="grid md:grid-cols-2 gap-8">
               {/* Shipping Address */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <MapPin className="w-5 h-5 mr-2" />
-                    Adresse de livraison
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="font-semibold">
-                      {orderData.shippingAddress.name}
-                    </div>
-                    {orderData.shippingAddress.company && (
-                      <div className="text-gray-600">
-                        {orderData.shippingAddress.company}
+              {orderData?.shippingAddress ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <MapPin className="w-5 h-5 mr-2" />
+                      Adresse de livraison
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="font-semibold">
+                        {orderData.shippingAddress.name}
                       </div>
-                    )}
-                    <div className="text-gray-600">
-                      {orderData.shippingAddress.street}
-                      <br />
-                      {orderData.shippingAddress.postalCode}{" "}
-                      {orderData.shippingAddress.city}
-                      <br />
-                      {orderData.shippingAddress.country}
+                      {orderData.shippingAddress.company && (
+                        <div className="text-gray-600">
+                          {orderData.shippingAddress.company}
+                        </div>
+                      )}
+                      <div className="text-gray-600">
+                        {orderData.shippingAddress.street}
+                        <br />
+                        {orderData.shippingAddress.postalCode}{" "}
+                        {orderData.shippingAddress.city}
+                        <br />
+                        {orderData.shippingAddress.country}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              ) : null}
 
               {/* Payment Info */}
               <Card>
@@ -451,23 +456,25 @@ export default function OrderDetailPage() {
                         {orderData.paymentMethod === "check" && "Chèque"}
                       </div>
                     </div>
-                    <div>
-                      <span className="text-gray-600">
-                        Adresse de facturation:
-                      </span>
-                      <div className="text-sm mt-1">
-                        <div>{orderData.billingAddress.name}</div>
-                        {orderData.billingAddress.company && (
-                          <div>{orderData.billingAddress.company}</div>
-                        )}
-                        <div>
-                          {orderData.billingAddress.street}
-                          <br />
-                          {orderData.billingAddress.postalCode}{" "}
-                          {orderData.billingAddress.city}
+                    {orderData?.billingAddress ? (
+                      <div>
+                        <span className="text-gray-600">
+                          Adresse de facturation:
+                        </span>
+                        <div className="text-sm mt-1">
+                          <div>{orderData.billingAddress.name}</div>
+                          {orderData.billingAddress.company && (
+                            <div>{orderData.billingAddress.company}</div>
+                          )}
+                          <div>
+                            {orderData.billingAddress.street}
+                            <br />
+                            {orderData.billingAddress.postalCode}{" "}
+                            {orderData.billingAddress.city}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    ) : null}
                   </div>
                 </CardContent>
               </Card>

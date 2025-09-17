@@ -67,7 +67,7 @@ export function BrandsSection() {
         {/* View all brands */}
         <div className="text-center">
           <Link
-            href="/marques"
+            href="/marque"
             className="inline-flex items-center space-x-2 text-primary-dark hover:text-primary-hover font-semibold text-lg group"
           >
             <span>Voir tous nos partenaires</span>

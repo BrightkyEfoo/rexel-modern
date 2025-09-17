@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Search, Filter, Grid, List, SortAsc, SortDesc, X } from "lucide-react";
+import { SearchFilters } from "@/components/search/SearchFilters";
+import { SearchPagination } from "@/components/search/SearchPagination";
+import { SearchResults } from "@/components/search/SearchResults";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -11,19 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useMultiSearch } from "@/lib/hooks/useSearch";
 import { useSearchFilters } from "@/lib/hooks/useSearchFilters";
-import {
-  useProductSearch,
-  useCategorySearch,
-  useBrandSearch,
-} from "@/lib/hooks/useSearch";
 import { formatSearchHit } from "@/lib/utils/search";
-import { SearchBar } from "@/components/search/SearchBar";
-import { SearchResults } from "@/components/search/SearchResults";
-import { SearchFilters } from "@/components/search/SearchFilters";
-import { SearchPagination } from "@/components/search/SearchPagination";
+import { Filter, Grid, List, Search, X } from "lucide-react";
+import { useMemo, useState } from "react";
 
 export function SearchPageContent() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -41,48 +35,67 @@ export function SearchPageContent() {
     setFilters,
   } = useSearchFilters();
 
-  // Requêtes de recherche selon le type sélectionné
-  const productSearchQuery = useProductSearch({
+  // Recherche multi-collections (produits, catégories, marques)
+  const multiSearchQuery = useMultiSearch({
     ...searchParams,
     type: undefined, // Enlever le type pour l'API spécifique
   });
 
-  const categorySearchQuery = useCategorySearch({
-    ...searchParams,
-    type: undefined,
-  });
+  // Séparer les résultats par collections
+  const resultsByCollection = useMemo(() => {
+    if (!multiSearchQuery.data?.results) return { products: [], categories: [], brands: [] };
 
-  const brandSearchQuery = useBrandSearch({
-    ...searchParams,
-    type: undefined,
-  });
+    const results = {
+      products: [] as any[],
+      categories: [] as any[],
+      brands: [] as any[]
+    };
 
-  // Sélectionner les résultats selon le type
-  const currentResults = useMemo(() => {
-    switch (filters.type) {
-      case "products":
-        return productSearchQuery;
-      case "categories":
-        return categorySearchQuery;
-      case "brands":
-        return brandSearchQuery;
-      default:
-        // Pour "all", on combine les résultats (on priorise les produits)
-        return productSearchQuery;
-    }
-  }, [filters.type, productSearchQuery, categorySearchQuery, brandSearchQuery]);
+    // Organiser les résultats par collection
+    multiSearchQuery.data.results.forEach((result) => {
+      if (result.collection === 'products') {
+        results.products = result.hits;
+      } else if (result.collection === 'categories') {
+        results.categories = result.hits;
+      } else if (result.collection === 'brands') {
+        results.brands = result.hits;
+      }
+    });
 
-  // Formater les résultats pour l'affichage
+    return results;
+  }, [multiSearchQuery.data]);
+
+  // Formater les résultats pour l'affichage selon le type sélectionné
   const formattedResults = useMemo(() => {
-    if (!currentResults.data?.hits) return [];
-
-    return currentResults.data.hits.map((hit) =>
-      formatSearchHit(hit, currentResults.data.collection)
-    );
-  }, [currentResults.data]);
+    if (filters.type === "products") {
+      return resultsByCollection.products.map((hit: any) => formatSearchHit(hit, "products"));
+    } else if (filters.type === "categories") {
+      return resultsByCollection.categories.map((hit: any) => formatSearchHit(hit, "categories"));
+    } else if (filters.type === "brands") {
+      return resultsByCollection.brands.map((hit: any) => formatSearchHit(hit, "brands"));
+    } else {
+      // Pour "all", on combine tous les résultats
+      return [
+        ...resultsByCollection.products.map((hit: any) => formatSearchHit(hit, "products")),
+        ...resultsByCollection.categories.map((hit: any) => formatSearchHit(hit, "categories")),
+        ...resultsByCollection.brands.map((hit: any) => formatSearchHit(hit, "brands"))
+      ];
+    }
+  }, [resultsByCollection, filters.type]);
 
   // Statistiques des résultats
-  const totalResults = currentResults.data?.found || 0;
+  const totalResults = useMemo(() => {
+    if (filters.type === "products") {
+      return resultsByCollection.products.length;
+    } else if (filters.type === "categories") {
+      return resultsByCollection.categories.length;
+    } else if (filters.type === "brands") {
+      return resultsByCollection.brands.length;
+    } else {
+      return resultsByCollection.products.length + resultsByCollection.categories.length + resultsByCollection.brands.length;
+    }
+  }, [resultsByCollection, filters.type]);
+  
   const currentPage = filters.page;
   const totalPages = Math.ceil(totalResults / filters.per_page);
 
@@ -131,18 +144,11 @@ export function SearchPageContent() {
           {filters.q ? `Recherche : "${filters.q}"` : "Recherche"}
         </h1>
 
-        {/* <div className="max-w-2xl">
-          <SearchBar 
-            placeholder="Affiner votre recherche..."
-            onSearch={handleSearch}
-          /> */}
-        {/* </div> */}
-
         {/* Statistiques et filtres actifs */}
         {filters.q && (
           <div className="flex flex-wrap items-center gap-4">
             <p className="text-muted-foreground">
-              {currentResults.isLoading
+              {multiSearchQuery.isLoading
                 ? "Recherche en cours..."
                 : `${totalResults.toLocaleString()} résultat${
                     totalResults > 1 ? "s" : ""
@@ -301,16 +307,106 @@ export function SearchPageContent() {
             </div>
 
             {/* Résultats de recherche */}
-            <SearchResults
-              results={formattedResults}
-              isLoading={currentResults.isLoading}
-              error={currentResults.error}
-              viewMode={viewMode}
-              query={filters.q}
-            />
+            {filters.type === "all" ? (
+              <div className="space-y-8">
+                {/* Section Produits */}
+                {resultsByCollection.products.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold">
+                        Produits ({resultsByCollection.products.length})
+                      </h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => updateType("products")}
+                      >
+                        Voir tous les produits
+                      </Button>
+                    </div>
+                    <SearchResults
+                      results={resultsByCollection.products.slice(0, 6).map((hit: any) => formatSearchHit(hit, "products"))}
+                      isLoading={multiSearchQuery.isLoading}
+                      error={multiSearchQuery.error}
+                      viewMode={viewMode}
+                      query={filters.q}
+                    />
+                  </div>
+                )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
+                {/* Section Catégories */}
+                {resultsByCollection.categories.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold">
+                        Catégories ({resultsByCollection.categories.length})
+                      </h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => updateType("categories")}
+                      >
+                        Voir toutes les catégories
+                      </Button>
+                    </div>
+                    <SearchResults
+                      results={resultsByCollection.categories.slice(0, 4).map((hit: any) => formatSearchHit(hit, "categories"))}
+                      isLoading={multiSearchQuery.isLoading}
+                      error={multiSearchQuery.error}
+                      viewMode={viewMode}
+                      query={filters.q}
+                    />
+                  </div>
+                )}
+
+                {/* Section Marques */}
+                {resultsByCollection.brands.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold">
+                        Marques ({resultsByCollection.brands.length})
+                      </h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => updateType("brands")}
+                      >
+                        Voir toutes les marques
+                      </Button>
+                    </div>
+                    <SearchResults
+                      results={resultsByCollection.brands.slice(0, 4).map((hit: any) => formatSearchHit(hit, "brands"))}
+                      isLoading={multiSearchQuery.isLoading}
+                      error={multiSearchQuery.error}
+                      viewMode={viewMode}
+                      query={filters.q}
+                    />
+                  </div>
+                )}
+
+                {/* Aucun résultat */}
+                {totalResults === 0 && !multiSearchQuery.isLoading && (
+                  <div className="text-center py-12">
+                    <Search className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-lg font-semibold mb-2">Aucun résultat trouvé</h3>
+                    <p className="text-muted-foreground">
+                      Essayez d'autres mots-clés ou vérifiez l'orthographe.
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <SearchResults
+                results={formattedResults}
+                isLoading={multiSearchQuery.isLoading}
+                error={multiSearchQuery.error}
+                viewMode={viewMode}
+                query={filters.q}
+              />
+            )}
+
+            {/* Pagination - seulement pour les vues spécifiques */}
+            {filters.type !== "all" && totalPages > 1 && (
               <SearchPagination
                 currentPage={currentPage}
                 totalPages={totalPages}

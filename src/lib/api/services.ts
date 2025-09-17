@@ -19,6 +19,14 @@ import type {
   CreateBrandRequest,
   UpdateBrandRequest,
 } from "./types";
+import type {
+  PickupPoint,
+  PickupPointFilters,
+  CreatePickupPointData,
+  PickupPointStats,
+  CountryManager,
+  CountryPickupPointsResponse,
+} from "../types/pickup-points";
 
 // Products Service
 export class ProductsService {
@@ -88,6 +96,43 @@ export class ProductsService {
     return apiClient.get<Product[]>(`/opened/products/brand/${brandId}`);
   }
 
+  async getProductsByBrandSlug(
+    brandSlug: string,
+    filters?: SearchFilters
+  ): Promise<ApiResponse<Product[]>> {
+    const params = new URLSearchParams();
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          if (Array.isArray(value)) {
+            params.append(key, value.join(","));
+          } else if (typeof value === "object" && value !== null) {
+            // Handle nested objects like priceRange
+            Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+              if (
+                nestedValue !== undefined &&
+                nestedValue !== null &&
+                nestedValue !== ""
+              ) {
+                params.append(`${key}.${nestedKey}`, nestedValue.toString());
+              }
+            });
+          } else {
+            params.append(key, value.toString());
+          }
+        }
+      });
+    }
+
+    const queryString = params.toString();
+    const url = `/opened/products/brand-slug/${brandSlug}${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    return apiClient.get<Product[]>(url);
+  }
+
   async searchProducts(
     query: string,
     page = 1,
@@ -134,19 +179,21 @@ export class ProductsService {
     return apiClient.delete<void>(`/secured/products/${id}`);
   }
 
-  async bulkImportProducts(products: any[]): Promise<ApiResponse<{
-    total: number;
-    successful: number;
-    failed: number;
-    results: Array<{
-      success: boolean;
-      productId?: number;
-      product?: any;
-      errors: string[];
-      warnings: string[];
-      originalIndex: number;
-    }>;
-  }>> {
+  async bulkImportProducts(products: any[]): Promise<
+    ApiResponse<{
+      total: number;
+      successful: number;
+      failed: number;
+      results: Array<{
+        success: boolean;
+        productId?: number;
+        product?: any;
+        errors: string[];
+        warnings: string[];
+        originalIndex: number;
+      }>;
+    }>
+  > {
     return nextAuthApiClient.post<{
       total: number;
       successful: number;
@@ -162,10 +209,12 @@ export class ProductsService {
     }>("/secured/products/bulk-import", { products });
   }
 
-  async startBulkImport(products: any[]): Promise<ApiResponse<{
-    importId: string;
-    total: number;
-  }>> {
+  async startBulkImport(products: any[]): Promise<
+    ApiResponse<{
+      importId: string;
+      total: number;
+    }>
+  > {
     const response = await nextAuthApiClient.post<{
       message: string;
       data: {
@@ -173,9 +222,9 @@ export class ProductsService {
         total: number;
       };
     }>("/secured/products/bulk-import/start", { products });
-    
-    console.log('🔍 Service startBulkImport response:', response);
-    
+
+    console.log("🔍 Service startBulkImport response:", response);
+
     // Transformer la réponse pour correspondre au type attendu
     return {
       data: response.data.data,
@@ -187,27 +236,29 @@ export class ProductsService {
     }>;
   }
 
-  async getImportProgress(importId: string): Promise<ApiResponse<{
-    id: string;
-    total: number;
-    processed: number;
-    successful: number;
-    failed: number;
-    status: 'processing' | 'completed' | 'failed';
-    currentProduct?: string;
-    results: Array<{
-      success: boolean;
-      productId?: number;
-      product?: any;
-      errors: string[];
-      warnings: string[];
-      originalIndex: number;
-    }>;
-    startTime: string;
-    endTime?: string;
-    percentage: number;
-    duration: number;
-  }>> {
+  async getImportProgress(importId: string): Promise<
+    ApiResponse<{
+      id: string;
+      total: number;
+      processed: number;
+      successful: number;
+      failed: number;
+      status: "processing" | "completed" | "failed";
+      currentProduct?: string;
+      results: Array<{
+        success: boolean;
+        productId?: number;
+        product?: any;
+        errors: string[];
+        warnings: string[];
+        originalIndex: number;
+      }>;
+      startTime: string;
+      endTime?: string;
+      percentage: number;
+      duration: number;
+    }>
+  > {
     const response = await nextAuthApiClient.get<{
       data: {
         id: string;
@@ -215,7 +266,7 @@ export class ProductsService {
         processed: number;
         successful: number;
         failed: number;
-        status: 'processing' | 'completed' | 'failed';
+        status: "processing" | "completed" | "failed";
         currentProduct?: string;
         results: Array<{
           success: boolean;
@@ -231,9 +282,9 @@ export class ProductsService {
         duration: number;
       };
     }>(`/secured/products/bulk-import/progress/${importId}`);
-    
-    console.log('🔍 Service getImportProgress response:', response);
-    
+
+    console.log("🔍 Service getImportProgress response:", response);
+
     // Transformer la réponse pour correspondre au type attendu
     // La réponse a une structure: { data: { data: { ... } } }
     return {
@@ -245,7 +296,7 @@ export class ProductsService {
       processed: number;
       successful: number;
       failed: number;
-      status: 'processing' | 'completed' | 'failed';
+      status: "processing" | "completed" | "failed";
       currentProduct?: string;
       results: Array<{
         success: boolean;
@@ -262,15 +313,17 @@ export class ProductsService {
     }>;
   }
 
-  async getBulkImportExample(): Promise<ApiResponse<{
-    format: string;
-    separator: string;
-    encoding: string;
-    requiredColumns: string[];
-    optionalColumns: string[];
-    example: any[];
-    notes: string[];
-  }>> {
+  async getBulkImportExample(): Promise<
+    ApiResponse<{
+      format: string;
+      separator: string;
+      encoding: string;
+      requiredColumns: string[];
+      optionalColumns: string[];
+      example: any[];
+      notes: string[];
+    }>
+  > {
     return nextAuthApiClient.get<{
       format: string;
       separator: string;
@@ -282,11 +335,13 @@ export class ProductsService {
     }>("/secured/products/bulk-import/example");
   }
 
-  async validateBulkImportCsv(csvData: string): Promise<ApiResponse<{
-    valid: boolean;
-    message: string;
-    error?: string;
-  }>> {
+  async validateBulkImportCsv(csvData: string): Promise<
+    ApiResponse<{
+      valid: boolean;
+      message: string;
+      error?: string;
+    }>
+  > {
     return nextAuthApiClient.post<{
       valid: boolean;
       message: string;
@@ -523,17 +578,19 @@ export class UsersService {
 
 // Cart Service
 export class CartService {
-  async getCart(): Promise<ApiResponse<Cart>> {
-    return apiClient.get<Cart>("/opened/cart", { cache: false });
+  async getCart(userId?: number): Promise<ApiResponse<Cart>> {
+    return apiClient.get<Cart>(`/opened/cart?userId=${userId}`, { cache: false });
   }
 
   async addToCart(
     productId: number,
-    quantity: number = 1
+    quantity: number = 1,
+    userId?: number
   ): Promise<ApiResponse<Cart>> {
     return apiClient.post<Cart>("/opened/cart/items", {
       productId,
       quantity,
+      userId
     });
   }
 
@@ -760,6 +817,86 @@ export class StatsService {
   }
 }
 
+// Pickup Points Service
+export class PickupPointsService {
+  async getPickupPoints(): Promise<ApiResponse<PickupPoint[]>> {
+    return apiClient.get<PickupPoint[]>("/opened/pickup-points", {
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    });
+  }
+
+  async getPickupPoint(slug: string): Promise<ApiResponse<PickupPoint>> {
+    return apiClient.get<PickupPoint>(`/opened/pickup-points/${slug}`);
+  }
+
+  async searchPickupPoints(query: string): Promise<ApiResponse<PickupPoint[]>> {
+    return apiClient.get<PickupPoint[]>(
+      `/opened/pickup-points/search?q=${encodeURIComponent(query)}`
+    );
+  }
+
+  async getPickupPointStats(): Promise<ApiResponse<PickupPointStats>> {
+    return apiClient.get<PickupPointStats>("/opened/pickup-points/stats");
+  }
+
+  // Admin methods
+  async getPickupPointsAdmin(
+    filters?: PickupPointFilters
+  ): Promise<ApiResponse<PickupPoint[]>> {
+    const params = new URLSearchParams();
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          params.append(key, value.toString());
+        }
+      });
+    }
+
+    const queryString = params.toString();
+    const url = `/secured/pickup-points${queryString ? `?${queryString}` : ""}`;
+    const res = await nextAuthApiClient.get<unknown>(url)
+
+    return res.data as ApiResponse<PickupPoint[]>;
+  }
+
+  async createPickupPoint(
+    data: CreatePickupPointData
+  ): Promise<ApiResponse<PickupPoint>> {
+    return nextAuthApiClient.post<PickupPoint>("/secured/pickup-points", data);
+  }
+
+  async updatePickupPoint(
+    id: number,
+    data: Partial<CreatePickupPointData>
+  ): Promise<ApiResponse<PickupPoint>> {
+    return nextAuthApiClient.put<PickupPoint>(`/secured/pickup-points/${id}`, data);
+  }
+
+  async deletePickupPoint(id: number): Promise<ApiResponse<void>> {
+    return nextAuthApiClient.delete<void>(`/secured/pickup-points/${id}`);
+  }
+
+  // Country-specific methods
+  async getPickupPointsByCountry(countryCode: string): Promise<ApiResponse<PickupPoint[]>> {
+    return nextAuthApiClient.get<PickupPoint[]>(`/opened/pickup-points/country/${countryCode}`, {
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    });
+  }
+
+  async getCountryManager(countryCode: string): Promise<ApiResponse<CountryManager>> {
+    return apiClient.get<CountryManager>(`/opened/country-managers/${countryCode}`, {
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    });
+  }
+
+  async getCountryPickupPointsWithManager(countryCode: string): Promise<ApiResponse<CountryPickupPointsResponse>> {
+    return apiClient.get<CountryPickupPointsResponse>(`/opened/pickup-points/country/${countryCode}/with-manager`, {
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    });
+  }
+}
+
 // Export instances
 export const productsService = new ProductsService();
 export const categoriesService = new CategoriesService();
@@ -770,3 +907,4 @@ export const favoritesService = new FavoritesService();
 export const filesService = new FilesService();
 export const contentService = new ContentService();
 export const statsService = new StatsService();
+export const pickupPointsService = new PickupPointsService();

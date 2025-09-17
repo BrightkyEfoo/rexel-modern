@@ -42,7 +42,9 @@ import {
   Mail,
   Settings,
   File,
+  Building2,
 } from "lucide-react";
+import Image from "next/image";
 import { useAuth, useLogout } from "@/lib/auth/nextauth-hooks";
 import { useMainCategories } from "@/lib/query/hooks";
 import { useFavoritesCount } from "@/lib/hooks/useFavorites";
@@ -88,6 +90,16 @@ const MobileNavLink = ({
     {children}
   </Link>
 );
+
+// Pays de la zone CEMAC
+const cemacCountries = [
+  { code: "CM", name: "Cameroun" },
+  { code: "CF", name: "Centrafrique" },
+  { code: "TD", name: "Tchad" },
+  { code: "CG", name: "République du Congo" },
+  { code: "GQ", name: "Guinée équatoriale" },
+  { code: "GA", name: "Gabon" },
+];
 
 export function Header({ className, withSearchBar = true }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -214,6 +226,10 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
                   <MobileNavLink href="/catalogue" onNavigate={closeMobileMenu}>
                     <Grid className="w-5 h-5" />
                     <span>Catalogue</span>
+                  </MobileNavLink>
+                  <MobileNavLink href="/marque" onNavigate={closeMobileMenu}>
+                    <Building2 className="w-5 h-5" />
+                    <span>Marques</span>
                   </MobileNavLink>
                   <MobileNavLink
                     href="/nouveautes"
@@ -378,74 +394,95 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
       {/* Navigation */}
       <div className="bg-slate-50 border-b hidden md:block">
         <div className="container mx-auto px-4">
-          <nav className="flex items-center space-x-8 h-12">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-primary"
-                >
-                  <Package className="w-4 h-4" />
-                  <span>Produits</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-64 p-4">
-                <DropdownMenuLabel className="text-base font-semibold">
-                  Catégories
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <div className="grid grid-cols-1 gap-1 mt-2">
-                  {categoriesLoading ? (
-                    <div className="py-2 px-3 text-muted-foreground">
-                      Chargement...
-                    </div>
-                  ) : categories.length > 0 ? (
-                    categories.map((category) => (
-                      <DropdownMenuItem key={category.id} asChild>
-                        <Link
-                          href={`/categorie/${category.slug}`}
-                          className="flex items-center py-2 px-3 rounded-md hover:bg-slate-100"
-                        >
-                          {category.name}
-                        </Link>
-                      </DropdownMenuItem>
-                    ))
-                  ) : (
-                    <div className="py-2 px-3 text-muted-foreground">
-                      Aucune catégorie disponible
-                    </div>
-                  )}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <div className="relative group">
-              <Link href="/catalogue">
-                <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-pointer">
-                  <Grid className="w-4 h-4" />
-                  <span>Catalogue </span>
+          <div className="flex items-center justify-between h-12">
+            <nav className="flex items-center space-x-8">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-primary"
+                  >
+                    <Package className="w-4 h-4" />
+                    <span>Produits</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64 p-4">
+                  <DropdownMenuLabel className="text-base font-semibold">
+                    Catégories
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <div className="grid grid-cols-1 gap-1 mt-2">
+                    {categoriesLoading ? (
+                      <div className="py-2 px-3 text-muted-foreground">
+                        Chargement...
+                      </div>
+                    ) : categories.length > 0 ? (
+                      categories.map((category) => (
+                        <DropdownMenuItem key={category.id} asChild>
+                          <Link
+                            href={`/categorie/${category.slug}`}
+                            className="flex items-center py-2 px-3 rounded-md hover:bg-slate-100"
+                          >
+                            {category.name}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))
+                    ) : (
+                      <div className="py-2 px-3 text-muted-foreground">
+                        Aucune catégorie disponible
+                      </div>
+                    )}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <div className="relative group">
+                <Link href="/catalogue">
+                  <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-pointer">
+                    <Grid className="w-4 h-4" />
+                    <span>Catalogue </span>
+                  </span>
+                </Link>
+              </div>
+              <div className="relative group">
+                <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
+                  <span>Destockage</span>
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 text-[8px] p-[0px] px-0.5"
+                  >
+                    Soon
+                  </Badge>
+                </span>
+              </div>
+              <Link href="/services" className="relative group">
+                <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:cursor-pointer">
+                  <Settings className="w-4 h-4" />
+                  <span>Services</span>
                 </span>
               </Link>
-            </div>
-            <div className="relative group">
-              <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
-                <span>Destockage</span>
-                <Badge
-                  variant="secondary"
-                  className="ml-1 text-[8px] p-[0px] px-0.5"
-                >
-                  Soon
-                </Badge>
-              </span>
-            </div>
-            <Link href="/services" className="relative group">
-              <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:cursor-pointer">
-                <Settings className="w-4 h-4" />
-                <span>Services</span>
-              </span>
-            </Link>
 
-            <NavLink href="/contact">Contact</NavLink>
-          </nav>
+              <NavLink href="/contact">Contact</NavLink>
+            </nav>
+            
+            {/* Drapeaux CEMAC */}
+            <div className="flex items-center space-x-3">
+              {cemacCountries.map((country) => (
+                <Link
+                  key={country.code}
+                  href={`/points-relais/${country.code.toLowerCase()}`}
+                  className="relative w-8 h-6 overflow-hidden rounded-sm border border-gray-200 hover:scale-110 transition-transform duration-200 cursor-pointer"
+                  title={`Points de relais en ${country.name}`}
+                >
+                  <Image
+                    alt={country.name}
+                    src={`http://purecatamphetamine.github.io/country-flag-icons/3x2/${country.code}.svg`}
+                    fill
+                    className="object-cover"
+                  />
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </header>

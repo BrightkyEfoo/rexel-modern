@@ -1,24 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Logo } from "@/components/ui/logo";
-import { ArrowLeft, Check } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { AlertCircle, ArrowLeft, Check, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { ConfirmationStepProps } from "../types";
-import { formatPrice, generateOrderNumber } from "../utils";
+import { formatPrice } from "../utils";
 
 export function ConfirmationStep({
-  cart,
+  mutation,
   totals,
-  user,
-  selectedShippingAddress,
-  selectedBillingAddress,
   paymentMethod,
-  orderNotes,
   deliveryMethod,
 }: ConfirmationStepProps) {
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
@@ -27,7 +24,51 @@ export function ConfirmationStep({
     setImageErrors((prev) => ({ ...prev, [productId]: true }));
   };
 
-  const orderNumber = generateOrderNumber();
+  // État de chargement
+  if (mutation.isPending) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center py-16">
+          <Loader2 className="w-16 h-16 animate-spin text-primary mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-foreground mb-4">
+            Création de votre commande...
+          </h2>
+          <p className="text-muted-foreground">
+            Veuillez patienter pendant que nous traitons votre commande.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // État d'erreur
+  if (mutation.isError) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <h2 className="text-3xl font-bold text-foreground mb-4">
+            Erreur lors de la commande
+          </h2>
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {mutation.error?.message || "Une erreur est survenue"}
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
+  }
+
+  // État de succès
+  if (!mutation.isSuccess || !mutation.data) {
+    return null;
+  }
+
+  const order = mutation.data.data;
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -39,8 +80,8 @@ export function ConfirmationStep({
           Commande confirmée !
         </h2>
         <p className="text-muted-foreground">
-          Merci pour votre commande. Vous recevrez un email de confirmation sous
-          peu.
+          Merci pour votre commande. Elle sera traitée par notre équipe dans les
+          plus brefs délais.
         </p>
       </div>
 
@@ -53,16 +94,27 @@ export function ConfirmationStep({
           <CardContent className="space-y-4">
             <div>
               <div className="font-semibold">Numéro de commande</div>
-              <div className="text-primary font-mono">{orderNumber}</div>
+              <div className="text-primary font-mono">{order.orderNumber}</div>
             </div>
             <div>
               <div className="font-semibold">Date de commande</div>
               <div>
-                {new Date().toLocaleDateString("fr-FR", {
+                {new Date(order.createdAt).toLocaleDateString("fr-FR", {
                   year: "numeric",
                   month: "long",
                   day: "numeric",
                 })}
+              </div>
+            </div>
+            <div>
+              <div className="font-semibold">Statut</div>
+              <div className="capitalize">
+                {order.status === "pending" && "En attente de validation"}
+                {order.status === "confirmed" && "Confirmée"}
+                {order.status === "processing" && "En traitement"}
+                {order.status === "shipped" && "Expédiée"}
+                {order.status === "delivered" && "Livrée"}
+                {order.status === "cancelled" && "Annulée"}
               </div>
             </div>
             <div>
@@ -71,18 +123,6 @@ export function ConfirmationStep({
                 {paymentMethod === "credit_card" && "Carte bancaire"}
                 {paymentMethod === "bank_transfer" && "Virement bancaire"}
                 {paymentMethod === "check" && "Chèque"}
-              </div>
-            </div>
-            <div>
-              <div className="font-semibold">Livraison prévue</div>
-              <div>
-                {new Date(
-                  Date.now() + 3 * 24 * 60 * 60 * 1000
-                ).toLocaleDateString("fr-FR", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
               </div>
             </div>
           </CardContent>
@@ -133,14 +173,14 @@ export function ConfirmationStep({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {cart.items.map((item: any) => (
+            {order.items.map((item: any) => (
               <div
                 key={item.id}
                 className="flex items-center space-x-4 py-4 border-b border-border last:border-b-0"
               >
                 <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden">
-                  {imageErrors[item.product.id.toString()] ||
-                  !item.product.imageUrl ? (
+                  {imageErrors[item.productId?.toString()] ||
+                  !item.product?.imageUrl ? (
                     <div className="w-full h-full flex items-center justify-center bg-muted">
                       <Logo variant="light" size="sm" showText={false} />
                     </div>
@@ -149,30 +189,25 @@ export function ConfirmationStep({
                       src={
                         item.product.files?.[0]?.url || item.product.imageUrl
                       }
-                      alt={item.product.name}
+                      alt={item.productName}
                       width={64}
                       height={64}
                       className="object-contain w-full h-full p-1"
                       onError={() =>
-                        handleImageError(item.product.id.toString())
+                        handleImageError(item.productId?.toString())
                       }
                     />
                   )}
                 </div>
                 <div className="flex-1">
-                  <div className="font-semibold">{item.product.name}</div>
+                  <div className="font-semibold">{item.productName}</div>
                   <div className="text-sm text-muted-foreground">
                     Quantité: {item.quantity} •{" "}
-                    {item.product?.price
-                      ? formatPrice(Number(item.product.price))
-                      : item.price
-                      ? formatPrice(Number(item.price))
-                      : ""}{" "}
-                    / unité
+                    {formatPrice(Number(item.unitPrice))} / unité
                   </div>
                 </div>
                 <div className="font-semibold">
-                  {item.totalPrice ? formatPrice(item.totalPrice) : ""}
+                  {formatPrice(Number(item.totalPrice))}
                 </div>
               </div>
             ))}

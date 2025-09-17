@@ -26,7 +26,7 @@ export function formatSearchHit(hit: SearchHit, collection: string): FormattedSe
         subtitle: product.brand_name,
         description: product.short_description || product.description,
         image_url: product.image_url,
-        url: `/produits/${product.slug}`,
+        url: `/produit/${product.slug}`,
         score,
         highlights: hit.highlights?.map(h => ({
           field: h.field,
@@ -43,7 +43,7 @@ export function formatSearchHit(hit: SearchHit, collection: string): FormattedSe
         subtitle: category.parent_name ? `Sous-catégorie de ${category.parent_name}` : 'Catégorie principale',
         description: category.description,
         image_url: undefined,
-        url: `/categories/${category.slug}`,
+        url: `/categorie/${category.slug}`,
         score,
         highlights: hit.highlights?.map(h => ({
           field: h.field,
@@ -60,7 +60,7 @@ export function formatSearchHit(hit: SearchHit, collection: string): FormattedSe
         subtitle: `${brand.products_count} produit${brand.products_count > 1 ? 's' : ''}`,
         description: brand.description,
         image_url: undefined,
-        url: `/marques/${brand.slug}`,
+        url: `/marque/${brand.slug}`,
         score,
         highlights: hit.highlights?.map(h => ({
           field: h.field,
@@ -180,11 +180,11 @@ export function combineAutocompleteResults(multiResult: MultiSearchResult): Sear
 export function getResultUrl(suggestion: SearchSuggestion): string {
   switch (suggestion.type) {
     case 'product':
-      return `/produits/${suggestion.slug}`
+      return `/produit/${suggestion.slug}`
     case 'category':
-      return `/categories/${suggestion.slug}`
+      return `/categorie/${suggestion.slug}`
     case 'brand':
-      return `/marques/${suggestion.slug}`
+      return `/marque/${suggestion.slug}`
     default:
       return '#'
   }

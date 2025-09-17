@@ -71,6 +71,8 @@ export class SearchService {
       `/api/v1/opened/search/products?${searchParams.toString()}`
     )
 
+    console.log('response of search products', response.data)
+
     return response.data
   }
 

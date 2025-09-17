@@ -205,6 +205,7 @@ export default function CataloguePage() {
               >
                 <div className="bg-background/95 backdrop-blur-sm rounded-lg border border-border/50 p-4 shadow-sm">
                   <FilterContent
+                    // @ts-ignore
                     categoryData={categoryDataForFilters}
                     filters={filters}
                     priceRange={priceRange}

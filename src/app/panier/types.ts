@@ -19,6 +19,8 @@ export interface ShippingStepProps {
   setSelectedShippingAddress: (id: string) => void;
   selectedBillingAddress: string;
   setSelectedBillingAddress: (id: string) => void;
+  selectedPickupPoint: string;
+  setSelectedPickupPoint: (id: string) => void;
   deliveryMethod: string;
   setDeliveryMethod: (method: string) => void;
   onNext: () => void;
@@ -38,12 +40,8 @@ export interface PaymentStepProps {
 }
 
 export interface ConfirmationStepProps {
-  cart: any;
+  mutation: any;
   totals: CartTotals;
-  user: any;
-  selectedShippingAddress: string;
-  selectedBillingAddress: string;
   paymentMethod: string;
-  orderNotes: string;
   deliveryMethod: string;
 }

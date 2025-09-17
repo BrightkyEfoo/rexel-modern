@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from "next/link";
 import {
   MapPin,
   Phone,
@@ -12,12 +12,12 @@ import {
   Shield,
   Award,
   Clock,
-  Twitter
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Logo } from '@/components/ui/logo';
-import { appConfig } from '@/lib/config/app';
+  Twitter,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Logo } from "@/components/ui/logo";
+import { appConfig } from "@/lib/config/app";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -206,11 +206,6 @@ export function Footer() {
               <Clock className="w-5 h-5 text-blue-400" />
               <span className="text-sm text-gray-300">Livraison J+1</span>
             </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 bg-gray-700 rounded"></div>
-            <div className="w-8 h-8 bg-gray-700 rounded"></div>
-            <div className="w-8 h-8 bg-gray-700 rounded"></div>
           </div>
         </div>
       </div>

@@ -16,17 +16,18 @@ import {
   contentService,
   statsService,
 } from "../api/services";
-import { 
+import {
   useFavorites as useFavoritesHook,
   useFavoritesCount,
   useAddToFavorites,
   useRemoveFromFavorites,
   useRemoveFromFavoritesByProduct,
   useToggleFavorite,
-  useProductFavoriteStatus
+  useProductFavoriteStatus,
 } from "../hooks/useFavorites";
+import { useAuth } from "../auth/nextauth-hooks";
 
-  // Query Keys
+// Query Keys
 export const queryKeys = {
   // Products
   products: ["products"] as const,
@@ -35,6 +36,8 @@ export const queryKeys = {
     ["products", "category", categoryId] as const,
   productsByCategorySlug: (categorySlug: string) =>
     ["products", "category-slug", categorySlug] as const,
+  productsByBrandSlug: (brandSlug: string, filters: SearchFilters) =>
+    ["products", "brand-slug", brandSlug, filters] as const,
   featuredProducts: ["products", "featured"] as const,
   searchProducts: (query: string) => ["products", "search", query] as const,
   similarProducts: (slug: string) => ["products", "similar", slug] as const,
@@ -105,11 +108,26 @@ export function useProductsByCategory(categoryId: string) {
   });
 }
 
-export function useProductsByCategorySlug(categorySlug: string, filters?: SearchFilters) {
+export function useProductsByCategorySlug(
+  categorySlug: string,
+  filters?: SearchFilters
+) {
   return useQuery({
-    queryKey: [...queryKeys.productsByCategorySlug(categorySlug), filters],
-    queryFn: () => productsService.getProductsByCategorySlug(categorySlug, filters),
+    queryKey: queryKeys.productsByCategorySlug(categorySlug),
+    queryFn: () =>
+      productsService.getProductsByCategorySlug(categorySlug, filters),
     enabled: !!categorySlug,
+  });
+}
+
+export function useProductsByBrandSlug(
+  brandSlug: string,
+  filters?: SearchFilters
+) {
+  return useQuery({
+    queryKey: queryKeys.productsByBrandSlug(brandSlug, filters || {}),
+    queryFn: () => productsService.getProductsByBrandSlug(brandSlug, filters),
+    enabled: !!brandSlug,
   });
 }
 
@@ -192,6 +210,14 @@ export function useBrand(id: string) {
   });
 }
 
+export function useBrandBySlug(slug: string) {
+  return useQuery({
+    queryKey: queryKeys.brand(slug),
+    queryFn: () => brandsService.getBrand(slug),
+    enabled: !!slug,
+  });
+}
+
 export function useFeaturedBrands() {
   return useQuery({
     queryKey: queryKeys.featuredBrands,
@@ -264,10 +290,14 @@ export function useUpdateUser() {
 }
 
 // Cart Hooks
-export function useCart(options?: { enabled?: boolean }) {
+export function useCart(options?: { enabled?: boolean, }) {
+  const { session } = useAuth();
+  
   return useQuery({
     queryKey: queryKeys.cart,
-    queryFn: () => cartService.getCart(),
+    queryFn: () => {
+      console.log('session.user.id', session?.user?.id)
+      return cartService.getCart(session?.user?.id ? Number(session?.user?.id) : undefined)},
     retry: false,
     enabled: options?.enabled ?? true,
   });
@@ -284,6 +314,8 @@ export function useCartCount() {
 export function useAddToCart() {
   const queryClient = useQueryClient();
 
+  const { isAuthenticated, session } = useAuth();
+
   return useMutation({
     mutationFn: ({
       productId,
@@ -291,7 +323,12 @@ export function useAddToCart() {
     }: {
       productId: string;
       quantity?: number;
-    }) => cartService.addToCart(Number(productId), quantity),
+    }) =>
+      cartService.addToCart(
+        Number(productId),
+        quantity,
+        isAuthenticated ? Number(session?.user?.id) : undefined
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
       queryClient.invalidateQueries({ queryKey: queryKeys.cartCount });
@@ -341,16 +378,16 @@ export function useMergeCart() {
 
   return useMutation({
     mutationFn: () => {
-      
       // Vérifier qu'on a un token avant d'appeler
-      const token = typeof window !== 'undefined' 
-        ? localStorage.getItem('kesimarket_access_token') 
-        : null;
-      
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("kesimarket_access_token")
+          : null;
+
       if (!token) {
-        throw new Error('User not authenticated');
+        throw new Error("User not authenticated");
       }
-      
+
       return cartService.mergeCart();
     },
     onSuccess: (data) => {
@@ -358,14 +395,21 @@ export function useMergeCart() {
       queryClient.invalidateQueries({ queryKey: queryKeys.cartCount });
     },
     onError: (error) => {
-      console.error('❌ Cart merge failed:', error);
+      console.error("❌ Cart merge failed:", error);
     },
   });
 }
 
 // Favorites Hooks - Re-exported from dedicated hooks
 export const useFavorites = useFavoritesHook;
-export { useFavoritesCount, useAddToFavorites, useRemoveFromFavorites, useRemoveFromFavoritesByProduct, useToggleFavorite, useProductFavoriteStatus };
+export {
+  useFavoritesCount,
+  useAddToFavorites,
+  useRemoveFromFavorites,
+  useRemoveFromFavoritesByProduct,
+  useToggleFavorite,
+  useProductFavoriteStatus,
+};
 
 // Hook simplifié pour vérifier si un produit est favori
 export function useIsFavorite(productId: string) {
@@ -373,7 +417,7 @@ export function useIsFavorite(productId: string) {
   return {
     data: isFavorite,
     isLoading,
-    error: null
+    error: null,
   };
 }
 

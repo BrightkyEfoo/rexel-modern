@@ -11,6 +11,7 @@ import type {
   PaginatedResponse,
   RequestConfig,
 } from "./types";
+import { getSession } from "next-auth/react";
 
 // Schema de validation pour les réponses API
 const ApiResponseSchema = z.object({
@@ -86,13 +87,13 @@ export class ApiClient {
   private setupInterceptors(): void {
     // Request interceptor
     this.instance.interceptors.request.use(
-      (configParams) => {
+      async (configParams) => {
         const config = configParams as CustomAxiosRequestConfig;
         const url = config.url || "";
 
         // Handle /secured routes - require authentication
         if (url.startsWith("/secured")) {
-          const token = this.getAuthToken();
+          const token = await this.getAuthToken();
 
           if (!token) {
             // Ne pas rediriger automatiquement, laisser le composant gérer
@@ -108,7 +109,16 @@ export class ApiClient {
 
         // Handle /opened routes - add correct prefix and session ID
         if (url.startsWith("/opened")) {
-          config.url = url.replace("/opened", "/api/v1/opened");
+          if (url.includes("/cart")) {
+            const token = await this.getAuthToken();
+            console.log("token", token);
+            config.headers.Authorization = `Bearer ${token}`;
+            config.url = url.replace("/opened", "/api/v1/secured");
+          } else {
+            config.url = url.replace("/opened", "/api/v1/opened");
+          }
+
+          console.log("url-test", url, url.includes("/cart"), config.url);
 
           // Add session ID for cart functionality
           const sessionId =
@@ -169,8 +179,12 @@ export class ApiClient {
     );
   }
 
-  private getAuthToken(): string | null {
-    return typeof window !== "undefined"
+  private async getAuthToken(): Promise<string | null> {
+    const session = await getSession();
+
+    return session
+      ? session.accessToken
+      : typeof window !== "undefined"
       ? localStorage.getItem("kesimarket_access_token")
       : null;
   }

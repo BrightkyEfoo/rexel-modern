@@ -10,7 +10,7 @@ interface BrandCardProps {
 export function BrandCard({ brand }: BrandCardProps) {
   return (
     <div className="group bg-background rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-border hover:border-primary/20 flex flex-col justify-between">
-      <Link href={`/marques/${brand.name.toLowerCase()}`} className="block">
+      <Link href={`/marque/${brand.name.toLowerCase()}`} className="block">
         <div className="relative h-16 flex items-center justify-center mb-4">
           <Image
             src={brand.logoUrl || "/images/PNG/logo_icon.png"}

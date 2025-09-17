@@ -46,10 +46,12 @@ export interface File {
   filename: string;
   originalName: string;
   mimeType: string;
+  isMain: boolean;
+  path: string;
   size: number;
   bucket: string;
   url: string;
-  fileableType?: string;
+  fileableType: string;
   fileableId?: number;
   createdAt: string;
   updatedAt: string;
@@ -118,6 +120,7 @@ export interface Brand {
   logoUrl?: string;
   websiteUrl?: string;
   isActive: boolean;
+  isFeatured: boolean;
   createdAt: string;
   updatedAt: string;
   

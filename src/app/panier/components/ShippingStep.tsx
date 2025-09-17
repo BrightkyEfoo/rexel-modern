@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ShippingAddressCard } from "@/components/ui/shipping-address-card";
 import { BillingAddressCard } from "@/components/ui/billing-address-card";
+import { PickupPointCard } from "@/components/ui/pickup-point-card";
 import { AddressFormData } from "@/components/ui/address-form";
 import { useAddresses, useCreateAddress } from "@/lib/hooks/useAddresses";
 import { ShippingStepProps } from "../types";
@@ -18,6 +19,8 @@ export function ShippingStep({
   setSelectedShippingAddress,
   selectedBillingAddress,
   setSelectedBillingAddress,
+  selectedPickupPoint,
+  setSelectedPickupPoint,
   deliveryMethod,
   setDeliveryMethod,
   onNext,
@@ -60,20 +63,69 @@ export function ShippingStep({
           Informations de livraison
         </h2>
 
-        {/* Shipping Address */}
-        {addressesLoading ? (
-          <div className="p-8 text-center">
-            <p>Chargement des adresses...</p>
+        {/* Delivery Method Selection */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Mode de livraison</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <Button
+              variant={deliveryMethod === "delivery" ? "default" : "outline"}
+              onClick={() => {
+                setDeliveryMethod("delivery");
+                setSelectedPickupPoint("");
+              }}
+              className="h-16"
+            >
+              <div className="text-center">
+                <div className="font-semibold">Livraison à domicile</div>
+                <div className="text-sm text-muted-foreground">
+                  {formatPrice(totals.shipping)}
+                </div>
+              </div>
+            </Button>
+            <Button
+              variant={deliveryMethod === "pickup" ? "default" : "outline"}
+              onClick={() => {
+                setDeliveryMethod("pickup");
+                setSelectedShippingAddress("");
+              }}
+              className="h-16"
+            >
+              <div className="text-center">
+                <div className="font-semibold">Retrait en boutique</div>
+                <div className="text-sm text-green-600 font-semibold">GRATUIT</div>
+              </div>
+            </Button>
           </div>
-        ) : (
-          <ShippingAddressCard
-            addresses={addresses}
-            selectedAddressId={selectedShippingAddress}
-            onAddressSelect={setSelectedShippingAddress}
-            onAddressAdd={(data) => handleAddAddress(data, "shipping")}
-            isAddingAddress={createAddressMutation.isPending}
-            deliveryMethod={deliveryMethod}
-            onDeliveryMethodChange={setDeliveryMethod}
+        </div>
+
+
+        {/* Shipping Address - Only show for delivery */}
+        {deliveryMethod === "delivery" && (
+          <>
+            {addressesLoading ? (
+              <div className="p-8 text-center">
+                <p>Chargement des adresses...</p>
+              </div>
+            ) : (
+              <ShippingAddressCard
+                addresses={addresses}
+                selectedAddressId={selectedShippingAddress}
+                onAddressSelect={setSelectedShippingAddress}
+                onAddressAdd={(data) => handleAddAddress(data, "shipping")}
+                isAddingAddress={createAddressMutation.isPending}
+                deliveryMethod={deliveryMethod}
+                onDeliveryMethodChange={setDeliveryMethod}
+              />
+            )}
+          </>
+        )}
+
+        {/* Pickup Points - Only show for pickup */}
+        {deliveryMethod === "pickup" && (
+          <PickupPointCard
+            selectedPickupPointId={selectedPickupPoint}
+            onPickupPointSelect={setSelectedPickupPoint}
+            isLoading={createAddressMutation.isPending}
           />
         )}
 
@@ -101,6 +153,7 @@ export function ShippingStep({
             onClick={onNext}
             disabled={
               (deliveryMethod === "delivery" && !selectedShippingAddress) ||
+              (deliveryMethod === "pickup" && !selectedPickupPoint) ||
               (needsBillingAddress && !useSameAsShipping && !selectedBillingAddress)
             }
             className="bg-primary hover:bg-primary/90"

@@ -158,7 +158,7 @@ export function CategoriesGrid() {
         {/* View all categories */}
         <div className="text-center mt-12">
           <Link
-            href="/categories"
+            href="/categorie"
             className="inline-flex items-center space-x-2 text-primary-dark hover:text-primary-hover font-semibold text-lg group"
           >
             <span>Voir toutes nos catégories</span>

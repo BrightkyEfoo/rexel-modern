@@ -9,6 +9,7 @@ import type { SearchParams, SearchOptions } from '@/lib/types/search'
 export const searchKeys = {
   all: ['search'] as const,
   global: (query: string, options?: SearchOptions) => [...searchKeys.all, 'global', query, options] as const,
+  multi: (params: SearchParams) => [...searchKeys.all, 'multi', params] as const,
   autocomplete: (query: string, collections?: string[]) => [...searchKeys.all, 'autocomplete', query, collections] as const,
   products: (params: SearchParams) => [...searchKeys.all, 'products', params] as const,
   categories: (params: SearchParams) => [...searchKeys.all, 'categories', params] as const,
@@ -26,6 +27,29 @@ export function useGlobalSearch(query: string, options: SearchOptions = {}) {
     queryKey: searchKeys.global(debouncedQuery, options),
     queryFn: () => searchService.search(debouncedQuery, options),
     enabled: debouncedQuery.length >= 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+
+/**
+ * Hook pour la recherche multi-collections (produits, catégories, marques)
+ */
+export function useMultiSearch(params: SearchParams) {
+  // Debounce seulement si on a une requête de recherche
+  const [debouncedQuery] = useDebounce(params.q || '', 300)
+  
+  const searchParams = {
+    ...params,
+    q: debouncedQuery
+  }
+
+  return useQuery({
+    queryKey: searchKeys.multi(searchParams),
+    queryFn: () => searchService.search(debouncedQuery, {
+      collections: ['products', 'categories', 'brands'],
+      per_page: params.per_page || 20
+    }),
+    enabled: !params.q || debouncedQuery.length >= 2,
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }
@@ -51,6 +75,8 @@ export function useAutocomplete(query: string, collections: string[] = ['product
 export function useProductSearch(params: SearchParams) {
   // Debounce seulement si on a une requête de recherche
   const [debouncedQuery] = useDebounce(params.q || '', 300)
+
+  
   
   const searchParams = {
     ...params,

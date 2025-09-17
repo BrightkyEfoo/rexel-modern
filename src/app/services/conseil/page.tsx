@@ -1,20 +1,17 @@
-import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { ScrollToTop } from '@/components/ui/scroll-to-top';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Header } from '@/components/layout/Header';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  Lightbulb, 
-  BarChart, 
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollToTop } from '@/components/ui/scroll-to-top';
+import {
+  BarChart,
   CheckCircle,
   FileText,
-  Calculator,
+  Lightbulb,
   Phone,
   Star,
-  Zap,
-  Shield
+  Users
 } from 'lucide-react';
 
 export default function ConseilServicePage() {

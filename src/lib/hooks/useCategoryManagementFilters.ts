@@ -1,60 +1,76 @@
-import { useCallback, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import type { CategoryFilters } from '@/lib/types/categories';
+"use client";
+
+import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
+import { useMemo, useCallback } from "react";
+import type { CategoryFilters } from "@/lib/types/categories";
 
 export function useCategoryManagementFilters() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const [filters, setFilters] = useQueryStates({
+    page: parseAsInteger.withDefault(1),
+    per_page: parseAsInteger.withDefault(20),
+    sort_by: parseAsString.withDefault("sortOrder"),
+    sort_order: parseAsString.withDefault("asc"),
+    search: parseAsString.withDefault(""),
+    parent_id: parseAsInteger,
+    is_active: parseAsString,
+  }, {
+    history: "push",
+    shallow: true,
+    clearOnDefault: true,
+  });
 
-  // Construire les filtres à partir des paramètres d'URL
-  const categoryFilters = useMemo((): CategoryFilters => {
-    return {
-      search: searchParams.get('search') || '',
-      sort_by: searchParams.get('sort_by') || 'sortOrder',
-      sort_order: (searchParams.get('sort_order') as 'asc' | 'desc') || 'asc',
-      page: Number(searchParams.get('page')) || 1,
-      per_page: Number(searchParams.get('per_page')) || 10,
-      isActive: searchParams.get('isActive') === 'true' ? true : searchParams.get('isActive') === 'false' ? false : undefined,
-      parentId: searchParams.get('parentId') ? Number(searchParams.get('parentId')) : undefined,
-    };
-  }, [searchParams]);
+  const categoryFilters: CategoryFilters = useMemo(() => ({
+    page: filters.page,
+    per_page: filters.per_page,
+    sort_by: filters.sort_by,
+    sort_order: filters.sort_order as 'asc' | 'desc',
+    search: filters.search || undefined,
+    parentId: filters.parent_id || undefined,
+    isActive: filters.is_active === 'true' ? true : filters.is_active === 'false' ? false : undefined,
+  }), [
+    filters.page,
+    filters.per_page, 
+    filters.sort_by,
+    filters.sort_order,
+    filters.search,
+    filters.parent_id,
+    filters.is_active
+  ]);
 
-  // Fonction pour mettre à jour les filtres dans l'URL
   const updateFilters = useCallback((newFilters: Partial<CategoryFilters>) => {
-    const params = new URLSearchParams(searchParams);
+    const nuqsFilters: any = {};
     
-    // Réinitialiser à la page 1 quand on change les filtres (sauf pagination)
-    if (!newFilters.page && Object.keys(newFilters).some(key => key !== 'page')) {
-      params.set('page', '1');
-    }
+    if (newFilters.page !== undefined) nuqsFilters.page = newFilters.page;
+    if (newFilters.per_page !== undefined) nuqsFilters.per_page = newFilters.per_page;
+    if (newFilters.sort_by !== undefined) nuqsFilters.sort_by = newFilters.sort_by;
+    if (newFilters.sort_order !== undefined) nuqsFilters.sort_order = newFilters.sort_order;
+    if (newFilters.search !== undefined) nuqsFilters.search = newFilters.search;
+    if (newFilters.parentId !== undefined) nuqsFilters.parent_id = newFilters.parentId;
+    if (newFilters.isActive !== undefined) nuqsFilters.is_active = newFilters.isActive?.toString();
+    
+    setFilters(nuqsFilters);
+  }, [setFilters]);
 
-    Object.entries(newFilters).forEach(([key, value]) => {
-      if (value === undefined || value === null || value === '') {
-        params.delete(key);
-      } else {
-        params.set(key, value.toString());
-      }
+  const resetFilters = useCallback(() => {
+    setFilters({
+      page: 1,
+      per_page: 20,
+      sort_by: "sortOrder",
+      sort_order: "asc",
+      search: "",
+      parent_id: null,
+      is_active: null,
     });
+  }, [setFilters]);
 
-    // Naviguer vers la nouvelle URL avec les filtres
-    const newUrl = `/admin/categories?${params.toString()}`;
-    router.replace(newUrl, { scroll: false });
-  }, [router, searchParams]);
-
-  // Fonction pour réinitialiser la pagination
   const resetPagination = useCallback(() => {
-    updateFilters({ page: 1 });
-  }, [updateFilters]);
-
-  // Fonction pour réinitialiser tous les filtres
-  const clearFilters = useCallback(() => {
-    router.replace('/admin/categories', { scroll: false });
-  }, [router]);
+    setFilters({ page: 1 });
+  }, [setFilters]);
 
   return {
     categoryFilters,
     updateFilters,
+    resetFilters,
     resetPagination,
-    clearFilters,
   };
 }

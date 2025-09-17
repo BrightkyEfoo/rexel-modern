@@ -5,9 +5,16 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/lib/auth/nextauth-hooks";
-import { useCart } from "@/lib/query/hooks";
+import { useCart, useClearCart } from "@/lib/query/hooks";
 import { useAddresses } from "@/lib/hooks/useAddresses";
-import { ArrowRight, Check, CreditCard, ShoppingCart, Truck, AlertCircle } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  CreditCard,
+  ShoppingCart,
+  Truck,
+  AlertCircle,
+} from "lucide-react";
 import Link from "next/link";
 
 // Import des composants séparés
@@ -19,18 +26,25 @@ import { ConfirmationStep } from "./components/ConfirmationStep";
 // Import des types et utilitaires
 import { CheckoutStep } from "./types";
 import { calculateTotals } from "./utils";
+import { useCreateOrder } from "@/lib/hooks/useCreateOrder";
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
   const { user, isAuthenticated } = useAuth();
   const { data: cart, isLoading, error } = useCart();
+  const { mutate: clearCart } = useClearCart();
   const { data: addresses = [] } = useAddresses();
+  const router = useRouter();
 
   // États principaux
   const [currentStep, setCurrentStep] = useState<CheckoutStep>("cart");
   const [promoCode, setPromoCode] = useState("");
   const [promoDiscount, setPromoDiscount] = useState(0);
-  const [selectedShippingAddress, setSelectedShippingAddress] = useState<string>("");
-  const [selectedBillingAddress, setSelectedBillingAddress] = useState<string>("");
+  const [selectedShippingAddress, setSelectedShippingAddress] =
+    useState<string>("");
+  const [selectedBillingAddress, setSelectedBillingAddress] =
+    useState<string>("");
+  const [selectedPickupPoint, setSelectedPickupPoint] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [orderNotes, setOrderNotes] = useState("");
   const [deliveryMethod, setDeliveryMethod] = useState<string>("delivery");
@@ -70,6 +84,36 @@ export default function CartPage() {
 
   // Calcul des totaux
   const totals = calculateTotals(cart, deliveryMethod, promoDiscount);
+
+  // React Query hook
+  const createOrderMutation = useCreateOrder();
+
+  const createOrder = async () => {
+    if (createOrderMutation.isPending || createOrderMutation.isSuccess) return;
+
+    const res = await createOrderMutation.mutateAsync({
+      shippingAddressId:
+        deliveryMethod === "delivery" ? String(selectedShippingAddress) : null,
+      pickupPointId: deliveryMethod === "pickup" ? selectedPickupPoint : null,
+      billingAddressId: selectedBillingAddress,
+      deliveryMethod: deliveryMethod as "delivery" | "pickup",
+      paymentMethod: paymentMethod as "credit_card" | "bank_transfer" | "check",
+      promoCode: promoCode || undefined,
+      notes: orderNotes,
+      totals: {
+        subtotal: totals.subtotal,
+        shipping: totals.shipping || 0,
+        discount: totals.discount || 0,
+        total: totals.total,
+      },
+    });
+
+    console.log('res', res)
+
+    // vider le panier
+    clearCart();
+    router.push(`/commandes/${res.data.orderNumber}`);
+  };
 
   // Loading state
   if (!isAuthenticated) {
@@ -122,7 +166,6 @@ export default function CartPage() {
   if (cartData.items.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-        
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-16">
@@ -158,7 +201,6 @@ export default function CartPage() {
           <span>/</span>
           <span className="text-foreground">Panier</span>
         </nav>
-
         {/* Step Indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-center space-x-4">
@@ -199,7 +241,6 @@ export default function CartPage() {
             ))}
           </div>
         </div>
-
         {/* Steps Content */}
         {currentStep === "cart" && (
           <CartStep
@@ -213,7 +254,6 @@ export default function CartPage() {
             deliveryMethod={deliveryMethod}
           />
         )}
-
         {currentStep === "shipping" && (
           <ShippingStep
             user={user}
@@ -221,6 +261,8 @@ export default function CartPage() {
             setSelectedShippingAddress={setSelectedShippingAddress}
             selectedBillingAddress={selectedBillingAddress}
             setSelectedBillingAddress={setSelectedBillingAddress}
+            selectedPickupPoint={selectedPickupPoint}
+            setSelectedPickupPoint={setSelectedPickupPoint}
             deliveryMethod={deliveryMethod}
             setDeliveryMethod={setDeliveryMethod}
             onNext={() => setCurrentStep("payment")}
@@ -228,7 +270,7 @@ export default function CartPage() {
             totals={totals}
           />
         )}
-
+        s
         {currentStep === "payment" && (
           <PaymentStep
             paymentMethod={paymentMethod}
@@ -236,21 +278,18 @@ export default function CartPage() {
             orderNotes={orderNotes}
             setOrderNotes={setOrderNotes}
             deliveryMethod={deliveryMethod}
-            onNext={() => setCurrentStep("confirmation")}
+            onNext={() => {
+              createOrder();
+            }}
             onBack={() => setCurrentStep("shipping")}
             totals={totals}
           />
         )}
-
         {currentStep === "confirmation" && (
           <ConfirmationStep
-            cart={cartData}
+            mutation={createOrderMutation}
             totals={totals}
-            user={user}
-            selectedShippingAddress={selectedShippingAddress}
-            selectedBillingAddress={selectedBillingAddress}
             paymentMethod={paymentMethod}
-            orderNotes={orderNotes}
             deliveryMethod={deliveryMethod}
           />
         )}
