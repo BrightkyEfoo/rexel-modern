@@ -29,11 +29,12 @@ env:
   CONTAINER_NAME: kesimarket-frontend-prod
   CONTAINER_PORT: 3000
   NETWORK_NAME: kesimarket-net
+  RUNNER: ubuntu-latest
 
 jobs:
   prepare-directory:
     name: Prepare VPS Directory
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: production
     steps:
       - name: Create deployment directory on VPS
@@ -52,7 +53,7 @@ jobs:
 
   docker-setup:
     name: Verify Docker Setup and Network
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: production
     steps:
       - name: Verify Docker environment and shared network
@@ -154,7 +155,7 @@ jobs:
 
   checkout:
     name: Checkout Code
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [docker-setup, prepare-directory]
     steps:
       - name: Checkout repository
@@ -171,7 +172,7 @@ jobs:
 
   build-docker:
     name: Build Docker Image
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: production
     needs: [checkout]
     steps:
@@ -347,7 +348,7 @@ jobs:
 
   transfer-image:
     name: Transfer Image to VPS
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: production
     needs: [prepare-directory, build-docker]
     steps:
@@ -389,7 +390,7 @@ jobs:
 
   load-and-run:
     name: Load and Run Frontend Service
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: production
     needs: [transfer-image]
     steps:
@@ -446,7 +447,7 @@ jobs:
 
   cleanup:
     name: Cleanup
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: production
     needs: [load-and-run]
     if: always()
