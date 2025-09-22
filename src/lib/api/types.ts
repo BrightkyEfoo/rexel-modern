@@ -225,6 +225,7 @@ export interface CategoryDetail extends Category {
       name: string;
       values: string[];
     }[];
+    
   };
 }
 

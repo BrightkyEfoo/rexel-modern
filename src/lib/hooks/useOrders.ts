@@ -87,11 +87,18 @@ const ordersApi = {
     return response.data.data as OrdersResponse;
   },
 
+  getOrder: async (orderId: string): Promise<Order> => {
+    const response = await nextAuthApi.secured.get<{ data: Order }>(
+      `/orders/${orderId}`
+    );
+    return response.data.data;
+  },
+
   updateOrderStatus: async (
     orderId: number,
     status: string
   ): Promise<{ data: Order }> => {
-    const response = await nextAuthApi.secured.patch<{ data: Order }>(
+    const response = await nextAuthApi.secured.put<{ data: Order }>(
       `/admin/orders/${orderId}/status`,
       { status }
     );
@@ -99,7 +106,7 @@ const ordersApi = {
   },
 
   confirmOrder: async (orderId: number): Promise<{ data: Order }> => {
-    const response = await nextAuthApi.secured.patch<{ data: Order }>(
+    const response = await nextAuthApi.secured.put<{ data: Order }>(
       `/admin/orders/${orderId}/confirm`
     );
     return response.data;
@@ -111,6 +118,15 @@ export function useOrders(params: OrdersParams = {}) {
   return useQuery({
     queryKey: ["orders", params],
     queryFn: () => ordersApi.getOrders(params),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+  });
+}
+
+export function useOrder(orderId: string) {
+  return useQuery({
+    queryKey: ["order", orderId],
+    queryFn: () => ordersApi.getOrder(orderId),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
   });

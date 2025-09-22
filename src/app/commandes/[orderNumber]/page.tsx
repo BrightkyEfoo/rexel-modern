@@ -37,17 +37,26 @@ import { Header } from "@/components/layout/Header";
 import { useAuth } from "@/lib/auth/nextauth-hooks";
 import { appConfig } from "@/lib/config/app";
 import { useOrder } from "@/lib/hooks/useOrders";
+import { useDownloadInvoice } from "@/lib/hooks/useInvoice";
+import { useOrderIssues } from "@/lib/hooks/useOrderIssues";
 import { formatPrice } from "@/lib/utils/currency";
+import { SafeImage } from "@/components/ui/safe-image";
+import { ReportIssueModal } from "@/components/ui/report-issue-modal";
+import { CancelOrderModal } from "@/components/ui/cancel-order-modal";
 
 export default function OrderDetailPage() {
   const params = useParams();
   const orderNumber = params.orderNumber as string;
   const { user, isAuthenticated } = useAuth();
   const { data: order, isLoading, error } = useOrder(orderNumber);
+  const downloadInvoiceMutation = useDownloadInvoice();
+  const { data: orderIssues } = useOrderIssues(orderNumber);
 
   const [activeTab, setActiveTab] = useState<
     "details" | "tracking" | "documents" | "support"
   >("details");
+  const [showReportIssueModal, setShowReportIssueModal] = useState(false);
+  const [showCancelOrderModal, setShowCancelOrderModal] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -236,12 +245,6 @@ export default function OrderDetailPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            {/* <Button variant="outline" size="sm" asChild>
-              <Link href="/commandes">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Retour aux commandes
-              </Link>
-            </Button> */}
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
                 Commande {orderData.orderNumber}
@@ -332,7 +335,7 @@ export default function OrderDetailPage() {
                       className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg"
                     >
                       <div className="w-20 h-20 bg-gray-100 rounded-lg">
-                        <Image
+                        <SafeImage
                           src={item.product.imageUrl}
                           alt={item.product.name}
                           width={80}
@@ -349,12 +352,12 @@ export default function OrderDetailPage() {
                         </Link>
                         <div className="text-sm text-gray-600 mt-1">
                           <Badge variant="secondary">
-                            {item.product.brandName}
+                            {item.product.brand.name}
                           </Badge>
                         </div>
                         <div className="text-sm text-gray-600 mt-1">
                           Quantité: {item.quantity} • Prix unitaire:{" "}
-                          {formatPrice(item.price)}
+                          {formatPrice(item.unitPrice)}
                         </div>
                       </div>
                       <div className="text-right">
@@ -454,6 +457,8 @@ export default function OrderDetailPage() {
                         {orderData.paymentMethod === "bank_transfer" &&
                           "Virement bancaire"}
                         {orderData.paymentMethod === "check" && "Chèque"}
+                        {orderData.paymentMethod === "store_payment" &&
+                          "Paiement en magasin"}
                       </div>
                     </div>
                     {orderData?.billingAddress ? (
@@ -631,7 +636,7 @@ export default function OrderDetailPage() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-3">
                       <FileText className="w-6 h-6 text-blue-600" />
                       <div>
                         <div className="font-semibold">Facture</div>
@@ -640,25 +645,30 @@ export default function OrderDetailPage() {
                         </div>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => downloadInvoiceMutation.mutate(orderNumber)}
+                      disabled={downloadInvoiceMutation.isPending}
+                    >
                       <Download className="w-4 h-4 mr-2" />
-                      Télécharger
+                      {downloadInvoiceMutation.isPending ? 'Génération...' : 'Télécharger'}
                     </Button>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg opacity-50">
                     <div className="flex items-center space-x-3">
-                      <FileText className="w-6 h-6 text-green-600" />
+                      <FileText className="w-6 h-6 text-gray-400" />
                       <div>
-                        <div className="font-semibold">Bon de livraison</div>
-                        <div className="text-sm text-gray-600">
-                          BL-{orderData.orderNumber}.pdf
+                        <div className="font-semibold text-gray-500">Bon de livraison</div>
+                        <div className="text-sm text-gray-400">
+                          Disponible après expédition
                         </div>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" disabled>
                       <Download className="w-4 h-4 mr-2" />
-                      Télécharger
+                      Non disponible
                     </Button>
                   </div>
 
@@ -753,14 +763,16 @@ export default function OrderDetailPage() {
                       <Button
                         variant="outline"
                         className="w-full justify-start"
+                        onClick={() => setShowReportIssueModal(true)}
                       >
                         <MessageCircle className="w-4 h-4 mr-2" />
                         Signaler un problème
                       </Button>
-                      {orderData.status === "pending" && (
+                      {(orderData.status === "pending" || orderData.status === "confirmed") && (
                         <Button
                           variant="outline"
                           className="w-full justify-start text-red-600 hover:text-red-700"
+                          onClick={() => setShowCancelOrderModal(true)}
                         >
                           <X className="w-4 h-4 mr-2" />
                           Annuler la commande
@@ -769,6 +781,59 @@ export default function OrderDetailPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Signalements existants */}
+                {orderIssues && orderIssues.data.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-lg mb-4">Signalements en cours</h3>
+                    <div className="space-y-4">
+                      {orderIssues.data.map((issue: any) => (
+                        <div
+                          key={issue.id}
+                          className="border border-gray-200 rounded-lg p-4"
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <span className="font-mono text-sm text-gray-600">
+                                {issue.issueNumber}
+                              </span>
+                              <h4 className="font-semibold">{issue.subject}</h4>
+                            </div>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                issue.status === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : issue.status === 'resolved'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-blue-100 text-blue-800'
+                              }`}
+                            >
+                              {issue.status === 'pending' && 'En attente'}
+                              {issue.status === 'acknowledged' && 'Accusé de réception'}
+                              {issue.status === 'investigating' && 'En investigation'}
+                              {issue.status === 'resolved' && 'Résolu'}
+                              {issue.status === 'closed' && 'Fermé'}
+                            </span>
+                          </div>
+                          <p className="text-gray-600 text-sm mb-2">
+                            {issue.description}
+                          </p>
+                          <div className="text-xs text-gray-500">
+                            Créé le {new Date(issue.createdAt).toLocaleDateString('fr-FR')}
+                          </div>
+                          {issue.resolution && (
+                            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded">
+                              <div className="font-medium text-green-800 text-sm mb-1">
+                                Résolution :
+                              </div>
+                              <p className="text-green-700 text-sm">{issue.resolution}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -784,9 +849,13 @@ export default function OrderDetailPage() {
           </Button>
 
           <div className="flex space-x-4">
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => downloadInvoiceMutation.mutate(orderNumber)}
+              disabled={downloadInvoiceMutation.isPending}
+            >
               <Download className="w-4 h-4 mr-2" />
-              Télécharger la facture
+              {downloadInvoiceMutation.isPending ? 'Génération...' : 'Télécharger la facture'}
             </Button>
             {orderData.status === "delivered" && (
               <Button>
@@ -799,6 +868,21 @@ export default function OrderDetailPage() {
       </main>
 
       <Footer />
+
+      {/* Modales */}
+      <ReportIssueModal
+        open={showReportIssueModal}
+        onOpenChange={setShowReportIssueModal}
+        orderId={orderData.id}
+        orderNumber={orderData.orderNumber}
+      />
+      
+      <CancelOrderModal
+        open={showCancelOrderModal}
+        onOpenChange={setShowCancelOrderModal}
+        orderNumber={orderData.orderNumber}
+        orderTotal={orderData.totalAmount}
+      />
     </div>
   );
 }

@@ -312,9 +312,6 @@ export function useAddToCart() {
 
   const { isAuthenticated, session } = useAuth();
 
-  console.log('isAuthenticated', isAuthenticated)
-  console.log('session', session)
-
   return useMutation({
     mutationFn: ({
       productId,

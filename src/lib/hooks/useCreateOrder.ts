@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { nextAuthApi } from "@/lib/api/nextauth-client";
 import { toast } from "@/hooks/use-toast";
 
@@ -61,6 +62,8 @@ const createOrderApi = async (
 
 // React Query hook
 export function useCreateOrder() {
+  const router = useRouter();
+  
   return useMutation({
     mutationFn: createOrderApi,
     onSuccess: (data) => {
@@ -68,6 +71,9 @@ export function useCreateOrder() {
         title: "Commande créée avec succès",
         description: `Votre commande ${data.data.orderNumber} a été créée.`,
       });
+      
+      // Rediriger vers la page de commande
+      router.push(`/commandes/${data.data.orderNumber}`);
     },
     onError: (error: any) => {
       toast({

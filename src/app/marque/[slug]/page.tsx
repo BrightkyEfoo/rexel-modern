@@ -273,6 +273,7 @@ export default function BrandPage() {
                         productCount: brand.productCount || 0,
                         filters: {
                           priceRange: { min: 0, max: 1000 },
+                          // @ts-ignore
                           categories: [],
                           brands: []
                         }
@@ -306,6 +307,7 @@ export default function BrandPage() {
                       productCount: brand.productCount || 0,
                       filters: {
                         priceRange: { min: 0, max: 1000 },
+                        // @ts-ignore
                         categories: [],
                         brands: []
                       }
