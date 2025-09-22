@@ -32,9 +32,10 @@ env:
   RUNNER: ubuntu-latest
 
 jobs:
+  
   prepare-directory:
     name: Prepare VPS Directory
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: production
     steps:
       - name: Create deployment directory on VPS
@@ -53,7 +54,7 @@ jobs:
 
   docker-setup:
     name: Verify Docker Setup and Network
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: production
     steps:
       - name: Verify Docker environment and shared network
@@ -155,7 +156,7 @@ jobs:
 
   checkout:
     name: Checkout Code
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [docker-setup, prepare-directory]
     steps:
       - name: Checkout repository
@@ -172,7 +173,7 @@ jobs:
 
   build-docker:
     name: Build Docker Image
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: production
     needs: [checkout]
     steps:
@@ -348,7 +349,7 @@ jobs:
 
   transfer-image:
     name: Transfer Image to VPS
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: production
     needs: [prepare-directory, build-docker]
     steps:
@@ -390,7 +391,7 @@ jobs:
 
   load-and-run:
     name: Load and Run Frontend Service
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: production
     needs: [transfer-image]
     steps:
@@ -447,7 +448,7 @@ jobs:
 
   cleanup:
     name: Cleanup
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: production
     needs: [load-and-run]
     if: always()

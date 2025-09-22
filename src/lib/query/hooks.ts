@@ -290,14 +290,10 @@ export function useUpdateUser() {
 }
 
 // Cart Hooks
-export function useCart(options?: { enabled?: boolean, }) {
-  const { session } = useAuth();
-  
+export function useCart(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKeys.cart,
-    queryFn: () => {
-      console.log('session.user.id', session?.user?.id)
-      return cartService.getCart(session?.user?.id ? Number(session?.user?.id) : undefined)},
+    queryFn: () => cartService.getCart(),
     retry: false,
     enabled: options?.enabled ?? true,
   });
@@ -315,6 +311,9 @@ export function useAddToCart() {
   const queryClient = useQueryClient();
 
   const { isAuthenticated, session } = useAuth();
+
+  console.log('isAuthenticated', isAuthenticated)
+  console.log('session', session)
 
   return useMutation({
     mutationFn: ({

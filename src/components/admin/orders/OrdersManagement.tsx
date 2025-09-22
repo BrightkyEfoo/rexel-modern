@@ -47,45 +47,16 @@ import {
   Loader2,
   RefreshCw,
 } from "lucide-react";
-import {
-  useOrders,
-  useUpdateOrderStatus,
-  useConfirmOrder,
-  type Order,
-} from "@/lib/hooks/useOrders";
-import { formatPrice } from "@/lib/utils/currency";
+import { useOrders, useUpdateOrderStatus, useConfirmOrder, type Order } from "@/lib/hooks/useOrders";
+
 
 const statusConfig = {
-  pending: {
-    label: "En attente",
-    color: "bg-yellow-100 text-yellow-800",
-    icon: Clock,
-  },
-  confirmed: {
-    label: "Confirmée",
-    color: "bg-blue-100 text-blue-800",
-    icon: CheckCircle,
-  },
-  processing: {
-    label: "En traitement",
-    color: "bg-purple-100 text-purple-800",
-    icon: Package,
-  },
-  shipped: {
-    label: "Expédiée",
-    color: "bg-green-100 text-green-800",
-    icon: Truck,
-  },
-  delivered: {
-    label: "Livrée",
-    color: "bg-green-200 text-green-900",
-    icon: CheckCircle,
-  },
-  cancelled: {
-    label: "Annulée",
-    color: "bg-red-100 text-red-800",
-    icon: XCircle,
-  },
+  pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800", icon: Clock },
+  confirmed: { label: "Confirmée", color: "bg-blue-100 text-blue-800", icon: CheckCircle },
+  processing: { label: "En traitement", color: "bg-purple-100 text-purple-800", icon: Package },
+  shipped: { label: "Expédiée", color: "bg-green-100 text-green-800", icon: Truck },
+  delivered: { label: "Livrée", color: "bg-green-200 text-green-900", icon: CheckCircle },
+  cancelled: { label: "Annulée", color: "bg-red-100 text-red-800", icon: XCircle },
 };
 
 export function OrdersManagement() {
@@ -93,15 +64,9 @@ export function OrdersManagement() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [canLoad, setCanLoad] = useState<any>(null);
-
+  
   // React Query hooks
-  const {
-    data: ordersData,
-    isLoading,
-    error,
-    refetch,
-  } = useOrders({
+  const { data: ordersData, isLoading, error, refetch } = useOrders({
     page: currentPage,
     limit: 20,
     status: statusFilter,
@@ -112,18 +77,26 @@ export function OrdersManagement() {
   const confirmOrderMutation = useConfirmOrder();
 
   // Helper functions
-  const handleUpdateStatus = async (orderId: number, newStatus: string) => {
-    await updateOrderStatusMutation.mutateAsync({ orderId, status: newStatus });
+  const handleUpdateStatus = (orderId: number, newStatus: string) => {
+    updateOrderStatusMutation.mutate({ orderId, status: newStatus });
   };
 
-  const handleConfirmOrder = async (orderId: number) => {
-    await confirmOrderMutation.mutateAsync(orderId);
-    setCanLoad(null);
+  const handleConfirmOrder = (orderId: number) => {
+    confirmOrderMutation.mutate(orderId);
   };
+
+  console.log('first', ordersData)
 
   // Extract data from query
   const orders = ordersData?.data || [];
   const totalPages = ordersData?.meta.lastPage || 1;
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+    }).format(price);
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR", {
@@ -144,14 +117,8 @@ export function OrdersManagement() {
             Gérez et suivez toutes les commandes
           </p>
         </div>
-        <Button
-          onClick={() => refetch()}
-          variant="outline"
-          disabled={isLoading}
-        >
-          <RefreshCw
-            className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
-          />
+        <Button onClick={() => refetch()} variant="outline" disabled={isLoading}>
+          <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
           Actualiser
         </Button>
       </div>
@@ -279,7 +246,7 @@ export function OrdersManagement() {
                                     Commande {order.orderNumber}
                                   </DialogTitle>
                                   <DialogDescription>
-                                    Détails de la commande passée les{" "}
+                                    Détails de la commande passée le{" "}
                                     {formatDate(order.createdAt)}
                                   </DialogDescription>
                                 </DialogHeader>
@@ -288,11 +255,7 @@ export function OrdersManagement() {
                                     order={selectedOrder}
                                     onUpdateStatus={handleUpdateStatus}
                                     onConfirm={handleConfirmOrder}
-                                    updatingStatus={
-                                      updateOrderStatusMutation.isPending
-                                        ? selectedOrder.id
-                                        : null
-                                    }
+                                    updatingStatus={updateOrderStatusMutation.isPending ? selectedOrder.id : null}
                                   />
                                 )}
                               </DialogContent>
@@ -301,17 +264,10 @@ export function OrdersManagement() {
                             {order.status === "pending" && (
                               <Button
                                 size="sm"
-                                onClick={() => {
-                                  setCanLoad(order.id);
-                                  handleConfirmOrder(order.id);
-                                }}
-                                disabled={
-                                  confirmOrderMutation.isPending &&
-                                  canLoad === order.id
-                                }
+                                onClick={() => handleConfirmOrder(order.id)}
+                                disabled={confirmOrderMutation.isPending}
                               >
-                                {confirmOrderMutation.isPending &&
-                                canLoad === order.id ? (
+                                {confirmOrderMutation.isPending ? (
                                   <Loader2 className="w-4 h-4 animate-spin" />
                                 ) : (
                                   <CheckCircle className="w-4 h-4" />
@@ -371,6 +327,13 @@ function OrderDetailsDialog({
   onConfirm,
   updatingStatus,
 }: OrderDetailsDialogProps) {
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+    }).format(price);
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR", {
       year: "numeric",
@@ -519,7 +482,7 @@ function OrderDetailsDialog({
               Confirmer la commande
             </Button>
           )}
-
+          
           <Select
             value={order.status}
             onValueChange={(value) => onUpdateStatus(order.id, value)}

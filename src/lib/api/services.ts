@@ -578,8 +578,8 @@ export class UsersService {
 
 // Cart Service
 export class CartService {
-  async getCart(userId?: number): Promise<ApiResponse<Cart>> {
-    return apiClient.get<Cart>(`/opened/cart?userId=${userId}`, { cache: false });
+  async getCart(): Promise<ApiResponse<Cart>> {
+    return apiClient.get<Cart>("/opened/cart", { cache: false });
   }
 
   async addToCart(

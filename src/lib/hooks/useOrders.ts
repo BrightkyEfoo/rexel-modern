@@ -1,7 +1,6 @@
-import { toast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { nextAuthApi } from "@/lib/api/nextauth-client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import apiClient from "../api/client";
+import { toast } from "@/hooks/use-toast";
 
 // Types
 export interface OrderItem {
@@ -88,25 +87,19 @@ const ordersApi = {
     return response.data.data as OrdersResponse;
   },
 
-  getOrder: async (orderNum: number | string) => {
-    const response = await nextAuthApi.secured.get<{ data: Order }>(
-      `/orders/${orderNum}`
-    );
-    return response.data.data;
-  },
   updateOrderStatus: async (
     orderId: number,
     status: string
   ): Promise<{ data: Order }> => {
-    const response = await apiClient.put<{ data: Order }>(
-      `/secured/admin/orders/${orderId}/status`,
+    const response = await nextAuthApi.secured.patch<{ data: Order }>(
+      `/admin/orders/${orderId}/status`,
       { status }
     );
     return response.data;
   },
 
   confirmOrder: async (orderId: number): Promise<{ data: Order }> => {
-    const response = await nextAuthApi.secured.put<{ data: Order }>(
+    const response = await nextAuthApi.secured.patch<{ data: Order }>(
       `/admin/orders/${orderId}/confirm`
     );
     return response.data;
@@ -123,21 +116,26 @@ export function useOrders(params: OrdersParams = {}) {
   });
 }
 
-export function useOrder(orderNum: string | number) {
-  return useQuery({
-    queryKey: ["orders", orderNum],
-    queryFn: () => ordersApi.getOrder(orderNum),
-  });
-}
-
 export function useUpdateOrderStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ orderId, status }: { orderId: number; status: string }) =>
       ordersApi.updateOrderStatus(orderId, status),
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       // Update the orders list
+      queryClient.setQueryData(
+        ["orders"],
+        (oldData: OrdersResponse | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            data: oldData.data.map((order) =>
+              order.id === variables.orderId ? data.data : order
+            ),
+          };
+        }
+      );
 
       // Invalidate and refetch orders to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["orders"] });
@@ -163,6 +161,20 @@ export function useConfirmOrder() {
   return useMutation({
     mutationFn: (orderId: number) => ordersApi.confirmOrder(orderId),
     onSuccess: (data, orderId) => {
+      // Update the orders list
+      queryClient.setQueryData(
+        ["orders"],
+        (oldData: OrdersResponse | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            data: oldData.data.map((order) =>
+              order.id === orderId ? data.data : order
+            ),
+          };
+        }
+      );
+
       // Invalidate and refetch orders to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["orders"] });
 

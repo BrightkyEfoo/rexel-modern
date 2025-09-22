@@ -40,8 +40,14 @@ export interface PaymentStepProps {
 }
 
 export interface ConfirmationStepProps {
-  mutation: any;
+  cart: any;
   totals: CartTotals;
+  user: any;
+  selectedShippingAddress: string;
+  selectedBillingAddress: string;
+  selectedPickupPoint: string;
   paymentMethod: string;
+  orderNotes: string;
   deliveryMethod: string;
+  promoCode: string;
 }

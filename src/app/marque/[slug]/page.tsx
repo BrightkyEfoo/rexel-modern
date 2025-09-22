@@ -183,26 +183,17 @@ export default function BrandPage() {
                   </h1>
                   <div className="flex flex-wrap items-center gap-2 mb-4">
                     {brand.isFeatured && (
-                      <Badge
-                        variant="secondary"
-                        className="bg-yellow-100 text-yellow-800"
-                      >
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
                         <Star className="w-3 h-3 mr-1" />
                         Marque vedette
                       </Badge>
                     )}
                     {brand.isActive ? (
-                      <Badge
-                        variant="secondary"
-                        className="bg-green-100 text-green-800"
-                      >
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
                         Active
                       </Badge>
                     ) : (
-                      <Badge
-                        variant="secondary"
-                        className="bg-gray-100 text-gray-600"
-                      >
+                      <Badge variant="secondary" className="bg-gray-100 text-gray-600">
                         Inactive
                       </Badge>
                     )}
@@ -240,9 +231,7 @@ export default function BrandPage() {
                 <div className="flex items-center">
                   <Building2 className="w-4 h-4 mr-2" />
                   <span className="font-medium">{brand.productCount || 0}</span>
-                  <span className="ml-1">
-                    produit{(brand.productCount || 0) > 1 ? "s" : ""}
-                  </span>
+                  <span className="ml-1">produit{(brand.productCount || 0) > 1 ? 's' : ''}</span>
                 </div>
               </div>
             </div>
@@ -272,12 +261,11 @@ export default function BrandPage() {
                     </SheetHeader>
                     <FilterContent
                       // Créer un objet mock pour les filtres de marque
-                      // @ts-ignore
                       categoryData={{
                         id: 0,
                         name: brand.name,
                         slug: brand.slug,
-                        description: brand.description || "",
+                        description: brand.description || '',
                         isActive: brand.isActive,
                         sortOrder: 0,
                         createdAt: brand.createdAt,
@@ -285,9 +273,9 @@ export default function BrandPage() {
                         productCount: brand.productCount || 0,
                         filters: {
                           priceRange: { min: 0, max: 1000 },
-                          brands: [],
-                          specifications: [],
-                        },
+                          categories: [],
+                          brands: []
+                        }
                       }}
                       filters={filters}
                       priceRange={priceRange}
@@ -306,12 +294,11 @@ export default function BrandPage() {
               >
                 <div className="bg-background/95 backdrop-blur-sm rounded-lg border border-border/50 p-4 shadow-sm">
                   <FilterContent
-                    // @ts-ignore
                     categoryData={{
                       id: 0,
                       name: brand.name,
                       slug: brand.slug,
-                      description: brand.description || "",
+                      description: brand.description || '',
                       isActive: brand.isActive,
                       sortOrder: 0,
                       createdAt: brand.createdAt,
@@ -319,9 +306,9 @@ export default function BrandPage() {
                       productCount: brand.productCount || 0,
                       filters: {
                         priceRange: { min: 0, max: 1000 },
-                        brands: [],
-                        specifications: [],
-                      },
+                        categories: [],
+                        brands: []
+                      }
                     }}
                     filters={filters}
                     priceRange={priceRange}
@@ -421,7 +408,9 @@ export default function BrandPage() {
               Cette marque n'a pas encore de produits dans notre catalogue.
             </p>
             <Link href="/marque">
-              <Button variant="outline">Voir toutes les marques</Button>
+              <Button variant="outline">
+                Voir toutes les marques
+              </Button>
             </Link>
           </div>
         )}
