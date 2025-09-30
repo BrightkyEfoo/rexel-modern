@@ -182,7 +182,7 @@ export function HeroSection() {
               <Button
                 variant="outline"
                 size="lg"
-                className="bg-primary border-primary-foreground text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
+                className="bg-primary border-primary-foreground text-primary hover:bg-primary/90 hover:text-primary-foreground"
                 asChild
               >
                 <Link href="/auth/login">Identifiez-vous</Link>

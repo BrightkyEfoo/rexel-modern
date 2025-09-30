@@ -85,7 +85,7 @@ export default function PointsRelaisPage() {
               {searchQuery && (
                 <Button 
                   variant="outline"
-                  className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
+                  className="border-primary-foreground text-primary hover:bg-primary-foreground/10"
                   onClick={() => setSearchQuery('')}
                 >
                   Effacer

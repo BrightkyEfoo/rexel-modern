@@ -6,9 +6,16 @@ import {
   Calendar,
   Tag,
   Loader2,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Header } from "@/components/layout/Header";
@@ -19,6 +26,7 @@ import { formatPrice } from "@/lib/utils/currency";
 import { useNewProducts } from "@/lib/hooks/useNewProducts";
 
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
 
 export default function NouveautesPage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
@@ -114,19 +122,13 @@ export default function NouveautesPage() {
               {products.map((product: any) => (
                 <Card
                   key={product.id}
-                  className="group hover:shadow-lg transition-all duration-300"
+                  className="group hover:shadow-lg transition-all duration-300 grid grid-rows-[auto_1fr_auto]"
                 >
                   <CardHeader className="relative">
-                    <div className="absolute top-4 left-4 z-10">
-                      <Badge variant="destructive" className="text-xs">
-                        Nouveau
-                      </Badge>
-                    </div>
-                    <div className="absolute top-4 right-4 z-10">
+                    <div className="absolute top-4 gap-1 flex right-4 z-10">
                       {product.categories.slice(0, 3).map((category: any) => (
                         <Badge
-                          variant="outline"
-                          className="text-xs"
+                          className="text-xs border border-secondary"
                           key={category.id}
                         >
                           {category.name}
@@ -152,13 +154,13 @@ export default function NouveautesPage() {
                       {/* Prix */}
                       <div className="flex items-center space-x-2">
                         <span className="text-2xl font-bold text-primary">
-                          {formatPrice(product.price / 100)}
+                          {formatPrice(product.price)}
                         </span>
                         {product.originalPrice &&
                           product.originalPrice > product.price && (
                             <>
                               <span className="text-muted-foreground line-through">
-                                {formatPrice(product.originalPrice / 100)}
+                                {formatPrice(product.originalPrice)}
                               </span>
                               <Badge variant="secondary" className="text-xs">
                                 -
@@ -174,7 +176,7 @@ export default function NouveautesPage() {
                       </div>
 
                       {/* Rating */}
-                      <div className="flex items-center space-x-2">
+                      {/* <div className="flex items-center space-x-2">
                         <div className="flex items-center space-x-1">
                           <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                           <span className="text-sm font-medium">
@@ -184,7 +186,7 @@ export default function NouveautesPage() {
                         <span className="text-sm text-muted-foreground">
                           ({product.reviewsCount} avis)
                         </span>
-                      </div>
+                      </div> */}
 
                       {/* Date */}
                       <div className="flex items-center space-x-2 text-sm text-muted-foreground">
@@ -196,23 +198,19 @@ export default function NouveautesPage() {
                           )}
                         </span>
                       </div>
-
-                      {/* Actions */}
-                      <div className="flex space-x-2 pt-2">
-                        <Button className="flex-1" size="sm" asChild>
-                          <Link href={`/produit/${product.slug}`}>
-                            <Tag className="w-4 h-4 mr-2" />
-                            Voir détails
-                          </Link>
-                        </Button>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={`/produit/${product.slug}`}>
-                            <ArrowRight className="w-4 h-4" />
-                          </Link>
-                        </Button>
-                      </div>
                     </div>
                   </CardContent>
+                  <CardFooter className="w-full">
+                    {/* Actions */}
+                    <div className="flex space-x-2 pt-2 w-full">
+                      <Button className="flex-1" size="sm" asChild>
+                        <Link href={`/produit/${product.slug}`}>
+                          <Tag className="w-4 h-4 mr-2" />
+                          Voir détails
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardFooter>
                 </Card>
               ))}
             </div>
@@ -231,12 +229,12 @@ export default function NouveautesPage() {
                 exclusifs
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <input
+                <Input
                   type="email"
                   placeholder="Votre adresse email"
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-0"
+                  className="flex-1 px-4 border border-gray-300 rounded-lg focus:border-primary focus:ring-0"
                 />
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                <Button className="bg-primary h-full text-primary-foreground hover:bg-primary/90">
                   S'abonner
                 </Button>
               </div>

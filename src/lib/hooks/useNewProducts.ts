@@ -64,7 +64,9 @@ const newProductsApi = {
       searchParams.toString() ? `?${searchParams.toString()}` : ""
     }`;
     const response = await apiClient.get<NewProductsResponse>(url);
-    return response.data.data;
+
+    console.log('response', response.data)
+    return response.data as unknown as NewProductsApiResponse;
   },
 };
 

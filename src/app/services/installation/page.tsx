@@ -187,7 +187,7 @@ export default function InstallationServicePage() {
                     <FileText className="w-5 h-5 mr-2" />
                     Demander un devis
                   </Button>
-                  <Button variant="outline" size="lg" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+                  <Button variant="outline" size="lg" className="border-primary-foreground text-primary hover:bg-primary-foreground hover:text-primary">
                     <Phone className="w-5 h-5 mr-2" />
                     Consultation gratuite
                   </Button>
@@ -450,7 +450,7 @@ export default function InstallationServicePage() {
                     <FileText className="w-5 h-5 mr-2" />
                     Demander un devis gratuit
                   </Button>
-                  <Button variant="outline" size="lg" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
+                  <Button variant="outline" size="lg" className="border-primary-foreground text-primary hover:bg-primary-foreground hover:text-primary" asChild>
                     <Link href="/contact">
                       <Phone className="w-5 h-5 mr-2" />
                       Conseil personnalisé
