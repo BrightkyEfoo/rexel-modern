@@ -121,7 +121,7 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
   const authContent = isAuthenticated ? (
     <>
       <DropdownMenuItem asChild>
-        <Link href="/profile">Mon profil</Link>
+        <Link href="/profil">Mon profil</Link>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
         <Link href="/commandes">Mes commandes</Link>
@@ -144,6 +144,28 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
       </DropdownMenuItem>
     </>
   );
+
+  const renderCemacFlags = () => {
+    return (
+      <div className="flex items-center space-x-3">
+        {cemacCountries.map((country) => (
+          <Link
+            key={country.code}
+            href={`/points-relais/${country.code.toLowerCase()}`}
+            className="relative w-8 h-6 overflow-hidden rounded-sm border border-gray-200 hover:scale-110 transition-transform duration-200 cursor-pointer"
+            title={`Points de relais en ${country.name}`}
+          >
+            <Image
+              alt={country.name}
+              src={`http://purecatamphetamine.github.io/country-flag-icons/3x2/${country.code}.svg`}
+              fill
+              className="object-cover"
+            />
+          </Link>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <header
@@ -392,9 +414,12 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
       </div>
 
       {/* Navigation */}
+      <div className="md:hidden py-2 flex justify-center w-full">
+        {renderCemacFlags()}
+      </div>
       <div className="bg-slate-50 border-b hidden md:block">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-12">
+          <div className="flex items-center justify-between py-2 flex-wrap">
             <nav className="flex items-center space-x-8">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -463,25 +488,8 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
 
               <NavLink href="/contact">Contact</NavLink>
             </nav>
-            
-            {/* Drapeaux CEMAC */}
-            <div className="flex items-center space-x-3">
-              {cemacCountries.map((country) => (
-                <Link
-                  key={country.code}
-                  href={`/points-relais/${country.code.toLowerCase()}`}
-                  className="relative w-8 h-6 overflow-hidden rounded-sm border border-gray-200 hover:scale-110 transition-transform duration-200 cursor-pointer"
-                  title={`Points de relais en ${country.name}`}
-                >
-                  <Image
-                    alt={country.name}
-                    src={`http://purecatamphetamine.github.io/country-flag-icons/3x2/${country.code}.svg`}
-                    fill
-                    className="object-cover"
-                  />
-                </Link>
-              ))}
-            </div>
+
+            {renderCemacFlags()}
           </div>
         </div>
       </div>

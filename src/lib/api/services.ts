@@ -509,7 +509,7 @@ export class BrandsService {
 // Users Service
 export class UsersService {
   async getCurrentUser(): Promise<ApiResponse<User>> {
-    return apiClient.get<User>("/secured/users/me", { cache: false });
+    return apiClient.get<User>("/secured/auth/me", { cache: false });
   }
 
   async updateUser(
