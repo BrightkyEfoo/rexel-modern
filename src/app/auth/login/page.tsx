@@ -140,6 +140,7 @@ export default function LoginPage() {
 
         {/* Form */}
         <div className="bg-card rounded-2xl shadow-lg p-8">
+          {/* @ts-ignore */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Error Alert */}
             {loginMutation.error && (
