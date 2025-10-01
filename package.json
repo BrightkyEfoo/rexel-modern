@@ -39,6 +39,7 @@
     "country-flag-icons": "^1.5.19",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.17.3",
+    "js-cookie": "^3.0.5",
     "json-server": "^1.0.0-beta.3",
     "lucide-react": "^0.475.0",
     "next": "^15.3.2",
@@ -58,6 +59,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@eslint/eslintrc": "^3.3.1",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20.19.0",
     "@types/react": "^18.3.22",
     "@types/react-dom": "^18.3.7",

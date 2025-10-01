@@ -220,21 +220,27 @@ export function Footer() {
             <div className="flex space-x-6">
               <Link
                 href="/mentions-legales"
-                className="text-sm  hover:text-foreground hover:underline hover:underline-offset-2 transition-colors"
+                className="text-sm  hover:text-secondary hover:underline hover:underline-offset-2 transition-colors"
               >
                 Mentions légales
               </Link>
               <Link
                 href="/politique-confidentialite"
-                className="text-sm  hover:text-foreground hover:underline hover:underline-offset-2 transition-colors"
+                className="text-sm  hover:text-secondary hover:underline hover:underline-offset-2 transition-colors"
               >
                 Politique de confidentialité
               </Link>
               <Link
                 href="/cgv"
-                className="text-sm  hover:text-foreground hover:underline hover:underline-offset-2 transition-colors"
+                className="text-sm  hover:text-secondary hover:underline hover:underline-offset-2 transition-colors"
               >
                 CGV
+              </Link>
+              <Link
+                href="/cookies/preferences"
+                className="text-sm  hover:text-secondary hover:underline hover:underline-offset-2 transition-colors"
+              >
+                Cookies
               </Link>
             </div>
           </div>

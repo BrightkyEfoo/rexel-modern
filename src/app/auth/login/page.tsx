@@ -1,21 +1,27 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Lock, Mail, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { FormField } from '@/components/ui/form-field';
-import { useLogin, useAuth } from '@/lib/auth/nextauth-hooks';
-import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
-import { appConfig } from '@/lib/config/app';
-import { Logo } from '@/components/ui/logo';
-import { useAuthRedirect } from '@/lib/hooks/useAuthRedirect';
-import { useToast } from '@/hooks/use-toast';
-import { preserveRedirectUrl } from '@/lib/utils/auth-redirect';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Lock,
+  Mail,
+  ArrowRight,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FormField } from "@/components/ui/form-field";
+import { useLogin, useAuth } from "@/lib/auth/nextauth-hooks";
+import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
+import { appConfig } from "@/lib/config/app";
+import { Logo } from "@/components/ui/logo";
+import { useAuthRedirect } from "@/lib/hooks/useAuthRedirect";
+import { useToast } from "@/hooks/use-toast";
+import { preserveRedirectUrl } from "@/lib/utils/auth-redirect";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,26 +33,31 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
 
   // Récupérer l'email pré-rempli depuis les paramètres URL
-  const prefilledEmail = searchParams.get('email') || '';
+  const prefilledEmail = searchParams.get("email") || "";
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isValid },
   } = useForm<LoginFormData>({
+    // @ts-ignore
     resolver: zodResolver(loginSchema),
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: {
       email: prefilledEmail,
-      password: '',
+      password: "",
+      rememberMe: false,
     },
   });
+
+  const rememberMe = watch("rememberMe");
 
   // Pré-remplir l'email si fourni dans l'URL
   useEffect(() => {
     if (prefilledEmail) {
-      setValue('email', prefilledEmail);
+      setValue("email", prefilledEmail);
     }
   }, [prefilledEmail, setValue]);
 
@@ -57,35 +68,37 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, redirectAfterAuth]);
 
+  // @ts-ignore
   const onSubmit = async (data: LoginFormData) => {
     try {
       await loginMutation.mutateAsync(data);
-      
+
       // Connexion réussie - rediriger vers la page précédente
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté à votre compte.",
       });
-      
+
       redirectAfterAuth();
     } catch (error: unknown) {
       if (
         error &&
-        typeof error === 'object' &&
-        'type' in error &&
-        error.type === 'VERIFICATION_REQUIRED'
+        typeof error === "object" &&
+        "type" in error &&
+        error.type === "VERIFICATION_REQUIRED"
       ) {
         // Compte non vérifié - rediriger vers OTP (pas de redirection vers previous URL)
-        const verificationError = error as any
-        
+        const verificationError = error as any;
+
         toast({
           title: "Vérification requise",
-          description: "Votre compte doit être vérifié. Un code vous a été envoyé par email.",
+          description:
+            "Votre compte doit être vérifié. Un code vous a été envoyé par email.",
           variant: "default",
         });
 
-        console.log('verificationError', verificationError)
-        
+        console.log("verificationError", verificationError);
+
         const params = new URLSearchParams({
           userId: verificationError.data?.userId.toString() || "",
           email: verificationError.data?.email || "",
@@ -110,8 +123,12 @@ export default function LoginPage() {
           <Link href="/" className="inline-flex items-center space-x-2 mb-8">
             <Logo variant="light" size="md" showText={false} />
             <div className="text-left">
-              <div className="text-xl font-bold text-primary">{appConfig.name}</div>
-              <div className="text-xs text-muted-foreground">{appConfig.country}</div>
+              <div className="text-xl font-bold text-primary">
+                {appConfig.name}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {appConfig.country}
+              </div>
             </div>
           </Link>
 
@@ -167,12 +184,16 @@ export default function LoginPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
               <div className="flex items-center">
                 <input
+                  {...register("rememberMe")}
                   id="remember-me"
-                  name="remember-me"
                   type="checkbox"
                   className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
+                  disabled={loginMutation.isPending}
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-foreground">
+                <label
+                  htmlFor="remember-me"
+                  className="ml-2 block text-sm text-foreground"
+                >
                   Se souvenir de moi
                 </label>
               </div>
@@ -208,9 +229,9 @@ export default function LoginPage() {
           {/* Sign Up Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Pas encore de compte ?{' '}
+              Pas encore de compte ?{" "}
               <Link
-                href={preserveRedirectUrl(searchParams, '/auth/register')}
+                href={preserveRedirectUrl(searchParams, "/auth/register")}
                 className="font-medium text-primary hover:text-primary/80"
               >
                 Créer un compte
@@ -221,23 +242,33 @@ export default function LoginPage() {
 
         {/* Benefits */}
         <div className="bg-card rounded-2xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold mb-4">Pourquoi créer un compte KesiMarket ?</h3>
+          <h3 className="text-lg font-semibold mb-4">
+            Pourquoi créer un compte KesiMarket ?
+          </h3>
           <div className="space-y-3">
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-muted-foreground">Prix personnalisés et remises exclusives</span>
+              <span className="text-sm text-muted-foreground">
+                Prix personnalisés et remises exclusives
+              </span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-muted-foreground">Suivi de commandes en temps réel</span>
+              <span className="text-sm text-muted-foreground">
+                Suivi de commandes en temps réel
+              </span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-muted-foreground">Historique d'achats et favoris</span>
+              <span className="text-sm text-muted-foreground">
+                Historique d'achats et favoris
+              </span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <span className="text-sm text-muted-foreground">Support client dédié</span>
+              <span className="text-sm text-muted-foreground">
+                Support client dédié
+              </span>
             </div>
           </div>
         </div>

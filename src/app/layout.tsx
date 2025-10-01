@@ -1,4 +1,5 @@
 import { CartDebugPanel } from "@/components/debug/CartDebugPanel";
+import { CookieConsentWrapper } from "@/components/layout/cookie-consent-wrapper";
 import { PageTracker } from "@/components/ui/page-tracker";
 import { PageTrackerDebug } from "@/components/ui/page-tracker-debug";
 import { Toaster } from "@/components/ui/toaster";
@@ -42,11 +43,13 @@ export default function RootLayout({
               <QueryProvider>
                 <CartSessionProvider>
                   <CartProvider>
-                    <PageTracker />
-                    {children}
-                    <Toaster />
-                    <PageTrackerDebug />
-                    <CartDebugPanel />
+                    <CookieConsentWrapper>
+                      <PageTracker />
+                      {children}
+                      <Toaster />
+                      <PageTrackerDebug />
+                      <CartDebugPanel />
+                    </CookieConsentWrapper>
                   </CartProvider>
                 </CartSessionProvider>
               </QueryProvider>

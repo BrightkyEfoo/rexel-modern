@@ -9,39 +9,59 @@ import type {
   ApiResponse,
 } from "../api/types";
 import { UserType } from "../types/user";
+import { CookieService, COOKIE_NAMES } from "../utils/cookies";
 
 export class AuthService {
-  private readonly ACCESS_TOKEN_KEY = "kesimarket_access_token";
-  private readonly REFRESH_TOKEN_KEY = "kesimarket_refresh_token";
-  private readonly USER_KEY = "kesimarket_user";
+  private readonly ACCESS_TOKEN_KEY = COOKIE_NAMES.ACCESS_TOKEN;
+  private readonly REFRESH_TOKEN_KEY = COOKIE_NAMES.REFRESH_TOKEN;
+  private readonly USER_KEY = COOKIE_NAMES.USER_DATA;
+  private readonly REMEMBER_ME_KEY = COOKIE_NAMES.REMEMBER_ME;
 
   // Login user
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
+  async login(credentials: LoginCredentials & { rememberMe?: boolean }): Promise<AuthResponse> {
     try {
       const response = await apiClient.post<{
         message: string;
         data: {
           user: User;
           token: string;
+          expiresIn: number;
+          rememberMe: boolean;
         };
       }>('/opened/auth/login', credentials);
 
       if (response.data.data.user && response.data.data.token) {
-        // Stocker le token et l'utilisateur
-        localStorage.setItem(this.ACCESS_TOKEN_KEY, response.data.data.token);
-        localStorage.setItem(this.USER_KEY, JSON.stringify(response.data.data.user));
+        const { user, token, expiresIn, rememberMe } = response.data.data;
+        
+        // Stocker selon "Se souvenir de moi"
+        if (rememberMe) {
+          // Cookies persistants (30 jours)
+          const expirationDays = Math.ceil(expiresIn / (24 * 60 * 60)); // Convertir secondes en jours
+          CookieService.setWithDays(this.ACCESS_TOKEN_KEY, token, expirationDays);
+          CookieService.setWithDays(this.USER_KEY, JSON.stringify(user), expirationDays);
+          CookieService.setWithDays(this.REMEMBER_ME_KEY, 'true', expirationDays);
+        } else {
+          // Cookies de session (expirent à la fermeture du navigateur)
+          CookieService.setSession(this.ACCESS_TOKEN_KEY, token);
+          CookieService.setSession(this.USER_KEY, JSON.stringify(user));
+          CookieService.remove(this.REMEMBER_ME_KEY); // S'assurer que remember me est désactivé
+        }
+
+        // Fallback localStorage pour compatibilité
+        localStorage.setItem(this.ACCESS_TOKEN_KEY, token);
+        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
 
         return {
           data: {
-            userId: response.data.data.user.id,
-            email: response.data.data.user.email,
+            userId: user.id,
+            email: user.email,
             requiresVerification: false,
           },
-          accessToken: response.data.data.token,
+          accessToken: token,
           refreshToken: '', // Pas utilisé dans notre implémentation
-          expiresIn: 86400, // 24h par défaut
+          expiresIn,
           user: {
-            ...response.data.data.user,
+            ...user,
             addresses: [], // Pas d'adresses pour l'instant
           },
         };
@@ -198,14 +218,40 @@ export class AuthService {
   // Token management
   getAccessToken(): string | null {
     if (typeof window === "undefined") return null;
+    
+    // Priorité aux cookies
+    const cookieToken = CookieService.get(this.ACCESS_TOKEN_KEY);
+    if (cookieToken) return cookieToken;
+    
+    // Fallback localStorage
     return localStorage.getItem(this.ACCESS_TOKEN_KEY);
   }
 
-
+  getRefreshToken(): string | null {
+    if (typeof window === "undefined") return null;
+    
+    // Priorité aux cookies
+    const cookieToken = CookieService.get(this.REFRESH_TOKEN_KEY);
+    if (cookieToken) return cookieToken;
+    
+    // Fallback localStorage
+    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
+  }
 
   getStoredUser(): User | null {
     if (typeof window === "undefined") return null;
 
+    // Priorité aux cookies
+    const cookieUser = CookieService.get(this.USER_KEY);
+    if (cookieUser) {
+      try {
+        return JSON.parse(cookieUser);
+      } catch {
+        // Si erreur de parsing, essayer localStorage
+      }
+    }
+    
+    // Fallback localStorage
     const userString = localStorage.getItem(this.USER_KEY);
     if (!userString) return null;
 
@@ -214,6 +260,12 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  // Vérifier si "Se souvenir de moi" est activé
+  isRememberMeEnabled(): boolean {
+    if (typeof window === "undefined") return false;
+    return CookieService.get(this.REMEMBER_ME_KEY) === 'true';
   }
 
   isAuthenticated(): boolean {
@@ -271,6 +323,13 @@ export class AuthService {
   private clearStorage(): void {
     if (typeof window === "undefined") return;
 
+    // Nettoyer les cookies
+    CookieService.remove(this.ACCESS_TOKEN_KEY);
+    CookieService.remove(this.REFRESH_TOKEN_KEY);
+    CookieService.remove(this.USER_KEY);
+    CookieService.remove(this.REMEMBER_ME_KEY);
+
+    // Nettoyer localStorage (fallback)
     localStorage.removeItem(this.ACCESS_TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
