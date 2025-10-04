@@ -7,6 +7,9 @@ import { OrdersTab } from '@/components/admin/orders';
 import { OverviewTab } from '@/components/admin/overview';
 import { PickupPointsManagement } from '@/components/admin/pickup-points/PickupPointsManagement';
 import { ProductsManagement } from '@/components/admin/products';
+import { PendingProductsManagement } from '@/components/admin/products/PendingProductsManagement';
+import { UsersManagement } from '@/components/admin/users';
+import { ActivitiesManagement } from '@/components/admin/activities';
 import { Footer } from '@/components/layout/Footer';
 import { useRequireAdminAuth } from '@/lib/hooks/useAdminAccess';
 import { useAdminTabs } from '@/lib/hooks/useAdminTabs';
@@ -17,14 +20,17 @@ import {
   MapPin,
   Package,
   ShoppingCart,
-  Tag
+  Tag,
+  ClipboardCheck,
+  Users,
+  Activity
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 
 
 export default function AdminDashboardPage() {
-  const { isAuthenticated: isAdminAuthenticated, isLoading: adminAuthLoading, adminUser } = useRequireAdminAuth();
+  const { isAuthenticated: isAdminAuthenticated, isLoading: adminAuthLoading, adminUser, isAdmin, isManager } = useRequireAdminAuth();
   const { activeTab, changeTab } = useAdminTabs();
   
   // Ref pour tracker le tab précédent et déclencher la réinitialisation
@@ -96,13 +102,23 @@ export default function AdminDashboardPage() {
         <div className="bg-card rounded-lg border mb-8">
           <div className="flex items-center gap-8 px-6 py-4 flex-wrap">
             {[
-              { id: 'overview', label: 'Vue d\'ensemble', icon: BarChart3 },
-              { id: 'products', label: 'Produits', icon: Package },
-              { id: 'categories', label: 'Catégories', icon: Tag },
-              { id: 'brands', label: 'Marques', icon: Building2 },
-              { id: 'pickup-points', label: 'Points de Relais', icon: MapPin },
-              { id: 'orders', label: 'Commandes', icon: ShoppingCart }
-            ].map(({ id, label, icon: Icon }) => (
+              { id: 'overview', label: 'Vue d\'ensemble', icon: BarChart3, roles: ['admin', 'manager'] },
+              { id: 'activities', label: 'Activités', icon: Activity, roles: ['admin', 'manager'] },
+              { id: 'validations', label: 'Validations', icon: ClipboardCheck, roles: ['admin'] },
+              { id: 'products', label: 'Produits', icon: Package, roles: ['admin', 'manager'] },
+              { id: 'categories', label: 'Catégories', icon: Tag, roles: ['admin', 'manager'] },
+              { id: 'brands', label: 'Marques', icon: Building2, roles: ['admin', 'manager'] },
+              { id: 'pickup-points', label: 'Points de Relais', icon: MapPin, roles: ['admin', 'manager'] },
+              { id: 'orders', label: 'Commandes', icon: ShoppingCart, roles: ['admin', 'manager'] },
+              { id: 'users', label: 'Utilisateurs', icon: Users, roles: ['admin'] }
+            ]
+            .filter(({ roles }) => {
+              // Filtrer les tabs selon le rôle
+              if (isAdmin) return true;
+              if (isManager) return roles.includes('manager');
+              return false;
+            })
+            .map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => changeTab(id as any)}
@@ -120,30 +136,47 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Overview Tab */}
-        {activeTab === 'overview' && <OverviewTab />}
+        {activeTab === 'overview' && (
+          <OverviewTab onNavigateToActivities={() => changeTab('activities')} />
+        )}
 
-        {/* Products Tab */}
+        {/* Activities Tab - Admin & Manager */}
+        {activeTab === 'activities' && (
+          <ActivitiesManagement />
+        )}
+
+        {/* Validations Tab - Admin only */}
+        {activeTab === 'validations' && isAdmin && (
+          <PendingProductsManagement />
+        )}
+
+        {/* Products Tab - Admin & Manager */}
         {activeTab === 'products' && (
           <ProductsManagement />
         )}
 
-        {/* Categories Tab */}
+        {/* Categories Tab - Admin & Manager */}
         {activeTab === 'categories' && (
           <CategoriesManagement />
         )}
 
-        {/* Brands Tab */}
+        {/* Brands Tab - Admin & Manager */}
         {activeTab === 'brands' && (
           <BrandsManagement />
         )}
 
-        {/* Pickup Points Tab */}
+        {/* Pickup Points Tab - Admin & Manager */}
         {activeTab === 'pickup-points' && (
           <PickupPointsManagement />
         )}
 
-        {/* Orders Tab */}
+        {/* Orders Tab - Admin & Manager */}
         {activeTab === 'orders' && <OrdersTab />}
+
+        {/* Users Tab - Admin only */}
+        {activeTab === 'users' && isAdmin && (
+          <UsersManagement />
+        )}
       </main>
 
         <Footer />

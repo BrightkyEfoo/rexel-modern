@@ -157,7 +157,7 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
           >
             <Image
               alt={country.name}
-              src={`http://purecatamphetamine.github.io/country-flag-icons/3x2/${country.code}.svg`}
+              src={`https://catamphetamine.gitlab.io/country-flag-icons/3x2/${country.code}.svg`}
               fill
               className="object-cover"
             />

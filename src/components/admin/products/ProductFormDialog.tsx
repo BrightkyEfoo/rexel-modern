@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -39,7 +40,7 @@ import {
 import { numberToString } from "@/lib/validations/common";
 import { useCreateProduct, useUpdateProduct } from "@/lib/hooks/useProducts";
 import { useCategories, useBrands } from "@/lib/query/hooks";
-import type { Product } from "@/lib/types/products";
+import type { Product } from "@/lib/api/types";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { UniqueInput } from "@/components/ui/unique-input";
@@ -59,6 +60,7 @@ interface ProductFormDialogProps {
   onOpenChange: (open: boolean) => void;
   product?: Product;
   mode: "create" | "edit";
+  onSuccess?: () => void;
 }
 
 export function ProductFormDialog({
@@ -66,8 +68,10 @@ export function ProductFormDialog({
   onOpenChange,
   product,
   mode,
+  onSuccess,
 }: ProductFormDialogProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // API hooks
@@ -91,7 +95,6 @@ export function ProductFormDialog({
       salePrice: "",
       stockQuantity: 0,
       manageStock: true,
-      inStock: true,
       isFeatured: false,
       isActive: true,
       brandId: undefined,
@@ -124,8 +127,7 @@ export function ProductFormDialog({
           ?.filter((file) => file.mimeType?.startsWith("image/"))
           .map((file, index) => ({
             url: file.url,
-            alt:
-              (file as any).originalName || (file as any).filename || file.name,
+            alt: file.originalName || file.filename,
             isMain: index === 0, // Premier fichier par défaut
           })) || [];
 
@@ -134,9 +136,8 @@ export function ProductFormDialog({
           ?.filter((file) => !file.mimeType?.startsWith("image/"))
           .map((file) => ({
             url: file.url,
-            filename: (file as any).filename || file.name,
-            originalName:
-              (file as any).originalName || (file as any).filename || file.name,
+            filename: file.filename,
+            originalName: file.originalName,
             size: file.size,
             mimeType: file.mimeType,
           })) || [];
@@ -154,7 +155,6 @@ export function ProductFormDialog({
         salePrice: numberToString(product.salePrice),
         stockQuantity: numberToString(product.stockQuantity),
         manageStock: product.manageStock,
-        inStock: product.inStock,
         isFeatured: product.isFeatured,
         isActive: product.isActive,
         brandId: numberToString(product.brandId),
@@ -188,7 +188,6 @@ export function ProductFormDialog({
         salePrice: "",
         stockQuantity: "0",
         manageStock: true,
-        inStock: true,
         isFeatured: false,
         isActive: true,
         brandId: "",
@@ -260,14 +259,19 @@ export function ProductFormDialog({
           title: "Produit créé",
           description: "Le produit a été créé avec succès.",
         });
+        // Invalider la query des activités après création
+        queryClient.invalidateQueries({ queryKey: ["productActivities"] });
       } else if (product) {
         await updateProduct.mutateAsync({ id: product.id, ...productData });
         toast({
           title: "Produit modifié",
           description: "Le produit a été modifié avec succès.",
         });
+        // Invalider la query des activités après modification
+        queryClient.invalidateQueries({ queryKey: ["productActivities"] });
       }
       onOpenChange(false);
+      onSuccess?.();
     } catch (error) {
       console.error("Submission error:", error);
       toast({
@@ -634,7 +638,7 @@ export function ProductFormDialog({
                                             <div className="relative w-4 h-4">
                                               <Image
                                                 alt={country.name}
-                                                src={`http://purecatamphetamine.github.io/country-flag-icons/3x2/${code}.svg`}
+                                                src={`https://catamphetamine.gitlab.io/country-flag-icons/3x2/${code}.svg`}
                                                 fill
                                               />
                                             </div>

@@ -2,10 +2,9 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -18,16 +17,17 @@ import {
   XCircle,
   Loader2,
   AlertCircle,
+  RefreshCw,
+  Download,
 } from "lucide-react";
-import { useVerifySignature } from "@/lib/hooks/useInvoice";
+import { useVerifySignature, useRegenerateInvoice } from "@/lib/hooks/useInvoice";
 
 interface VerificationResult {
-  orderNumber: string;
-  isValidStored: boolean;
-  isValidContent: boolean;
+  orderNumber: string | null;
   isValid: boolean;
   verificationDate: string;
-  order: {
+  message?: string;
+  order?: {
     id: number;
     orderNumber: string;
     totalAmount: number;
@@ -38,12 +38,12 @@ interface VerificationResult {
 
 export function InvoiceSignatureVerification() {
   const [orderNumber, setOrderNumber] = useState("");
-  const [signature, setSignature] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfBase64, setPdfBase64] = useState<string>("");
   const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
 
   const verifySignatureMutation = useVerifySignature();
+  const regenerateInvoiceMutation = useRegenerateInvoice();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -61,14 +61,13 @@ export function InvoiceSignatureVerification() {
   };
 
   const handleVerify = () => {
-    if (!orderNumber.trim() || !signature.trim()) {
+    if (!pdfBase64) {
       return;
     }
 
     const data = {
-      orderNumber: orderNumber.trim(),
-      signature: signature.trim(),
-      ...(pdfBase64 && { pdfData: pdfBase64 }),
+      pdfData: pdfBase64,
+      ...(orderNumber.trim() && { orderNumber: orderNumber.trim() }),
     };
 
     verifySignatureMutation.mutate(data, {
@@ -80,10 +79,15 @@ export function InvoiceSignatureVerification() {
 
   const handleReset = () => {
     setOrderNumber("");
-    setSignature("");
     setPdfFile(null);
     setPdfBase64("");
     setVerificationResult(null);
+  };
+
+  const handleRegenerateInvoice = () => {
+    if (verificationResult?.orderNumber) {
+      regenerateInvoiceMutation.mutate(verificationResult.orderNumber);
+    }
   };
 
   const getStatusIcon = (isValid: boolean) => {
@@ -113,87 +117,91 @@ export function InvoiceSignatureVerification() {
             <Shield className="w-5 h-5" />
             Vérification de signature de facture
           </CardTitle>
+          <CardDescription>
+            Uploadez un fichier PDF de facture pour vérifier son authenticité. Le numéro de commande est optionnel.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Formulaire de vérification */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="orderNumber">Numéro de commande *</Label>
-                <Input
-                  id="orderNumber"
-                  value={orderNumber}
-                  onChange={(e) => setOrderNumber(e.target.value)}
-                  placeholder="ORD-2024-001234"
+          <div className="space-y-4">
+            {/* Upload du fichier PDF */}
+            <div>
+              <Label htmlFor="pdfFile" className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Fichier PDF de la facture *
+              </Label>
+              <div className="mt-2">
+                <input
+                  id="pdfFile"
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleFileUpload}
+                  className="hidden"
                 />
+                <Button
+                  variant="outline"
+                  onClick={() => document.getElementById("pdfFile")?.click()}
+                  className="w-full justify-start"
+                  size="lg"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {pdfFile ? pdfFile.name : "Sélectionner un fichier PDF"}
+                </Button>
               </div>
-
-              <div>
-                <Label htmlFor="signature">Signature numérique *</Label>
-                <Textarea
-                  id="signature"
-                  value={signature}
-                  onChange={(e) => setSignature(e.target.value)}
-                  placeholder="Collez ici la signature numérique..."
-                  rows={4}
-                />
-              </div>
+              {pdfFile && (
+                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 text-sm text-blue-800">
+                  <FileText className="w-4 h-4" />
+                  <span className="font-medium">{pdfFile.name}</span>
+                  <span className="text-blue-600">({(pdfFile.size / 1024 / 1024).toFixed(2)} MB)</span>
+                </div>
+              )}
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="pdfFile">Fichier PDF (optionnel)</Label>
-                <div className="mt-1">
-                  <input
-                    id="pdfFile"
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <Button
-                    variant="outline"
-                    onClick={() => document.getElementById("pdfFile")?.click()}
-                    className="w-full"
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    {pdfFile ? pdfFile.name : "Sélectionner un fichier PDF"}
-                  </Button>
-                </div>
-                {pdfFile && (
-                  <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
-                    <FileText className="w-4 h-4" />
-                    <span>{pdfFile.name} ({(pdfFile.size / 1024 / 1024).toFixed(2)} MB)</span>
-                  </div>
-                )}
-              </div>
-
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Le fichier PDF est optionnel. Si fourni, la vérification sera plus complète
-                  en validant à la fois la signature stockée et le contenu du fichier.
-                </AlertDescription>
-              </Alert>
+            {/* Numéro de commande optionnel */}
+            <div>
+              <Label htmlFor="orderNumber" className="flex items-center gap-2">
+                Numéro de commande <span className="text-gray-500 text-sm">(optionnel)</span>
+              </Label>
+              <Input
+                id="orderNumber"
+                value={orderNumber}
+                onChange={(e) => setOrderNumber(e.target.value)}
+                placeholder="ORD-2024-001234"
+                className="mt-2"
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                Si fourni, accélère la vérification. Sinon, le système recherchera automatiquement la commande correspondante.
+              </p>
             </div>
           </div>
+
+          {/* Info */}
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Comment ça marche ?</strong> Le système vérifie l'authenticité du fichier PDF en comparant
+              sa signature numérique avec celle enregistrée lors de la génération de la facture.
+            </AlertDescription>
+          </Alert>
 
           {/* Boutons d'action */}
           <div className="flex gap-4">
             <Button
               onClick={handleVerify}
-              disabled={!orderNumber.trim() || !signature.trim() || verifySignatureMutation.isPending}
+              disabled={!pdfFile || verifySignatureMutation.isPending}
               className="flex items-center gap-2"
+              size="lg"
             >
               {verifySignatureMutation.isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <ShieldCheck className="w-4 h-4" />
               )}
-              {verifySignatureMutation.isPending ? "Vérification..." : "Vérifier la signature"}
+              {verifySignatureMutation.isPending ? "Vérification en cours..." : "Vérifier la signature"}
             </Button>
 
-            <Button variant="outline" onClick={handleReset}>
+            <Button variant="outline" onClick={handleReset} size="lg">
+              <XCircle className="w-4 h-4 mr-2" />
               Réinitialiser
             </Button>
           </div>
@@ -215,82 +223,105 @@ export function InvoiceSignatureVerification() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Statut global */}
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                {getStatusIcon(verificationResult.isValid)}
-                <div>
-                  <div className="font-semibold">
-                    Signature {verificationResult.isValid ? "authentique" : "non valide"}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Vérifiée le {new Date(verificationResult.verificationDate).toLocaleString("fr-FR")}
-                  </div>
-                </div>
-              </div>
-              {getStatusBadge(verificationResult.isValid)}
-            </div>
-
-            {/* Détails de vérification */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <h4 className="font-semibold">Vérifications effectuées</h4>
-                
-                <div className="flex items-center justify-between p-3 border rounded">
-                  <span className="text-sm">Signature stockée en base</span>
-                  <div className="flex items-center gap-2">
-                    {getStatusIcon(verificationResult.isValidStored)}
-                    {getStatusBadge(verificationResult.isValidStored)}
-                  </div>
-                </div>
-
-                {pdfBase64 && (
-                  <div className="flex items-center justify-between p-3 border rounded">
-                    <span className="text-sm">Contenu du fichier PDF</span>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(verificationResult.isValidContent)}
-                      {getStatusBadge(verificationResult.isValidContent)}
+            <div className={`p-6 border-2 rounded-lg ${
+              verificationResult.isValid 
+                ? "bg-green-50 border-green-300" 
+                : "bg-red-50 border-red-300"
+            }`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {getStatusIcon(verificationResult.isValid)}
+                  <div>
+                    <div className="text-lg font-bold">
+                      Signature {verificationResult.isValid ? "authentique" : "non valide"}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      Vérifiée le {new Date(verificationResult.verificationDate).toLocaleString("fr-FR")}
                     </div>
                   </div>
-                )}
+                </div>
+                {getStatusBadge(verificationResult.isValid)}
               </div>
+            </div>
 
-              <div className="space-y-3">
-                <h4 className="font-semibold">Informations de la commande</h4>
+            {/* Informations de la commande */}
+            {verificationResult.order ? (
+              <div className="space-y-4">
+                <h4 className="font-semibold text-lg">Informations de la commande</h4>
                 
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Numéro :</span>
-                    <span className="font-mono">{verificationResult.order.orderNumber}</span>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="text-sm text-gray-600 mb-1">Numéro de commande</div>
+                    <div className="font-mono font-bold text-lg">{verificationResult.order.orderNumber}</div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">ID :</span>
-                    <span>{verificationResult.order.id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Montant :</span>
-                    <span className="font-semibold">
+                  
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="text-sm text-gray-600 mb-1">Montant total</div>
+                    <div className="font-bold text-lg">
                       {(verificationResult.order.totalAmount / 100).toLocaleString("fr-FR", {
                         style: "currency",
                         currency: "XAF",
                       })}
-                    </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Statut :</span>
-                    <Badge variant="outline">{verificationResult.order.status}</Badge>
+
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="text-sm text-gray-600 mb-1">Statut</div>
+                    <Badge variant="outline" className="mt-1">{verificationResult.order.status}</Badge>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Date :</span>
-                    <span>
-                      {new Date(verificationResult.order.createdAt).toLocaleDateString("fr-FR")}
-                    </span>
+
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="text-sm text-gray-600 mb-1">Date de création</div>
+                    <div className="font-semibold">
+                      {new Date(verificationResult.order.createdAt).toLocaleDateString("fr-FR", {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </div>
                   </div>
                 </div>
+
+                {/* Bouton de régénération */}
+                {verificationResult.isValid && (
+                  <div className="pt-4 border-t">
+                    <Button
+                      onClick={handleRegenerateInvoice}
+                      disabled={regenerateInvoiceMutation.isPending}
+                      variant="outline"
+                      size="lg"
+                      className="w-full"
+                    >
+                      {regenerateInvoiceMutation.isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Régénération en cours...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Régénérer la facture pour comparaison visuelle
+                        </>
+                      )}
+                    </Button>
+                    <p className="text-sm text-gray-500 mt-2 text-center">
+                      Téléchargez une nouvelle copie de la facture pour la comparer visuellement avec l'originale
+                    </p>
+                  </div>
+                )}
               </div>
-            </div>
+            ) : (
+              /* Message si aucune commande trouvée */
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  {verificationResult.message || "Aucune commande correspondante trouvée pour ce fichier PDF"}
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Message d'alerte si invalide */}
-            {!verificationResult.isValid && (
+            {!verificationResult.isValid && verificationResult.order && (
               <Alert variant="destructive">
                 <ShieldX className="h-4 w-4" />
                 <AlertDescription>

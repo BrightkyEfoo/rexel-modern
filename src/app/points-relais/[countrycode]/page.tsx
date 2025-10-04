@@ -103,7 +103,7 @@ export default function CountryPickupPointsPage() {
             <div className="relative w-12 h-8 rounded-sm overflow-hidden border border-gray-200">
               <Image
                 alt={countryName}
-                src={`http://purecatamphetamine.github.io/country-flag-icons/3x2/${upperCountryCode}.svg`}
+                src={`https://catamphetamine.gitlab.io/country-flag-icons/3x2/${upperCountryCode}.svg`}
                 fill
                 className="object-cover"
               />

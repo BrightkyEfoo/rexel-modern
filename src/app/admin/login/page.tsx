@@ -48,9 +48,9 @@ export default function AdminLoginPage() {
     },
   });
 
-  // Vérifier si l'utilisateur est déjà connecté et admin
+  // Vérifier si l'utilisateur est déjà connecté et admin/manager
   useEffect(() => {
-    if (isAuthenticated && hasRole("admin")) {
+    if (isAuthenticated && (hasRole("admin") || hasRole("manager"))) {
       router.push("/admin");
     }
   }, [isAuthenticated, hasRole, router, user]);
@@ -64,11 +64,11 @@ export default function AdminLoginPage() {
       if (result?.ok) {
         // Attendre un petit délai pour que NextAuth mette à jour la session
         setTimeout(() => {
-          if (isAuthenticated && hasRole("admin")) {
+          if (isAuthenticated && (hasRole("admin") || hasRole("manager"))) {
             router.push("/admin");
-          } else if (isAuthenticated && !hasRole("admin")) {
+          } else if (isAuthenticated && !hasRole("admin") && !hasRole("manager")) {
             form.setError("root", {
-              message: "Vous n'avez pas les permissions administrateur",
+              message: "Vous n'avez pas les permissions administrateur ou manager",
             });
           }
         }, 1000);

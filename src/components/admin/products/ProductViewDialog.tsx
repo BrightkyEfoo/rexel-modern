@@ -10,17 +10,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Package, 
-  Tag, 
-  DollarSign, 
-  Building2, 
+import {
+  Package,
+  Tag,
+  DollarSign,
+  Building2,
   Calendar,
   CheckCircle,
   XCircle,
   Star,
   Eye,
-  Hash
+  Hash,
 } from "lucide-react";
 import type { Product } from "@/lib/types/products";
 import { formatPrice } from "@/lib/utils/currency";
@@ -74,7 +74,10 @@ export function ProductViewDialog({
                   <CardTitle className="text-2xl">{product.name}</CardTitle>
                   <div className="flex items-center gap-2">
                     {product.sku && (
-                      <Badge variant="outline" className="flex items-center gap-1">
+                      <Badge
+                        variant="outline"
+                        className="flex items-center gap-1"
+                      >
                         <Hash className="h-3 w-3" />
                         {product.sku}
                       </Badge>
@@ -129,11 +132,15 @@ export function ProductViewDialog({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Quantité en stock</span>
+                  <span className="text-muted-foreground">
+                    Quantité en stock
+                  </span>
                   <span className="font-medium">{product.stockQuantity}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Gestion du stock</span>
+                  <span className="text-muted-foreground">
+                    Gestion du stock
+                  </span>
                   <div className="flex items-center gap-1">
                     {product.manageStock ? (
                       <CheckCircle className="h-4 w-4 text-green-600" />
@@ -172,11 +179,15 @@ export function ProductViewDialog({
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Prix de base</span>
-                  <span className="font-medium">{formatPrice(product.price)}</span>
+                  <span className="font-medium">
+                    {formatPrice(product.price)}
+                  </span>
                 </div>
                 {product.salePrice && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Prix promotionnel</span>
+                    <span className="text-muted-foreground">
+                      Prix promotionnel
+                    </span>
                     <span className="font-medium text-green-600">
                       {formatPrice(product.salePrice)}
                     </span>
@@ -186,7 +197,10 @@ export function ProductViewDialog({
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Économie</span>
                     <span className="font-medium text-green-600">
-                      -{formatPrice(product.price - product.salePrice)}
+                      -
+                      {formatPrice(
+                        Number(product.price) - Number(product.salePrice)
+                      )}
                     </span>
                   </div>
                 )}
@@ -217,7 +231,10 @@ export function ProductViewDialog({
                 {product.brand && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Marque</span>
-                    <Badge variant="outline" className="flex items-center gap-1">
+                    <Badge
+                      variant="outline"
+                      className="flex items-center gap-1"
+                    >
                       <Building2 className="h-3 w-3" />
                       {product.brand.name}
                     </Badge>
@@ -246,24 +263,24 @@ export function ProductViewDialog({
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Créé le</span>
                   <span className="text-sm">
-                    {new Date(product.createdAt).toLocaleDateString('fr-FR', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
+                    {new Date(product.createdAt).toLocaleDateString("fr-FR", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Modifié le</span>
                   <span className="text-sm">
-                    {new Date(product.updatedAt).toLocaleDateString('fr-FR', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
+                    {new Date(product.updatedAt).toLocaleDateString("fr-FR", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </span>
                 </div>
@@ -272,25 +289,31 @@ export function ProductViewDialog({
           </div>
 
           {/* Spécifications techniques */}
-          {product.specifications && Object.keys(product.specifications).length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Spécifications techniques</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(product.specifications).map(([key, value]) => (
-                    <div key={key} className="flex justify-between py-2 border-b">
-                      <span className="text-muted-foreground capitalize">
-                        {key.replace(/_/g, ' ')}
-                      </span>
-                      <span className="font-medium">{String(value)}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {product.specifications &&
+            Object.keys(product.specifications).length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Spécifications techniques</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(product.specifications).map(
+                      ([key, value]) => (
+                        <div
+                          key={key}
+                          className="flex justify-between py-2 border-b"
+                        >
+                          <span className="text-muted-foreground capitalize">
+                            {key.replace(/_/g, " ")}
+                          </span>
+                          <span className="font-medium">{String(value)}</span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
         </div>
       </DialogContent>
     </Dialog>

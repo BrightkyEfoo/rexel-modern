@@ -87,6 +87,69 @@ export function useProducts(filters: ProductFilters = {}) {
   });
 }
 
+// Hook pour récupérer tous les produits (admin/manager) - inclut tous les statuts
+export function useProductsSecured(filters: ProductFilters = {}) {
+  console.log('🎯 useProductsSecured called with filters:', filters);
+  
+  // Stabiliser les filtres pour éviter les re-renders inutiles
+  const stableFilters = useMemo(() => {
+    const cleanFilters: Record<string, any> = {};
+    
+    const orderedKeys = [
+      'page', 'per_page', 'sort_by', 'sort_order', 'search', 
+      'categoryId', 'brandId', 'minPrice', 'maxPrice',
+      'inStock', 'isFeatured', 'isActive'
+    ];
+    
+    for (const key of orderedKeys) {
+      const value = filters[key as keyof ProductFilters];
+      if (value !== undefined && value !== null && value !== '') {
+        cleanFilters[key] = value;
+      }
+    }
+    
+    return cleanFilters;
+  }, [
+    filters.page, 
+    filters.per_page, 
+    filters.sort_by, 
+    filters.sort_order, 
+    filters.search,
+    filters.categoryId, 
+    filters.brandId, 
+    filters.minPrice, 
+    filters.maxPrice,
+    filters.inStock, 
+    filters.isFeatured, 
+    filters.isActive
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return useQuery({
+    queryKey: [...productKeys.list(stableFilters), 'secured'],
+    queryFn: async (): Promise<ProductsResponse> => {
+      const params = new URLSearchParams();
+      
+      // Convertir les filtres en snake_case pour le backend
+      const backendFilters = convertProductFilters(filters);
+      
+      Object.entries(backendFilters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params.append(key, value.toString());
+        }
+      });
+
+      // Utiliser la route sécurisée qui inclut tous les statuts
+      const response = await nextAuthApiClient.get<ProductsResponse>(
+        `/secured/products?${params.toString()}`
+      );
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+}
+
 // Hook pour récupérer un produit par ID
 export function useProduct(id: number) {
   return useQuery({
@@ -162,6 +225,8 @@ export function useDeleteProduct() {
         refetchType: 'active'
       });
       queryClient.removeQueries({ queryKey: productKeys.detail(id) });
+      // Invalider la query des activités
+      queryClient.invalidateQueries({ queryKey: ["productActivities"] });
     },
   });
 }
@@ -185,6 +250,8 @@ export function useBulkDeleteProducts() {
         queryKey: productKeys.all,
         refetchType: 'active'
       });
+      // Invalider la query des activités
+      queryClient.invalidateQueries({ queryKey: ["productActivities"] });
     },
   });
 }

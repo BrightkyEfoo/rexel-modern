@@ -4,19 +4,17 @@ import { toast } from "@/hooks/use-toast";
 
 // Types
 export interface VerifySignatureData {
-  orderNumber: string;
-  signature: string;
-  pdfData?: string; // Base64 encoded PDF data
+  pdfData: string; // Base64 encoded PDF data (obligatoire)
+  orderNumber?: string; // Numéro de commande (optionnel)
 }
 
 export interface VerifySignatureResponse {
   data: {
-    orderNumber: string;
-    isValidStored: boolean;
-    isValidContent: boolean;
+    orderNumber: string | null;
     isValid: boolean;
     verificationDate: string;
-    order: {
+    message?: string;
+    order?: {
       id: number;
       orderNumber: string;
       totalAmount: number;
@@ -44,6 +42,16 @@ const invoiceApi = {
       data
     );
     return response.data;
+  },
+
+  regenerateInvoice: async (orderNumber: string): Promise<Blob> => {
+    const response = await nextAuthApi.secured.get(
+      `/admin/orders/${orderNumber}/regenerate-invoice`,
+      {
+        responseType: 'blob',
+      }
+    );
+    return response.data as Blob;
   },
 };
 
@@ -81,13 +89,13 @@ export function useVerifySignature() {
   return useMutation({
     mutationFn: (data: VerifySignatureData) => invoiceApi.verifySignature(data),
     onSuccess: (response) => {
-      const { isValid, orderNumber } = response.data;
+      const { isValid, orderNumber, message } = response.data;
       
       toast({
-        title: isValid ? "Signature valide" : "Signature invalide",
+        title: isValid ? "Signature valide ✓" : "Signature invalide ✗",
         description: isValid 
           ? `La signature de la facture ${orderNumber} est authentique.`
-          : `La signature de la facture ${orderNumber} n'est pas valide.`,
+          : message || `La signature n'est pas valide.`,
         variant: isValid ? "default" : "destructive",
       });
     },
@@ -95,6 +103,35 @@ export function useVerifySignature() {
       toast({
         title: "Erreur de vérification",
         description: error.message || "Impossible de vérifier la signature",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useRegenerateInvoice() {
+  return useMutation({
+    mutationFn: (orderNumber: string) => invoiceApi.regenerateInvoice(orderNumber),
+    onSuccess: (blob, orderNumber) => {
+      // Créer un lien de téléchargement
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `facture-${orderNumber}-regeneree.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Facture régénérée",
+        description: `La facture ${orderNumber} a été régénérée et téléchargée pour comparaison.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur de régénération",
+        description: error.message || "Impossible de régénérer la facture",
         variant: "destructive",
       });
     },

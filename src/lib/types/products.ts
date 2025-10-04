@@ -5,11 +5,11 @@ export interface Product {
   description?: string;
   shortDescription?: string;
   sku?: string;
-  price: number;
-  salePrice?: number;
+  price: number | string;
+  salePrice?: number | string;
   stockQuantity: number;
   manageStock: boolean;
-  inStock: boolean;
+  inStock?: boolean;
   isFeatured: boolean;
   isActive: boolean;
   brandId?: number;
@@ -19,7 +19,29 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   
+  // Validation workflow fields
+  status?: string;
+  createdById?: number;
+  approvedById?: number;
+  submittedAt?: string;
+  approvedAt?: string;
+  rejectionReason?: string;
+  
   // Relations
+  createdBy?: {
+    id: number;
+    firstName?: string | null;
+    lastName?: string | null;
+    email: string;
+    type: string;
+  };
+  approvedBy?: {
+    id: number;
+    firstName?: string | null;
+    lastName?: string | null;
+    email: string;
+    type: string;
+  };
   brand?: {
     id: number;
     name: string;
@@ -33,11 +55,18 @@ export interface Product {
   }>;
   files?: Array<{
     id: number;
-    name: string;
+    filename: string;
+    originalName: string;
     path: string;
     url: string;
     size: number;
     mimeType: string;
+    isMain: boolean;
+    bucket: string;
+    fileableType: string;
+    fileableId?: number;
+    createdAt: string;
+    updatedAt: string;
   }>;
   imageUrl?: string; // Computed field for the main image
 }

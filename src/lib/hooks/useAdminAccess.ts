@@ -6,48 +6,55 @@ import { useEffect } from 'react';
 import { useLogout } from '../auth/auth-hooks';
 
 /**
- * Hook pour vérifier l'accès admin
+ * Hook pour vérifier l'accès admin ou manager
  */
 export function useAdminAccess() {
   const { user, isAuthenticated, isLoading, hasRole } = useAuth();
   
   const isAdmin = isAuthenticated && hasRole('admin');
+  const isManager = isAuthenticated && hasRole('manager');
+  const hasAdminAccess = isAdmin || isManager;
   const needsLogin = !isLoading && !isAuthenticated;
-  const needsAdminRole = !isLoading && isAuthenticated && !hasRole('admin');
+  const needsAdminRole = !isLoading && isAuthenticated && !hasAdminAccess;
 
   return {
     user,
     isAuthenticated,
     isAdmin,
+    isManager,
+    hasAdminAccess,
     isLoading,
     needsLogin,
     needsAdminRole,
-    hasAccess: isAdmin,
+    hasAccess: hasAdminAccess,
   };
 }
 
 /**
  * Hook pour protéger les pages admin avec NextAuth
+ * Permet l'accès aux admins et aux managers
  */
 export function useRequireAdminAuth() {
   const router = useRouter();
-  const { isAdmin, needsLogin, needsAdminRole, isLoading, user } = useAdminAccess();
+  const { isAdmin, isManager, hasAdminAccess, needsLogin, needsAdminRole, isLoading, user } = useAdminAccess();
 
   useEffect(() => {
     if (needsLogin) {
       // Rediriger vers la page de login admin
       router.push('/admin/login');
     } else if (needsAdminRole) {
-      // Rediriger vers l'accueil si pas admin
+      // Rediriger vers l'accueil si ni admin ni manager
       router.push('/?error=access_denied');
     }
   }, [needsLogin, needsAdminRole, router]);
 
   return {
-    isAuthenticated: isAdmin,
+    isAuthenticated: hasAdminAccess,
     adminUser: user,
+    isAdmin,
+    isManager,
     isLoading,
-    hasAccess: isAdmin,
+    hasAccess: hasAdminAccess,
   };
 }
 

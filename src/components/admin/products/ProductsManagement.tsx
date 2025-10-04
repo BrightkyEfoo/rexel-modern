@@ -5,7 +5,7 @@ import { ProductFilters } from "./ProductFilters";
 import { ProductsTable } from "./ProductsTable";
 import { ProductFormDialog } from "./ProductFormDialog";
 import { ProductImportDialog } from "./ProductImportDialog";
-import { useProducts } from "@/lib/hooks/useProducts";
+import { useProductsSecured } from "@/lib/hooks/useProducts";
 import { useProductFilters } from "@/lib/hooks/useProductFilters";
 
 export function ProductsManagement() {
@@ -15,8 +15,8 @@ export function ProductsManagement() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
 
-  // API
-  const { data: productsResponse } = useProducts(filters);
+  // API - utilise la route sécurisée qui inclut tous les produits (y compris pending)
+  const { data: productsResponse } = useProductsSecured(filters);
 
   const handleCreateProduct = () => {
     setShowCreateDialog(true);

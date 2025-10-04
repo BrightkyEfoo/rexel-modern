@@ -65,6 +65,8 @@ export interface Product {
   shortDescription?: string;
   sku?: string;
   price: number | string;
+  createdBy?: User;
+  status?: string;
   salePrice?: number | string;
   stockQuantity: number ;
   manageStock: boolean;
@@ -77,8 +79,17 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   
+  // Validation workflow fields
+  createdById?: number;
+  approvedById?: number;
+  approvedBy?: User;
+  submittedAt?: string;
+  approvedAt?: string;
+  rejectionReason?: string;
+  
   // Relations
   category?: Category;
+  categories?: Category[];
   brand?: Brand;
   files?: File[];
   

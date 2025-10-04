@@ -318,7 +318,7 @@ export default function OrdersPage() {
         )}
       </main>
 
-      <Footer />
+      <Footer sectionsVisible={[true, false, false, false]}/>
     </div>
   );
 }

@@ -318,7 +318,7 @@ export function PickupPointFormDialog({
                           <SelectItem key={`select-item-${code}`} value={code}>
                             <div className="flex items-center gap-2">
                               <Image
-                                src={`http://purecatamphetamine.github.io/country-flag-icons/3x2/${code}.svg`}
+                                src={`https://catamphetamine.gitlab.io/country-flag-icons/3x2/${code}.svg`}
                                 alt={country.name}
                                 width={16}
                                 height={16}

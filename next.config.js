@@ -13,7 +13,7 @@ const nextConfig = {
       "minio.kesimarket.com",
       "kesimarket.com",
       "assets.kesimarket.com",
-      "purecatamphetamine.github.io",
+      "catamphetamine.gitlab.io",
     ],
     remotePatterns: [
       {
@@ -52,7 +52,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "purecatamphetamine.github.io",
+        hostname: "catamphetamine.gitlab.io",
         pathname: "/**",
       },
     ],

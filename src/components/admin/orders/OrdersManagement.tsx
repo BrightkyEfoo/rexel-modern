@@ -46,6 +46,7 @@ import {
   XCircle,
   Loader2,
   RefreshCw,
+  Download,
 } from "lucide-react";
 import {
   useOrders,
@@ -53,6 +54,7 @@ import {
   useConfirmOrder,
   type Order,
 } from "@/lib/hooks/useOrders";
+import { useDownloadInvoice } from "@/lib/hooks/useInvoice";
 import { formatPrice } from "@/lib/utils/currency";
 
 const statusConfig = {
@@ -93,6 +95,7 @@ export function OrdersManagement() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [downloadingOrderNumber, setDownloadingOrderNumber] = useState<string | null>(null);
 
   // React Query hooks
   const {
@@ -109,6 +112,7 @@ export function OrdersManagement() {
 
   const updateOrderStatusMutation = useUpdateOrderStatus();
   const confirmOrderMutation = useConfirmOrder();
+  const downloadInvoiceMutation = useDownloadInvoice();
 
   // Helper functions
   const handleUpdateStatus = (orderId: number, newStatus: string) => {
@@ -117,6 +121,15 @@ export function OrdersManagement() {
 
   const handleConfirmOrder = async (orderId: number) => {
     await confirmOrderMutation.mutateAsync(orderId);
+  };
+
+  const handleDownloadInvoice = (orderNumber: string) => {
+    setDownloadingOrderNumber(orderNumber);
+    downloadInvoiceMutation.mutate(orderNumber, {
+      onSettled: () => {
+        setDownloadingOrderNumber(null);
+      },
+    });
   };
 
   console.log("first", ordersData);
@@ -269,6 +282,7 @@ export function OrdersManagement() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => setSelectedOrder(order)}
+                                  title="Voir les détails"
                                 >
                                   <Eye className="w-4 h-4" />
                                 </Button>
@@ -293,16 +307,33 @@ export function OrdersManagement() {
                                         ? selectedOrder.id
                                         : null
                                     }
+                                    downloadingOrderNumber={downloadingOrderNumber}
+                                    onDownloadInvoice={handleDownloadInvoice}
                                   />
                                 )}
                               </DialogContent>
                             </Dialog>
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDownloadInvoice(order.orderNumber)}
+                              disabled={downloadingOrderNumber === order.orderNumber}
+                              title="Télécharger la facture"
+                            >
+                              {downloadingOrderNumber === order.orderNumber ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Download className="w-4 h-4" />
+                              )}
+                            </Button>
 
                             {order.status === "pending" && (
                               <Button
                                 size="sm"
                                 onClick={() => handleConfirmOrder(order.id)}
                                 disabled={confirmOrderMutation.isPending}
+                                title="Confirmer la commande"
                               >
                                 {confirmOrderMutation.isPending ? (
                                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -356,6 +387,8 @@ interface OrderDetailsDialogProps {
   onUpdateStatus: (orderId: number, status: string) => void;
   onConfirm: (orderId: number) => void;
   updatingStatus: number | null;
+  downloadingOrderNumber: string | null;
+  onDownloadInvoice: (orderNumber: string) => void;
 }
 
 function OrderDetailsDialog({
@@ -363,6 +396,8 @@ function OrderDetailsDialog({
   onUpdateStatus,
   onConfirm,
   updatingStatus,
+  downloadingOrderNumber,
+  onDownloadInvoice,
 }: OrderDetailsDialogProps) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR", {
@@ -498,7 +533,20 @@ function OrderDetailsDialog({
 
       {/* Actions */}
       <div className="border-t pt-4">
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={() => onDownloadInvoice(order.orderNumber)}
+            disabled={downloadingOrderNumber === order.orderNumber}
+          >
+            {downloadingOrderNumber === order.orderNumber ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
+            Télécharger la facture
+          </Button>
+
           {order.status === "pending" && (
             <Button
               onClick={() => onConfirm(order.id)}

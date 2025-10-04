@@ -29,7 +29,7 @@ import {
   Tag,
 } from "lucide-react";
 import type { Product, ProductFilters } from "@/lib/types/products";
-import { useProducts } from "@/lib/hooks/useProducts";
+import { useProductsSecured } from "@/lib/hooks/useProducts";
 import { ProductFormDialog } from "./ProductFormDialog";
 import { ProductViewDialog } from "./ProductViewDialog";
 import { ProductDeleteDialog } from "./ProductDeleteDialog";
@@ -45,6 +45,37 @@ interface ProductsTableProps {
   onFiltersChange: (filters: Partial<ProductFilters>) => void;
 }
 
+// Helper function pour obtenir la classe de bordure selon le statut
+const getStatusBorderClass = (status?: string): string => {
+  switch (status) {
+    case "approved":
+      return "border-l-4 border-l-green-600 hover:border-l-green-700";
+    case "pending":
+      // Ruban rayé jaune/noir pour les produits en attente (comme ruban de danger)
+      return "relative border-l-[6px] border-l-transparent hover:shadow-lg transition-shadow";
+    case "rejected":
+      return "border-l-4 border-l-red-600 hover:border-l-red-700";
+    case "draft":
+      return "border-l-4 border-l-gray-400 hover:border-l-gray-500";
+    default:
+      return "border-l-4 border-l-gray-300 hover:border-l-gray-400";
+  }
+};
+
+// Helper function pour obtenir le style inline des rayures pour pending
+const getStatusBorderStyle = (
+  status?: string
+): React.CSSProperties | undefined => {
+  if (status === "pending") {
+    return {
+      borderLeft: "6px solid transparent",
+      borderImage:
+        "repeating-linear-gradient(45deg, #fbbf24 0px, #fbbf24 10px, #000 10px, #000 20px) 1",
+    };
+  }
+  return undefined;
+};
+
 export function ProductsTable({
   filters,
   onFiltersChange,
@@ -57,7 +88,11 @@ export function ProductsTable({
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // API
-  const { data: productsResponse, isLoading, error } = useProducts(filters);
+  const {
+    data: productsResponse,
+    isLoading,
+    error,
+  } = useProductsSecured(filters);
 
   const products = productsResponse?.data || [];
   const meta = productsResponse?.meta;
@@ -86,19 +121,22 @@ export function ProductsTable({
   };
 
   // Gestion de la pagination
-  const handlePageChange = useCallback((page: number) => {
-    console.log('🔢 handlePageChange called with page:', page);
-    console.log('📍 Current page:', filters.page);
-    
-    // Éviter les changements inutiles si on est déjà sur la bonne page
-    if (filters.page === page) {
-      console.log('⚠️ Same page, skipping update');
-      return;
-    }
-    
-    console.log('✅ Calling onFiltersChange with page:', page);
-    onFiltersChange({ page });
-  }, [filters.page, onFiltersChange]);
+  const handlePageChange = useCallback(
+    (page: number) => {
+      console.log("🔢 handlePageChange called with page:", page);
+      console.log("📍 Current page:", filters.page);
+
+      // Éviter les changements inutiles si on est déjà sur la bonne page
+      if (filters.page === page) {
+        console.log("⚠️ Same page, skipping update");
+        return;
+      }
+
+      console.log("✅ Calling onFiltersChange with page:", page);
+      onFiltersChange({ page });
+    },
+    [filters.page, onFiltersChange]
+  );
 
   // Gestion du tri
   const handleSort = (column: string) => {
@@ -248,7 +286,11 @@ export function ProductsTable({
                     product.fabricationCountryCode || ""
                   );
                   return (
-                    <TableRow key={product.id}>
+                    <TableRow
+                      key={product.id}
+                      className={getStatusBorderClass(product.status)}
+                      style={getStatusBorderStyle(product.status)}
+                    >
                       <TableCell>
                         <Checkbox
                           checked={selectedProducts.some(
@@ -291,11 +333,12 @@ export function ProductsTable({
                           <div className="font-medium">
                             {formatPrice(product.price)}
                           </div>
-                          {product.salePrice && product.salePrice > 0 && (
-                            <div className="text-sm text-green-600">
-                              {formatPrice(product.salePrice)}
-                            </div>
-                          )}
+                          {product.salePrice &&
+                            Number(product.salePrice) > 0 && (
+                              <div className="text-sm text-green-600">
+                                {formatPrice(product.salePrice)}
+                              </div>
+                            )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -328,7 +371,7 @@ export function ProductsTable({
                             {country && hasFlagIcon ? (
                               <Image
                                 alt={country.name}
-                                src={`http://purecatamphetamine.github.io/country-flag-icons/3x2/${product.fabricationCountryCode}.svg`}
+                                src={`https://catamphetamine.gitlab.io/country-flag-icons/3x2/${product.fabricationCountryCode}.svg`}
                                 fill
                               />
                             ) : null}
@@ -397,7 +440,8 @@ export function ProductsTable({
         {meta && meta.last_page > 1 && (
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
-              Page {meta.current_page} sur {meta.last_page} ({meta.total} produits)
+              Page {meta.current_page} sur {meta.last_page} ({meta.total}{" "}
+              produits)
             </div>
             <ProductPagination
               currentPage={meta.current_page}
@@ -407,7 +451,6 @@ export function ProductsTable({
           </div>
         )}
       </div>
-
 
       {/* Dialogues */}
       <ProductFormDialog
@@ -419,6 +462,7 @@ export function ProductsTable({
       <ProductFormDialog
         open={!!productToEdit}
         onOpenChange={(open) => !open && setProductToEdit(undefined)}
+        // @ts-ignore
         product={productToEdit}
         mode="edit"
       />

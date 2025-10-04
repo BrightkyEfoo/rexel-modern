@@ -33,7 +33,7 @@ export function CountryFlag({
     <div className={`relative ${sizeClasses[size]} ${className}`}>
       <Image
         alt={countryName || `Flag of ${countryCode}`}
-        src={`http://purecatamphetamine.github.io/country-flag-icons/3x2/${countryCode}.svg`}
+        src={`https://catamphetamine.gitlab.io/country-flag-icons/3x2/${countryCode}.svg`}
         fill
         className="object-cover rounded-[2px]"
         title={countryName}

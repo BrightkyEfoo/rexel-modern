@@ -3,13 +3,13 @@
 import { useQueryState } from "nuqs";
 import { useCallback } from "react";
 
-export type AdminTabType = 'overview' | 'products' | 'categories' | 'brands' | 'pickup-points' | 'orders';
+export type AdminTabType = 'overview' | 'activities' | 'validations' | 'products' | 'categories' | 'brands' | 'pickup-points' | 'orders' | 'users';
 
 export function useAdminTabs() {
   const [activeTab, setActiveTab] = useQueryState('tab', {
     defaultValue: 'overview' as AdminTabType,
     parse: (value: string): AdminTabType => {
-      const validTabs: AdminTabType[] = ['overview', 'products', 'categories', 'brands', 'pickup-points', 'orders'];
+      const validTabs: AdminTabType[] = ['overview', 'activities', 'validations', 'products', 'categories', 'brands', 'pickup-points', 'orders', 'users'];
       return validTabs.includes(value as AdminTabType) ? (value as AdminTabType) : 'overview';
     },
     serialize: (value: AdminTabType) => value,

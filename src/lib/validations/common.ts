@@ -142,7 +142,7 @@ export const optionalIdSchema = numericStringSchema({
 /**
  * Utilitaire pour convertir une valeur number en string pour les inputs
  */
-export const numberToString = (value: number | undefined | null): string => {
+export const numberToString = (value: number | string | undefined | null): string => {
   if (value === undefined || value === null) return "";
   return value.toString();
 };

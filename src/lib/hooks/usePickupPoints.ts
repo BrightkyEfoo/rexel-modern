@@ -87,6 +87,9 @@ export function useCreatePickupPoint() {
       // Invalider toutes les listes de points de relais
       queryClient.invalidateQueries({ queryKey: pickupPointKeys.lists() });
       queryClient.invalidateQueries({ queryKey: pickupPointKeys.stats() });
+      queryClient.invalidateQueries({ queryKey: pickupPointKeys.all });
+      // Invalider les activités pour afficher la nouvelle création
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
     },
   });
 }
@@ -104,6 +107,9 @@ export function useUpdatePickupPoint() {
       // Invalider les listes et mettre à jour le détail
       queryClient.invalidateQueries({ queryKey: pickupPointKeys.lists() });
       queryClient.invalidateQueries({ queryKey: pickupPointKeys.stats() });
+      queryClient.invalidateQueries({ queryKey: pickupPointKeys.all });
+      // Invalider les activités pour afficher la modification
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       // Mettre à jour le cache du détail si on a le slug
       if (data.slug) {
         queryClient.setQueryData(pickupPointKeys.detail(data.slug), { data });
@@ -124,6 +130,9 @@ export function useDeletePickupPoint() {
       // Invalider les listes et supprimer le détail du cache
       queryClient.invalidateQueries({ queryKey: pickupPointKeys.lists() });
       queryClient.invalidateQueries({ queryKey: pickupPointKeys.stats() });
+      queryClient.invalidateQueries({ queryKey: pickupPointKeys.all });
+      // Invalider les activités pour afficher la suppression
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       // On ne peut pas supprimer le cache du détail car on n'a que l'ID
     },
   });
@@ -145,6 +154,8 @@ export function useBulkDeletePickupPoints() {
     onSuccess: () => {
       // Invalider toutes les requêtes de points de relais
       queryClient.invalidateQueries({ queryKey: pickupPointKeys.all });
+      // Invalider les activités
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
     },
   });
 }
