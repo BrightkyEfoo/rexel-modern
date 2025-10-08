@@ -126,6 +126,15 @@ export default function CartPage() {
         
         <Header />
         <div className="container mx-auto px-4 py-8">
+          {/* Breadcrumb */}
+          <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-8">
+            <Link href="/profil" className="hover:text-primary">
+              Accueil
+            </Link>
+            <span>/</span>
+            <span className="text-foreground">Panier</span>
+          </nav>
+
           <div className="text-center py-16">
             <ShoppingCart className="w-24 h-24 text-muted-foreground mx-auto mb-6" />
             <h2 className="text-2xl font-bold text-foreground mb-4">
@@ -153,7 +162,7 @@ export default function CartPage() {
       <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-8">
-          <Link href="/" className="hover:text-primary">
+          <Link href="/profil" className="hover:text-primary">
             Accueil
           </Link>
           <span>/</span>

@@ -77,7 +77,7 @@ export default function AdminDashboardPage() {
         <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-8">
-          <Link href="/" className="hover:text-primary">Accueil</Link>
+          <button onClick={() => changeTab('overview')} className="hover:text-primary">Accueil</button>
           <span>/</span>
           <span className="text-foreground">Administration</span>
         </nav>
@@ -137,7 +137,13 @@ export default function AdminDashboardPage() {
 
         {/* Overview Tab */}
         {activeTab === 'overview' && (
-          <OverviewTab onNavigateToActivities={() => changeTab('activities')} />
+          <OverviewTab 
+            onNavigateToActivities={() => changeTab('activities')}
+            onNavigateToProducts={() => changeTab('products')}
+            onNavigateToCategories={() => changeTab('categories')}
+            onNavigateToBrands={() => changeTab('brands')}
+            onNavigateToPickupPoints={() => changeTab('pickup-points')}
+          />
         )}
 
         {/* Activities Tab - Admin & Manager */}

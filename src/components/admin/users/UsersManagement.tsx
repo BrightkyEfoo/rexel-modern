@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { getUsers, type User, type UsersFilters } from '@/lib/api/users'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { getUsers, toggleSuspendUser, bulkSuspendUsers, bulkDeleteUsers, type User, type UsersFilters } from '@/lib/api/users'
 import { UserType } from '@/lib/types/user'
 import { UserFormDialog } from './UserFormDialog'
 import { UserDeleteDialog } from './UserDeleteDialog'
+import { BulkDeleteDialog } from './BulkDeleteDialog'
+import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -33,11 +35,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Users, Plus, Search, MoreVertical, Edit, Trash2, Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { Users, Plus, Search, MoreVertical, Edit, Trash2, Loader2, CheckCircle, XCircle, Ban, UserCheck } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export function UsersManagement() {
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  
   const [filters, setFilters] = useState<UsersFilters>({
     page: 1,
     per_page: 20,
@@ -46,8 +52,10 @@ export function UsersManagement() {
   })
   const [search, setSearch] = useState('')
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([])
   const [formDialogOpen, setFormDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
 
   // Query pour récupérer les utilisateurs
   const { data, isLoading, error } = useQuery({
@@ -57,6 +65,78 @@ export function UsersManagement() {
 
   const users = data?.data || []
   const meta = data?.meta
+
+  // Mutation pour suspendre/réactiver un utilisateur
+  const suspendMutation = useMutation({
+    mutationFn: ({ userId, suspend }: { userId: number, suspend: boolean }) => 
+      toggleSuspendUser(userId, suspend),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast({
+        title: 'Succès',
+        description: 'Le statut de l\'utilisateur a été mis à jour.',
+      })
+    },
+    onError: () => {
+      toast({
+        title: 'Erreur',
+        description: 'Une erreur est survenue lors de la mise à jour.',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  // Mutation pour suspendre/réactiver plusieurs utilisateurs en masse
+  const bulkSuspendMutation = useMutation({
+    mutationFn: async ({ suspend }: { suspend: boolean }) => {
+      const userIds = selectedUsers.map(user => user.id)
+      return bulkSuspendUsers(userIds, suspend)
+    },
+    onSuccess: (response, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      setSelectedUsers([])
+      
+      const count = response.data?.updated?.length || selectedUsers.length
+      toast({
+        title: 'Succès',
+        description: variables.suspend 
+          ? `${count} utilisateur(s) suspendu(s)`
+          : `${count} utilisateur(s) réactivé(s)`,
+      })
+    },
+    onError: () => {
+      toast({
+        title: 'Erreur',
+        description: 'Une erreur est survenue lors de la mise à jour en masse.',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  // Mutation pour supprimer plusieurs utilisateurs en masse
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async () => {
+      const userIds = selectedUsers.map(user => user.id)
+      return bulkDeleteUsers(userIds)
+    },
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      const count = response.data?.deleted?.length || selectedUsers.length
+      setSelectedUsers([])
+      
+      toast({
+        title: 'Succès',
+        description: `${count} utilisateur(s) supprimé(s)`,
+      })
+    },
+    onError: () => {
+      toast({
+        title: 'Erreur',
+        description: 'Une erreur est survenue lors de la suppression en masse.',
+        variant: 'destructive',
+      })
+    },
+  })
 
   const handleSearch = () => {
     setFilters({ ...filters, search, page: 1 })
@@ -93,8 +173,49 @@ export function UsersManagement() {
     setDeleteDialogOpen(true)
   }
 
+  const handleToggleSuspend = (user: User) => {
+    suspendMutation.mutate({
+      userId: user.id,
+      suspend: !user.isSuspended
+    })
+  }
+
+  const handleBulkSuspend = (suspend: boolean) => {
+    bulkSuspendMutation.mutate({ suspend })
+  }
+
+  const handleBulkDelete = () => {
+    setBulkDeleteDialogOpen(true)
+  }
+
+  const confirmBulkDelete = () => {
+    bulkDeleteMutation.mutate()
+    setBulkDeleteDialogOpen(false)
+  }
+
   const handlePageChange = (newPage: number) => {
     setFilters({ ...filters, page: newPage })
+  }
+
+  // Gestion de la sélection
+  const isAllSelected = users.length > 0 && selectedUsers.length === users.length
+  const isIndeterminate = selectedUsers.length > 0 && selectedUsers.length < users.length
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      // Sélectionner seulement les utilisateurs non-admin
+      setSelectedUsers(users.filter(u => u.type !== UserType.ADMIN))
+    } else {
+      setSelectedUsers([])
+    }
+  }
+
+  const handleSelectUser = (user: User, checked: boolean) => {
+    if (checked) {
+      setSelectedUsers([...selectedUsers, user])
+    } else {
+      setSelectedUsers(selectedUsers.filter(u => u.id !== user.id))
+    }
   }
 
   const getUserTypeBadge = (type: UserType) => {
@@ -196,10 +317,57 @@ export function UsersManagement() {
             </div>
           ) : (
             <>
+              {/* Actions en lot */}
+              {selectedUsers.length > 0 && (
+                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg mb-4 flex-wrap">
+                  <span className="text-sm font-medium">
+                    {selectedUsers.length} utilisateur(s) sélectionné(s)
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleBulkSuspend(true)}
+                    disabled={bulkSuspendMutation.isPending || bulkDeleteMutation.isPending}
+                  >
+                    <Ban className="w-4 h-4 mr-2" />
+                    Suspendre la sélection
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleBulkSuspend(false)}
+                    disabled={bulkSuspendMutation.isPending || bulkDeleteMutation.isPending}
+                  >
+                    <UserCheck className="w-4 h-4 mr-2" />
+                    Réactiver la sélection
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleBulkDelete}
+                    disabled={bulkSuspendMutation.isPending || bulkDeleteMutation.isPending}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Supprimer la sélection
+                  </Button>
+                </div>
+              )}
+
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12">
+                        <Checkbox
+                          checked={isAllSelected}
+                          ref={(el) => {
+                            if (el) {
+                              (el as any).indeterminate = isIndeterminate
+                            }
+                          }}
+                          onCheckedChange={handleSelectAll}
+                        />
+                      </TableHead>
                       <TableHead>Nom</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Type</TableHead>
@@ -213,6 +381,14 @@ export function UsersManagement() {
                   <TableBody>
                     {users.map((user) => (
                       <TableRow key={user.id}>
+                        <TableCell>
+                          {user.type !== UserType.ADMIN && (
+                            <Checkbox
+                              checked={selectedUsers.some(u => u.id === user.id)}
+                              onCheckedChange={(checked) => handleSelectUser(user, checked as boolean)}
+                            />
+                          )}
+                        </TableCell>
                         <TableCell className="font-medium">
                           {user.firstName} {user.lastName}
                         </TableCell>
@@ -221,7 +397,12 @@ export function UsersManagement() {
                         <TableCell>{user.company || '-'}</TableCell>
                         <TableCell>{user.phone || '-'}</TableCell>
                         <TableCell>
-                          {user.isVerified ? (
+                          {user.isSuspended ? (
+                            <div className="flex items-center gap-1 text-red-600">
+                              <Ban className="w-4 h-4" />
+                              <span className="text-sm">Suspendu</span>
+                            </div>
+                          ) : user.isVerified ? (
                             <div className="flex items-center gap-1 text-green-600">
                               <CheckCircle className="w-4 h-4" />
                               <span className="text-sm">Vérifié</span>
@@ -250,6 +431,25 @@ export function UsersManagement() {
                                 <Edit className="w-4 h-4 mr-2" />
                                 Modifier
                               </DropdownMenuItem>
+                              {user.type !== UserType.ADMIN && (
+                                <DropdownMenuItem 
+                                  onClick={() => handleToggleSuspend(user)}
+                                  className={user.isSuspended ? "text-green-600" : "text-orange-600"}
+                                >
+                                  {user.isSuspended ? (
+                                    <>
+                                      <UserCheck className="w-4 h-4 mr-2" />
+                                      Réactiver
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Ban className="w-4 h-4 mr-2" />
+                                      Suspendre
+                                    </>
+                                  )}
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 onClick={() => handleDelete(user)}
                                 className="text-destructive"
@@ -307,6 +507,13 @@ export function UsersManagement() {
         user={selectedUser}
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
+      />
+      <BulkDeleteDialog
+        open={bulkDeleteDialogOpen}
+        onOpenChange={setBulkDeleteDialogOpen}
+        onConfirm={confirmBulkDelete}
+        count={selectedUsers.length}
+        isLoading={bulkDeleteMutation.isPending}
       />
     </>
   )

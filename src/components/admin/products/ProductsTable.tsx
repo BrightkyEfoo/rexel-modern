@@ -27,6 +27,8 @@ import {
   Package,
   Building2,
   Tag,
+  AlertTriangle,
+  TagIcon,
 } from "lucide-react";
 import type { Product, ProductFilters } from "@/lib/types/products";
 import { useProductsSecured } from "@/lib/hooks/useProducts";
@@ -39,6 +41,9 @@ import { ProductPagination } from "@/components/category/ProductPagination";
 import { getCountryData } from "countries-list";
 import Image from "next/image";
 import { hasFlag } from "country-flag-icons";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { productsService } from "@/lib/api/services";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductsTableProps {
   filters: ProductFilters;
@@ -96,6 +101,38 @@ export function ProductsTable({
 
   const products = productsResponse?.data || [];
   const meta = productsResponse?.meta;
+
+  // Query client pour invalider le cache
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  // Mutation pour marquer en destockage
+  const bulkClearanceMutation = useMutation({
+    mutationFn: ({ isOnClearance }: { isOnClearance: boolean }) =>
+      productsService.bulkSetClearance(
+        selectedProducts.map((p) => p.id),
+        isOnClearance
+      ),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      setSelectedProducts([]);
+      toast({
+        title: "Succès",
+        description: variables.isOnClearance
+          ? `${data.data.updated.length} produit(s) marqué(s) en destockage`
+          : `${data.data.updated.length} produit(s) retiré(s) du destockage`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description:
+          error.message ||
+          "Une erreur est survenue lors de la mise à jour",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Gestion de la sélection
   const isAllSelected =
@@ -176,10 +213,28 @@ export function ProductsTable({
       <div className="space-y-4">
         {/* Actions en lot */}
         {selectedProducts.length > 0 && (
-          <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+          <div className="flex items-center gap-2 p-3 bg-muted rounded-lg flex-wrap">
             <span className="text-sm font-medium">
               {selectedProducts.length} produit(s) sélectionné(s)
             </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => bulkClearanceMutation.mutate({ isOnClearance: true })}
+              disabled={bulkClearanceMutation.isPending}
+            >
+              <AlertTriangle className="w-4 h-4 mr-2" />
+              Marquer en destockage
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => bulkClearanceMutation.mutate({ isOnClearance: false })}
+              disabled={bulkClearanceMutation.isPending}
+            >
+              <TagIcon className="w-4 h-4 mr-2" />
+              Retirer du destockage
+            </Button>
             <Button
               variant="outline"
               size="sm"

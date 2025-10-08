@@ -36,6 +36,7 @@ import {
   User,
   Grid,
   Sparkles,
+  AlertTriangle,
   MapPin,
   Package,
   Phone,
@@ -107,7 +108,8 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
   const logoutMutation = useLogout();
   const { data: favoritesCount } = useFavoritesCount();
   const { data: categoriesResponse, isLoading: categoriesLoading } =
-    useMainCategories();
+    useMainCategories(5);
+    
 
   // Extraire les catégories de la réponse API
   const categories = categoriesResponse?.data || [];
@@ -210,13 +212,6 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
               >
                 Contact
               </Link>
-
-              <Link
-                href="/docs/format-csv-import"
-                className="text-xs sm:text-sm hover:text-primary-foreground/80"
-              >
-                Documentation
-              </Link>
             </div>
           </div>
         </div>
@@ -270,6 +265,13 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
                   <MobileNavLink href="/services" onNavigate={closeMobileMenu}>
                     <Settings className="w-5 h-5" />
                     <span>Services</span>
+                  </MobileNavLink>
+                  <MobileNavLink
+                    href="/destockage"
+                    onNavigate={closeMobileMenu}
+                  >
+                    <AlertTriangle className="w-5 h-5" />
+                    <span>Destockage</span>
                   </MobileNavLink>
                   <MobileNavLink href="/contact" onNavigate={closeMobileMenu}>
                     <span>Contact</span>
@@ -468,21 +470,17 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
                   </span>
                 </Link>
               </div>
-              <div className="relative group">
-                <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50">
-                  <span>Destockage</span>
-                  <Badge
-                    variant="secondary"
-                    className="ml-1 text-[8px] p-[0px] px-0.5"
-                  >
-                    Soon
-                  </Badge>
-                </span>
-              </div>
               <Link href="/services" className="relative group">
                 <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:cursor-pointer">
                   <Settings className="w-4 h-4" />
                   <span>Services</span>
+                </span>
+              </Link>
+
+              <Link href="/destockage" className="relative group">
+                <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:cursor-pointer">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>Destockage</span>
                 </span>
               </Link>
 

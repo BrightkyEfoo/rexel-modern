@@ -10,8 +10,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Shield, LogOut, User, Settings } from "lucide-react";
+import { Shield, LogOut, User, Settings, FileText } from "lucide-react";
 import { useAuth, useLogout } from "@/lib/auth/nextauth-hooks";
+import Link from "next/link";
 
 interface AdminHeaderProps {
   className?: string;
@@ -37,6 +38,15 @@ export function AdminHeader({ className }: AdminHeaderProps) {
 
         {/* Menu utilisateur admin */}
         <div className="flex items-center space-x-4">
+          {/* Lien documentation */}
+          <Link
+            href="/docs/format-csv-import"
+            className="hidden md:flex items-center space-x-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            <FileText className="w-4 h-4" />
+            <span>Documentation</span>
+          </Link>
+
           {/* Indicateur admin */}
           <div className="hidden md:flex items-center space-x-2 px-3 py-1 bg-primary/10 rounded-full">
             <Shield className="w-4 h-4 text-primary" />
@@ -78,7 +88,13 @@ export function AdminHeader({ className }: AdminHeaderProps) {
               <DropdownMenuSeparator />
 
               <DropdownMenuItem
-                onClick={() => logoutMutation.mutate()}
+                onClick={() => {
+                  logoutMutation.mutate(undefined, {
+                    onSuccess: () => {
+                      window.location.href = "/auth/admin/login";
+                    }
+                  });
+                }}
                 className="text-destructive focus:text-destructive"
               >
                 <LogOut className="mr-2 h-4 w-4" />

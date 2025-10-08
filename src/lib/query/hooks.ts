@@ -179,10 +179,10 @@ export function useCategoryBySlug(slug: string) {
   });
 }
 
-export function useMainCategories() {
+export function useMainCategories(limit?: number) {
   return useQuery({
-    queryKey: queryKeys.mainCategories,
-    queryFn: () => categoriesService.getMainCategories(),
+    queryKey: [...queryKeys.mainCategories, limit],
+    queryFn: () => categoriesService.getMainCategories(limit),
   });
 }
 

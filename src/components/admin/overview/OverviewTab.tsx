@@ -31,9 +31,19 @@ import { formatDistanceToNow } from "date-fns";
 
 interface OverviewTabProps {
   onNavigateToActivities?: () => void;
+  onNavigateToProducts?: () => void;
+  onNavigateToCategories?: () => void;
+  onNavigateToBrands?: () => void;
+  onNavigateToPickupPoints?: () => void;
 }
 
-export function OverviewTab({ onNavigateToActivities }: OverviewTabProps) {
+export function OverviewTab({ 
+  onNavigateToActivities,
+  onNavigateToProducts,
+  onNavigateToCategories,
+  onNavigateToBrands,
+  onNavigateToPickupPoints
+}: OverviewTabProps) {
   const { data: products } = useProducts({});
   const { data: categories } = useCategories();
   const { data: brands } = useBrands();
@@ -120,7 +130,10 @@ export function OverviewTab({ onNavigateToActivities }: OverviewTabProps) {
     <div className="space-y-8">
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => onNavigateToProducts?.()}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -139,7 +152,10 @@ export function OverviewTab({ onNavigateToActivities }: OverviewTabProps) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => onNavigateToCategories?.()}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -158,7 +174,10 @@ export function OverviewTab({ onNavigateToActivities }: OverviewTabProps) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => onNavigateToBrands?.()}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -177,7 +196,10 @@ export function OverviewTab({ onNavigateToActivities }: OverviewTabProps) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => onNavigateToPickupPoints?.()}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>

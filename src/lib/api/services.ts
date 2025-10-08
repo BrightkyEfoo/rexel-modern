@@ -424,6 +424,30 @@ export class ProductsService {
 
     return params;
   }
+
+  async bulkSetClearance(
+    productIds: number[],
+    isOnClearance: boolean
+  ): Promise<
+    ApiResponse<{
+      updated: Product[];
+      errors: Array<{ productId: number; error: string }>;
+    }>
+  > {
+    return nextAuthApiClient.post<{
+      updated: Product[];
+      errors: Array<{ productId: number; error: string }>;
+    }>("/secured/products/bulk-set-clearance", { productIds, isOnClearance });
+  }
+
+  async getClearanceProducts(
+    filters?: SearchFilters
+  ): Promise<PaginatedResponse<Product>> {
+    const params = this.buildSearchParams(filters);
+    return apiClient.getPaginated<Product>("/opened/products/clearance", {
+      params,
+    });
+  }
 }
 
 // Categories Service
@@ -442,9 +466,11 @@ export class CategoriesService {
     return apiClient.get<Category>(`/opened/categories/${slug}`);
   }
 
-  async getMainCategories(): Promise<ApiResponse<Category[]>> {
+  async getMainCategories(limit?: number): Promise<ApiResponse<Category[]>> {
+    const params = limit ? { limit } : {};
     return apiClient.get<Category[]>("/opened/categories/main", {
       cacheTime: 15 * 60 * 1000,
+      params,
     });
   }
 
@@ -590,7 +616,7 @@ export class CartService {
     return apiClient.post<Cart>("/opened/cart/items", {
       productId,
       quantity,
-      userId
+      userId,
     });
   }
 
@@ -855,7 +881,7 @@ export class PickupPointsService {
 
     const queryString = params.toString();
     const url = `/secured/pickup-points${queryString ? `?${queryString}` : ""}`;
-    const res = await nextAuthApiClient.get<unknown>(url)
+    const res = await nextAuthApiClient.get<unknown>(url);
 
     return res.data as ApiResponse<PickupPoint[]>;
   }
@@ -870,7 +896,10 @@ export class PickupPointsService {
     id: number,
     data: Partial<CreatePickupPointData>
   ): Promise<ApiResponse<PickupPoint>> {
-    return nextAuthApiClient.put<PickupPoint>(`/secured/pickup-points/${id}`, data);
+    return nextAuthApiClient.put<PickupPoint>(
+      `/secured/pickup-points/${id}`,
+      data
+    );
   }
 
   async deletePickupPoint(id: number): Promise<ApiResponse<void>> {
@@ -878,22 +907,37 @@ export class PickupPointsService {
   }
 
   // Country-specific methods
-  async getPickupPointsByCountry(countryCode: string): Promise<ApiResponse<PickupPoint[]>> {
-    return nextAuthApiClient.get<PickupPoint[]>(`/opened/pickup-points/country/${countryCode}`, {
-      cacheTime: 10 * 60 * 1000, // 10 minutes
-    });
+  async getPickupPointsByCountry(
+    countryCode: string
+  ): Promise<ApiResponse<PickupPoint[]>> {
+    return nextAuthApiClient.get<PickupPoint[]>(
+      `/opened/pickup-points/country/${countryCode}`,
+      {
+        cacheTime: 10 * 60 * 1000, // 10 minutes
+      }
+    );
   }
 
-  async getCountryManager(countryCode: string): Promise<ApiResponse<CountryManager>> {
-    return apiClient.get<CountryManager>(`/opened/country-managers/${countryCode}`, {
-      cacheTime: 10 * 60 * 1000, // 10 minutes
-    });
+  async getCountryManager(
+    countryCode: string
+  ): Promise<ApiResponse<CountryManager>> {
+    return apiClient.get<CountryManager>(
+      `/opened/country-managers/${countryCode}`,
+      {
+        cacheTime: 10 * 60 * 1000, // 10 minutes
+      }
+    );
   }
 
-  async getCountryPickupPointsWithManager(countryCode: string): Promise<ApiResponse<CountryPickupPointsResponse>> {
-    return apiClient.get<CountryPickupPointsResponse>(`/opened/pickup-points/country/${countryCode}/with-manager`, {
-      cacheTime: 10 * 60 * 1000, // 10 minutes
-    });
+  async getCountryPickupPointsWithManager(
+    countryCode: string
+  ): Promise<ApiResponse<CountryPickupPointsResponse>> {
+    return apiClient.get<CountryPickupPointsResponse>(
+      `/opened/pickup-points/country/${countryCode}/with-manager`,
+      {
+        cacheTime: 10 * 60 * 1000, // 10 minutes
+      }
+    );
   }
 }
 

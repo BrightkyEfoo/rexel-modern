@@ -198,7 +198,7 @@ export default function OrdersPage() {
       <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-8">
-          <Link href="/" className="hover:text-primary">
+          <Link href="/profil" className="hover:text-primary">
             Accueil
           </Link>
           <span>/</span>

@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Header } from "@/components/layout/Header";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import {
@@ -283,7 +283,7 @@ export default function FormatCSVImportPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <AdminHeader />
       <main>
         {/* Hero Section */}
         <section className="bg-primary text-primary-foreground py-20">

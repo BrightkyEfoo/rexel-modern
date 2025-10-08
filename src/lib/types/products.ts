@@ -11,6 +11,7 @@ export interface Product {
   manageStock: boolean;
   inStock?: boolean;
   isFeatured: boolean;
+  isOnClearance?: boolean;
   isActive: boolean;
   brandId?: number;
   fabricationCountryCode?: string;
@@ -89,6 +90,7 @@ export interface ProductFilters {
   categoryId?: number;
   brandId?: number;
   isFeatured?: boolean;
+  isOnClearance?: boolean;
   isActive?: boolean;
   inStock?: boolean;
   minPrice?: number;

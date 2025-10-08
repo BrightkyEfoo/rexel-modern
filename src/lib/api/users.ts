@@ -1,6 +1,7 @@
 import { apiClient } from './client'
 import type { ApiResponse, PaginatedResponse } from './types'
 import { UserType } from '../types/user'
+import nextAuthApiClient from './nextauth-client'
 
 /**
  * Service API pour la gestion des utilisateurs (Admin only)
@@ -15,6 +16,7 @@ export interface User {
   phone: string | null
   type: UserType
   isVerified: boolean
+  isSuspended?: boolean
   createdAt: string
   updatedAt: string | null
 }
@@ -61,10 +63,13 @@ export interface UsersFilters {
  * Récupère la liste des utilisateurs avec pagination et filtres
  */
 export async function getUsers(filters?: UsersFilters): Promise<UsersResponse> {
-  const response = await apiClient.get<UsersResponse>('/secured/users', {
+  const response = await nextAuthApiClient.get<UsersResponse>('/secured/users', {
     // @ts-ignore
     params: filters,
   })
+
+  console.log("users",response)
+
   return response.data
 }
 
@@ -111,6 +116,49 @@ export async function checkEmailUnique(
     '/secured/users/validate/email',
     { email, userId }
   )
+  return response.data
+}
+
+/**
+ * Suspend ou réactive un utilisateur
+ */
+export async function toggleSuspendUser(id: number, suspend: boolean): Promise<ApiResponse<User>> {
+  const response = await nextAuthApiClient.put<ApiResponse<User>>(`/secured/users/${id}/suspend`, {
+    isSuspended: suspend
+  })
+  return response.data
+}
+
+/**
+ * Suspend ou réactive plusieurs utilisateurs en masse
+ */
+export async function bulkSuspendUsers(userIds: number[], suspend: boolean): Promise<ApiResponse<{
+  updated: User[]
+  errors: Array<{ userId: number; error: string }>
+}>> {
+  const response = await nextAuthApiClient.put<ApiResponse<{
+    updated: User[]
+    errors: Array<{ userId: number; error: string }>
+  }>>('/secured/users/bulk-suspend', {
+    userIds,
+    isSuspended: suspend
+  })
+  return response.data
+}
+
+/**
+ * Supprime plusieurs utilisateurs en masse
+ */
+export async function bulkDeleteUsers(userIds: number[]): Promise<ApiResponse<{
+  deleted: number[]
+  errors: Array<{ userId: number; error: string }>
+}>> {
+  const response = await nextAuthApiClient.delete<ApiResponse<{
+    deleted: number[]
+    errors: Array<{ userId: number; error: string }>
+  }>>('/secured/users/bulk-delete', {
+    data: { userIds }
+  })
   return response.data
 }
 

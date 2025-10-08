@@ -59,7 +59,7 @@ const categoryIcons = {
 };
 
 export function CategoriesGrid() {
-  const { data: categories, isLoading, error } = useMainCategories();
+  const { data: categories, isLoading, error } = useMainCategories(10);
 
   console.log("error", error);
 
@@ -88,9 +88,7 @@ export function CategoriesGrid() {
   }
 
   if (error) {
-    return (
-      null
-    );
+    return null;
   }
 
   return (
@@ -136,7 +134,9 @@ export function CategoriesGrid() {
                     </h3>
                     <p className="text-xs text-gray-500 mb-2">
                       {category.productCount?.toLocaleString()} référence
-                      {category.productCount && category.productCount > 1 ? "s" : ""}
+                      {category.productCount && category.productCount > 1
+                        ? "s"
+                        : ""}
                     </p>
                   </div>
 
@@ -148,7 +148,7 @@ export function CategoriesGrid() {
                   </div>
 
                   {/* Gradient overlay on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-300" />
                 </div>
               </Link>
             );

@@ -56,7 +56,13 @@ export function useFilters({ baseUrl, priceRange }: UseFiltersParams) {
 
     Object.entries(newFilters).forEach(([key, value]) => {
       if (value === undefined || value === null || value === '') {
-        params.delete(key);
+        params.delete(key === 'sortBy' ? 'sort_by' : key === 'sortOrder' ? 'sort_order' : key === 'limit' ? 'per_page' : key);
+      } else if (key === 'sortBy') {
+        params.set('sort_by', value.toString());
+      } else if (key === 'sortOrder') {
+        params.set('sort_order', value.toString());
+      } else if (key === 'limit') {
+        params.set('per_page', value.toString());
       } else if (key === 'brands' && Array.isArray(value)) {
         if (value.length > 0) {
           params.set(key, value.join(','));

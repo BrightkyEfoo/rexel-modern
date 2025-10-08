@@ -90,6 +90,7 @@ export function ProductFilters({
     filters.categoryId ||
     filters.brandId ||
     filters.isFeatured !== undefined ||
+    filters.isOnClearance !== undefined ||
     filters.isActive !== undefined ||
     filters.inStock !== undefined
   );
@@ -100,6 +101,7 @@ export function ProductFilters({
     if (filters.categoryId) count++;
     if (filters.brandId) count++;
     if (filters.isFeatured !== undefined) count++;
+    if (filters.isOnClearance !== undefined) count++;
     if (filters.isActive !== undefined) count++;
     if (filters.inStock !== undefined) count++;
     return count;
@@ -197,7 +199,7 @@ export function ProductFilters({
               <SelectValue placeholder="Stock" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tous</SelectItem>
+              <SelectItem value="all">Toutes quantités</SelectItem>
               <SelectItem value="in_stock">En stock</SelectItem>
               <SelectItem value="out_of_stock">Rupture</SelectItem>
             </SelectContent>
@@ -214,9 +216,26 @@ export function ProductFilters({
               <SelectValue placeholder="Vedette" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tous</SelectItem>
+              <SelectItem value="all">Tous les produits</SelectItem>
               <SelectItem value="featured">Vedette</SelectItem>
               <SelectItem value="not_featured">Normal</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Destockage */}
+          <Select
+            value={filters.isOnClearance === true ? "clearance" : filters.isOnClearance === false ? "not_clearance" : "all"}
+            onValueChange={(value) => 
+              handleFilterChange("isOnClearance", value === "all" ? undefined : value === "clearance")
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Destockage" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les produits</SelectItem>
+              <SelectItem value="clearance">En destockage</SelectItem>
+              <SelectItem value="not_clearance">Hors destockage</SelectItem>
             </SelectContent>
           </Select>
 
