@@ -62,13 +62,18 @@ interface HeaderProps {
 const NavLink = ({
   href,
   children,
+  className,
 }: {
   href: string;
   children: React.ReactNode;
+  className?: string;
 }) => (
   <Link
     href={href}
-    className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+    className={cn(
+      "text-sm font-medium text-muted-foreground hover:text-primary transition-colors",
+      className
+    )}
   >
     {children}
   </Link>
@@ -109,7 +114,6 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
   const { data: favoritesCount } = useFavoritesCount();
   const { data: categoriesResponse, isLoading: categoriesLoading } =
     useMainCategories(5);
-    
 
   // Extraire les catégories de la réponse API
   const categories = categoriesResponse?.data || [];
@@ -427,7 +431,7 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-primary"
+                    className="flex items-center text-md space-x-1 font-medium text-muted-foreground hover:text-primary"
                   >
                     <Package className="w-4 h-4" />
                     <span>Produits</span>
@@ -464,27 +468,29 @@ export function Header({ className, withSearchBar = true }: HeaderProps) {
               </DropdownMenu>
               <div className="relative group">
                 <Link href="/catalogue">
-                  <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground cursor-pointer">
+                  <span className="flex items-center space-x-1 font-medium text-muted-foreground cursor-pointer">
                     <Grid className="w-4 h-4" />
                     <span>Catalogue </span>
                   </span>
                 </Link>
               </div>
               <Link href="/services" className="relative group">
-                <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:cursor-pointer">
+                <span className="flex items-center space-x-1 font-medium text-muted-foreground hover:cursor-pointer">
                   <Settings className="w-4 h-4" />
                   <span>Services</span>
                 </span>
               </Link>
 
               <Link href="/destockage" className="relative group">
-                <span className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:cursor-pointer">
+                <span className="flex items-center space-x-1 font-medium text-muted-foreground hover:cursor-pointer">
                   <AlertTriangle className="w-4 h-4" />
                   <span>Destockage</span>
                 </span>
               </Link>
 
-              <NavLink href="/contact">Contact</NavLink>
+              <NavLink href="/contact" className="text-md">
+                Contact
+              </NavLink>
             </nav>
 
             {renderCemacFlags()}
