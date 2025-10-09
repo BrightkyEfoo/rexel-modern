@@ -156,10 +156,16 @@ export function useGlobalFilters() {
 }
 
 // Categories Hooks
-export function useCategories() {
+export function useCategories({
+  page,
+  per_page,
+}: {
+  page: number;
+  per_page: number;
+}) {
   return useQuery({
-    queryKey: queryKeys.categories,
-    queryFn: () => categoriesService.getCategories(),
+    queryKey: [...queryKeys.categories, page, per_page],
+    queryFn: () => categoriesService.getCategories({ page, per_page }),
   });
 }
 

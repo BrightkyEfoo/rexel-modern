@@ -452,9 +452,10 @@ export class ProductsService {
 
 // Categories Service
 export class CategoriesService {
-  async getCategories(): Promise<ApiResponse<Category[]>> {
+  async getCategories({ page, per_page }: { page: number, per_page: number }): Promise<ApiResponse<Category[]>> {
     return apiClient.get<Category[]>("/opened/categories", {
       cacheTime: 15 * 60 * 1000,
+      params: { page, per_page },
     });
   }
 
@@ -468,10 +469,14 @@ export class CategoriesService {
 
   async getMainCategories(limit?: number): Promise<ApiResponse<Category[]>> {
     const params = limit ? { limit } : {};
-    return apiClient.get<Category[]>("/opened/categories/main", {
+    const res = await apiClient.get<Category[]>("/opened/categories/main", {
       cacheTime: 15 * 60 * 1000,
       params,
     });
+
+    res.data = res.data.slice(0, limit);
+
+    return res;
   }
 
   async getSubCategories(parentId: number): Promise<ApiResponse<Category[]>> {
