@@ -452,10 +452,13 @@ export class ProductsService {
 
 // Categories Service
 export class CategoriesService {
-  async getCategories({ page, per_page }: { page: number, per_page: number }): Promise<ApiResponse<Category[]>> {
+  async getCategories(filters?: {
+    page: number;
+    per_page: number;
+  }): Promise<ApiResponse<Category[]>> {
     return apiClient.get<Category[]>("/opened/categories", {
       cacheTime: 15 * 60 * 1000,
-      params: { page, per_page },
+      params: filters,
     });
   }
 

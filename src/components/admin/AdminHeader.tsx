@@ -13,6 +13,7 @@ import {
 import { Shield, LogOut, User, Settings, FileText } from "lucide-react";
 import { useAuth, useLogout } from "@/lib/auth/nextauth-hooks";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface AdminHeaderProps {
   className?: string;
@@ -21,7 +22,7 @@ interface AdminHeaderProps {
 export function AdminHeader({ className }: AdminHeaderProps) {
   const { user } = useAuth();
   const logoutMutation = useLogout();
-
+  const router = useRouter();
   return (
     <header className={`border-b bg-background ${className}`}>
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -91,7 +92,7 @@ export function AdminHeader({ className }: AdminHeaderProps) {
                 onClick={() => {
                   logoutMutation.mutate(undefined, {
                     onSuccess: () => {
-                      window.location.href = "/auth/admin/login";
+                     router.push("/auth/admin/login");
                     }
                   });
                 }}

@@ -151,11 +151,6 @@ export function useLogout() {
 
       // Nettoyer toutes les données utilisateur
       clearUserData();
-
-      // Rediriger vers la page d'accueil
-      if (typeof window !== "undefined") {
-        window.location.href = "/";
-      }
     },
   });
 }
