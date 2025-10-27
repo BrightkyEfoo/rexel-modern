@@ -517,8 +517,8 @@ export class BrandsService {
     return apiClient.get<Brand>(`/opened/brands/${slugOrId}`);
   }
 
-  async getFeaturedBrands(): Promise<ApiResponse<Brand[]>> {
-    return apiClient.get<Brand[]>("/opened/brands/featured", {
+  async getFeaturedBrands(limit: number): Promise<ApiResponse<Brand[]>> {
+    return apiClient.get<Brand[]>(`/opened/brands/featured?limit=${limit}`, {
       cacheTime: 15 * 60 * 1000,
     });
   }

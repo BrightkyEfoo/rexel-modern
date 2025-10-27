@@ -218,10 +218,10 @@ export function useBrandBySlug(slug: string) {
   });
 }
 
-export function useFeaturedBrands() {
+export function useFeaturedBrands(limit: number) {
   return useQuery({
     queryKey: queryKeys.featuredBrands,
-    queryFn: () => brandsService.getFeaturedBrands(),
+    queryFn: () => brandsService.getFeaturedBrands(limit),
   });
 }
 

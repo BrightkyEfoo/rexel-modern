@@ -6,7 +6,7 @@ import { useFeaturedBrands } from '@/lib/query/hooks';
 import { BrandCard } from './BrandCard';
 
 export function BrandsSection() {
-  const { data: brands, isLoading, error } = useFeaturedBrands();
+  const { data: brands, isLoading, error } = useFeaturedBrands(10);
 
   console.log('error', error)
 
