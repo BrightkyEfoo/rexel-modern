@@ -69,6 +69,9 @@ export const queryKeys = {
   // Content
   testimonials: ["content", "testimonials"] as const,
   services: ["content", "services"] as const,
+  service: (slug: string) => ["content", "services", slug] as const,
+  servicesByCategory: (category: string) => ["content", "services", "category", category] as const,
+  groupedServices: ["content", "services", "grouped"] as const,
   tools: ["content", "tools"] as const,
   promotions: ["content", "promotions"] as const,
 
@@ -429,6 +432,29 @@ export function useServices() {
   return useQuery({
     queryKey: queryKeys.services,
     queryFn: () => contentService.getServices(),
+  });
+}
+
+export function useServiceBySlug(slug: string) {
+  return useQuery({
+    queryKey: queryKeys.service(slug),
+    queryFn: () => contentService.getServiceBySlug(slug),
+    enabled: !!slug,
+  });
+}
+
+export function useServicesByCategory(category: string) {
+  return useQuery({
+    queryKey: queryKeys.servicesByCategory(category),
+    queryFn: () => contentService.getServicesByCategory(category),
+    enabled: !!category,
+  });
+}
+
+export function useGroupedServices() {
+  return useQuery({
+    queryKey: queryKeys.groupedServices,
+    queryFn: () => contentService.getGroupedServices(),
   });
 }
 

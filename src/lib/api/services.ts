@@ -747,7 +747,7 @@ export class FilesService {
   }
 }
 
-// Content Service (mock data for now)
+// Content Service
 export class ContentService {
   async getTestimonials(): Promise<
     ApiResponse<
@@ -767,22 +767,27 @@ export class ContentService {
     });
   }
 
-  async getServices(): Promise<
-    ApiResponse<
-      Array<{
-        id: string;
-        name: string;
-        description: string;
-        imageUrl: string;
-        link: string;
-        features: string[];
-      }>
-    >
-  > {
-    // Mock data - replace with actual API call when backend is ready
-    return Promise.resolve({
-      data: [],
-      message: "Services not implemented in backend yet",
+  async getServices(): Promise<ApiResponse<any[]>> {
+    return apiClient.get<any[]>("/opened/services", {
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    });
+  }
+
+  async getServiceBySlug(slug: string): Promise<ApiResponse<any>> {
+    return apiClient.get<any>(`/opened/services/${slug}`, {
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    });
+  }
+
+  async getServicesByCategory(category: string): Promise<ApiResponse<any[]>> {
+    return apiClient.get<any[]>(`/opened/services/category/${category}`, {
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    });
+  }
+
+  async getGroupedServices(): Promise<ApiResponse<any[]>> {
+    return apiClient.get<any[]>("/opened/services/grouped", {
+      cacheTime: 10 * 60 * 1000, // 10 minutes
     });
   }
 

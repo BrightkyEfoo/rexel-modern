@@ -1,17 +1,19 @@
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, Check, Settings, LucideIcon } from "lucide-react";
+import { ArrowRight, Check, Settings, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SERVICE_GROUPS, type ServiceCategory } from "@/types/services";
 
 interface ServiceCardProps {
   service: {
-    id: string;
+    id: string | number;
+    slug: string;
     name: string;
-    description: string;
-    imageUrl?: string;
+    shortDescription: string;
+    category: ServiceCategory;
     features?: string[];
-    link: string;
+    pricing?: string;
+    popular?: boolean;
   };
   size?: 'default' | 'large' | 'xlarge';
   serviceIcons: Record<string, LucideIcon>;
@@ -22,8 +24,8 @@ export function ServiceCard({
   size = 'default',
   serviceIcons,
 }: ServiceCardProps) {
-  const IconComponent =
-    serviceIcons[service.name as keyof typeof serviceIcons] || Settings;
+  const IconComponent = serviceIcons[service.slug] || Settings;
+  const group = SERVICE_GROUPS[service.category];
 
   const sizeClasses = {
     default: '',
@@ -36,35 +38,24 @@ export function ServiceCard({
       className={`group relative bg-gradient-to-br from-secondary to-background rounded-2xl p-6 border hover:shadow-lg transition-all duration-300 flex flex-col justify-between ${
         sizeClasses[size]
       }`}
+      style={{ borderTopWidth: '4px', borderTopColor: group?.color || '#3B82F6' }}
     >
       <div>
         {/* Service badge */}
         <div className="flex items-center justify-between mb-6">
           <Badge
             variant="secondary"
-            className="bg-primary/10 text-primary hover:bg-primary/20"
+            className="text-xs"
+            style={{ backgroundColor: `${group?.color}20`, color: group?.color }}
           >
-            Solution KesiMarket
+            {group?.name || 'Service KesiMarket'}
           </Badge>
-          {service.name === "Open" && (
+          {service.popular && (
             <Badge
-              variant="outline"
-              className="border-green-200 text-green-700"
+              className="text-white text-xs"
+              style={{ backgroundColor: group?.color }}
             >
-              Éco-responsable
-            </Badge>
-          )}
-          {service.name === "Freshmile" && (
-            <Badge variant="outline" className="border-primary/20 text-primary">
-              Électromobilité
-            </Badge>
-          )}
-          {service.name === "Safir" && (
-            <Badge
-              variant="outline"
-              className="border-orange-200 text-orange-700"
-            >
-              RGE
+              Populaire
             </Badge>
           )}
         </div>
@@ -72,34 +63,20 @@ export function ServiceCard({
         {/* Service header */}
         <div className="flex items-start space-x-4 mb-6">
           <div className="relative flex-shrink-0">
-            <div className="w-16 h-16 bg-background rounded-xl shadow-sm border flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-              {service.imageUrl ? (
-                <Image
-                  src={service.imageUrl}
-                  alt={`Logo ${service.name}`}
-                  width={40}
-                  height={40}
-                  className="object-contain"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    const fallback = document.createElement("div");
-                    fallback.className = "w-8 h-8 text-primary";
-                    target.style.display = "none";
-                    target.parentNode?.appendChild(fallback);
-                  }}
-                />
-              ) : (
-                <IconComponent className="w-8 h-8 text-primary" />
-              )}
+            <div
+              className="w-14 h-14 rounded-xl shadow-sm border flex items-center justify-center group-hover:scale-105 transition-transform duration-300"
+              style={{ backgroundColor: `${group?.color}10` }}
+            >
+              <IconComponent className="w-7 h-7" style={{ color: group?.color }} />
             </div>
           </div>
 
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+            <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
               {service.name}
             </h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              {service.description}
+            <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
+              {service.shortDescription}
             </p>
           </div>
         </div>
@@ -110,13 +87,13 @@ export function ServiceCard({
         {service.features && service.features.length > 0 && (
           <div className="mb-6">
             <div className="flex flex-wrap gap-2">
-              {service.features.map((feature, featureIndex) => (
+              {service.features.slice(0, 3).map((feature, featureIndex) => (
                 <div
                   key={featureIndex}
                   className="flex items-center space-x-1 text-xs text-muted-foreground bg-background rounded-full px-3 py-1 border"
                 >
-                  <Check className="w-3 h-3 text-green-500" />
-                  <span>{feature}</span>
+                  <Check className="w-3 h-3" style={{ color: group?.color }} />
+                  <span className="line-clamp-1">{typeof feature === 'string' ? feature : feature}</span>
                 </div>
               ))}
             </div>
@@ -128,25 +105,34 @@ export function ServiceCard({
           <Button
             variant="outline"
             size="sm"
-            className="group/btn border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+            className="group/btn"
+            style={{ borderColor: group?.color, color: group?.color }}
             asChild
           >
-            <Link href={service.link}>
-              Découvrir {service.name}
+            <Link href={`/services/${service.slug}`}>
+              Découvrir
               <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
             </Link>
           </Button>
 
-          {/* Service indicator */}
-          <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span>Service actif</span>
-          </div>
+          {/* Pricing indicator */}
+          {service.pricing && (
+            <div className="text-xs text-muted-foreground">
+              <span className="font-medium" style={{ color: group?.color }}>
+                {service.pricing}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Hover effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      <div
+        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+        style={{
+          background: `linear-gradient(135deg, ${group?.color}05 0%, transparent 50%, ${group?.color}05 100%)`
+        }}
+      />
     </div>
   );
 }

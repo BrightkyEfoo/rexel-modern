@@ -8,9 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollToTop } from '@/components/ui/scroll-to-top';
+import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { Service } from '@/types/services';
+import { useServiceBySlug } from '@/lib/query/hooks';
+import { SERVICE_GROUPS, type ServiceCategory } from '@/types/services';
 import {
+  ArrowLeft,
+  ArrowRight,
   Award,
   Calendar,
   CheckCircle,
@@ -21,204 +25,86 @@ import {
   Mail,
   MapPin,
   Phone,
-  PlayCircle,
   Send,
   Star,
-  Users
+  Users,
+  Package,
+  Wrench,
+  Ruler,
+  GraduationCap,
+  Calculator,
+  FileSearch,
+  Video,
+  Sun,
+  Settings,
+  Handshake,
+  type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-// Service temporaire pour démonstration (en production, viendrait de l'API)
-const mockService: Service = {
-  id: 'maintenance-preventive',
-  slug: 'maintenance-preventive',
-  name: 'Maintenance Préventive',
-  shortDescription: 'Contrats de maintenance pour vos installations électriques',
-  fullDescription: 'Notre service de maintenance préventive vous garantit le bon fonctionnement et la longévité de vos installations électriques. Grâce à des interventions programmées et un suivi personnalisé, prévenez les pannes et optimisez les performances de vos équipements.',
-  category: 'premium',
-  status: 'active',
-  
-  heroImage: '/images/services/maintenance-hero.jpg',
-  heroVideo: '/videos/services/maintenance-intro.mp4',
-  
-  features: [
-    {
-      id: '1',
-      title: 'Inspections régulières',
-      description: 'Contrôles techniques programmés selon vos besoins',
-      icon: 'CheckCircle',
-      included: true
-    },
-    {
-      id: '2', 
-      title: 'Rapport détaillé',
-      description: 'Documentation complète après chaque intervention',
-      icon: 'FileText',
-      included: true
-    },
-    {
-      id: '3',
-      title: 'Intervention d\'urgence',
-      description: 'Service 24/7 pour les situations critiques',
-      icon: 'Phone',
-      included: true
-    },
-    {
-      id: '4',
-      title: 'Pièces de rechange',
-      description: 'Stock de pièces détachées garanties',
-      icon: 'Award',
-      included: false
-    }
-  ],
-  
-  benefits: [
-    'Réduction des coûts de réparation',
-    'Prolongation de la durée de vie des équipements',
-    'Conformité aux normes de sécurité',
-    'Disponibilité optimale des installations',
-    'Planification budgétaire prévisible'
-  ],
-  
-  pricing: [
-    {
-      id: 'basic',
-      name: 'Contrat Basique',
-      price: 150000,
-      unit: 'FCFA/an',
-      description: 'Maintenance préventive standard',
-      features: ['2 visites/an', 'Rapport technique', 'Support téléphonique'],
-      isPopular: false
-    },
-    {
-      id: 'premium',
-      name: 'Contrat Premium',
-      price: 300000,
-      unit: 'FCFA/an', 
-      description: 'Maintenance complète avec urgences',
-      features: ['4 visites/an', 'Intervention 24/7', 'Pièces incluses', 'Formation équipe'],
-      isPopular: true
-    },
-    {
-      id: 'enterprise',
-      name: 'Contrat Entreprise',
-      price: 0,
-      unit: 'Sur devis',
-      description: 'Solution sur mesure pour grandes installations',
-      features: ['Visites illimitées', 'Technicien dédié', 'SLA garanti', 'Reporting avancé'],
-      isPopular: false
-    }
-  ],
-  
-  gallery: [
-    {
-      id: '1',
-      type: 'image',
-      url: '/images/services/maintenance-1.jpg',
-      title: 'Inspection tableau électrique',
-      description: 'Contrôle des connexions et sécurités'
-    },
-    {
-      id: '2',
-      type: 'video',
-      url: '/videos/services/maintenance-process.mp4',
-      thumbnail: '/images/services/maintenance-video-thumb.jpg',
-      title: 'Processus de maintenance',
-      description: 'Découvrez notre méthodologie d\'intervention'
-    }
-  ],
-  
-  testimonials: [
-    {
-      id: '1',
-      customerName: 'Société BATIMEX',
-      customerTitle: 'Directeur Technique',
-      customerCompany: 'BATIMEX SARL',
-      rating: 5,
-      comment: 'Excellent service de maintenance. Depuis la signature du contrat, nous n\'avons eu aucune panne majeure. L\'équipe est très professionnelle.',
-      date: '2024-01-15',
-      avatar: '/images/avatars/customer-1.jpg'
-    },
-    {
-      id: '2',
-      customerName: 'Hôtel Akwa Palace',
-      customerTitle: 'Responsable Maintenance',
-      rating: 5,
-      comment: 'Service impeccable ! Les interventions sont toujours planifiées et l\'équipe respecte nos contraintes d\'exploitation.',
-      date: '2024-01-10'
-    }
-  ],
-  
-  faqs: [
-    {
-      id: '1',
-      question: 'Quelle est la fréquence des interventions ?',
-      answer: 'La fréquence dépend du contrat choisi : 2 fois par an pour le contrat basique, 4 fois par an pour le premium, et selon vos besoins pour l\'entreprise.',
-      category: 'contrat'
-    },
-    {
-      id: '2',
-      question: 'Que comprend une visite de maintenance ?',
-      answer: 'Chaque visite inclut : inspection visuelle, tests électriques, vérification des protections, nettoyage des équipements, et rapport détaillé.',
-      category: 'technique'
-    },
-    {
-      id: '3',
-      question: 'Comment sont gérées les urgences ?',
-      answer: 'Pour les contrats Premium et Entreprise, nous intervenons 24/7. Un numéro d\'urgence est mis à votre disposition.',
-      category: 'urgence'
-    }
-  ],
-  
-  contacts: [
-    {
-      name: 'Jean MBARGA',
-      title: 'Responsable Maintenance',
-      phone: '+237 6 12 34 56 78',
-      email: 'j.mbarga@kesimarket.cm',
-      avatar: '/images/team/jean-mbarga.jpg',
-      specialties: ['Maintenance industrielle', 'Automatismes', 'Haute tension']
-    }
-  ],
-  
-  coverageAreas: ['Douala', 'Yaoundé', 'Bafoussam', 'Garoua'],
-  
-  availability: {
-    workingDays: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'],
-    workingHours: '8h - 17h',
-    emergencyAvailable: true,
-    bookingRequired: true,
-    leadTime: '48h pour planification'
-  },
-  
-  certifications: ['ISO 9001', 'Qualification électricité', 'Assurance RC'],
-  warranties: ['Garantie intervention 30 jours', 'Assurance décennale'],
-  
-  seoTitle: 'Maintenance Préventive - KesiMarket Cameroun',
-  seoDescription: 'Service de maintenance préventive pour installations électriques au Cameroun',
-  seoKeywords: ['maintenance', 'électrique', 'préventive', 'cameroun'],
-  
-  createdAt: '2024-01-01',
-  updatedAt: '2024-01-15',
-  createdBy: 'admin',
-  isPromoted: true,
-  sortOrder: 1,
-  
-  relatedServices: ['installation', 'formation'],
-  requiredEquipment: ['Multimètre', 'Oscilloscope', 'Caméra thermique'],
-  
-  ctaText: 'Demander un contrat de maintenance',
-  ctaLink: '/contact',
-  showBookingForm: true,
-  showQuoteForm: true
+// Mapping des icônes par slug de service
+const serviceIconMap: Record<string, LucideIcon> = {
+  "equip-pret": Package,
+  "planex": FileText,
+  "fix-and-go": Wrench,
+  "equiloc": Ruler,
+  "protechrh": Users,
+  "talent-form": GraduationCap,
+  "perfeco": Calculator,
+  "contractis": FileSearch,
+  "surveytech": Video,
+  "solartech": Sun,
 };
 
-export default function DynamicServicePage() {
+// Mapping des icônes par catégorie
+const categoryIconMap: Record<ServiceCategory, LucideIcon> = {
+  "solutions-techniques": Settings,
+  "rh-formation": Users,
+  "accompagnement-conseil": Handshake,
+  "energie-renouvelable": Sun,
+};
+
+// Types pour les données de service
+interface PricingPlan {
+  id?: string;
+  name: string;
+  price: number;
+  unit: string;
+  description: string;
+  features: string[];
+  isPopular?: boolean;
+}
+
+interface Testimonial {
+  id?: string;
+  customerName: string;
+  customerTitle?: string;
+  customerCompany?: string;
+  rating: number;
+  comment: string;
+  date?: string;
+}
+
+interface FAQ {
+  id?: string;
+  question: string;
+  answer: string;
+}
+
+interface Contact {
+  name: string;
+  title: string;
+  phone: string;
+  email: string;
+  specialties?: string[];
+}
+
+export default function ServiceDetailPage() {
   const params = useParams();
-  const [service, setService] = useState<Service | null>(null);
-  const [loading, setLoading] = useState(true);
+  const slug = params.slug as string;
+  const { data: serviceData, isLoading, error } = useServiceBySlug(slug);
   const [activeTab, setActiveTab] = useState('overview');
   const [openFAQ, setOpenFAQ] = useState<string | null>(null);
   const [bookingForm, setBookingForm] = useState({
@@ -228,56 +114,65 @@ export default function DynamicServicePage() {
     message: ''
   });
 
-  useEffect(() => {
-    // En production, ceci ferait un appel API pour récupérer le service
-    // GET /api/services/[slug]
-    const fetchService = async () => {
-      setLoading(true);
-      
-      // Simulation d'un appel API
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Pour la démo, on utilise le service mock
-      if (params.slug === 'maintenance-preventive') {
-        setService(mockService);
-      } else {
-        setService(null);
-      }
-      
-      setLoading(false);
-    };
+  const service = serviceData?.data;
 
-    fetchService();
-  }, [params.slug]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-muted-foreground">Chargement du service...</p>
-          </div>
-        </div>
+        <main>
+          <section className="bg-primary text-primary-foreground py-20">
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto">
+                <div className="h-8 bg-primary-foreground/20 rounded w-32 mb-4 animate-pulse" />
+                <div className="h-12 bg-primary-foreground/20 rounded w-2/3 mb-6 animate-pulse" />
+                <div className="h-6 bg-primary-foreground/20 rounded w-full mb-4 animate-pulse" />
+                <div className="h-6 bg-primary-foreground/20 rounded w-3/4 animate-pulse" />
+              </div>
+            </div>
+          </section>
+          <section className="py-16">
+            <div className="container mx-auto px-4">
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[...Array(4)].map((_, index) => (
+                  <div key={index} className="bg-muted/20 rounded-xl p-6 animate-pulse">
+                    <div className="h-12 bg-muted rounded mb-4" />
+                    <div className="h-6 bg-muted rounded mb-2" />
+                    <div className="h-4 bg-muted rounded" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </main>
         <Footer />
       </div>
     );
   }
 
-  if (!service) {
+  if (error || !service) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Service non trouvé</h1>
-            <p className="text-muted-foreground mb-8">Le service demandé n'existe pas ou n'est plus disponible.</p>
-            <Button asChild>
-              <Link href="/services">Retour aux services</Link>
-            </Button>
+        <main className="py-20">
+          <div className="container mx-auto px-4 text-center">
+            <div className="max-w-md mx-auto">
+              <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                <FileText className="w-10 h-10 text-muted-foreground" />
+              </div>
+              <h1 className="text-2xl font-bold mb-4">Service non trouvé</h1>
+              <p className="text-muted-foreground mb-8">
+                Le service demandé n'existe pas ou n'est plus disponible.
+              </p>
+              <Button asChild>
+                <Link href="/services">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Retour aux services
+                </Link>
+              </Button>
+            </div>
           </div>
-        </div>
+        </main>
         <Footer />
       </div>
     );
@@ -287,71 +182,171 @@ export default function DynamicServicePage() {
     setOpenFAQ(openFAQ === id ? null : id);
   };
 
+  const category = service.category as ServiceCategory;
+  const group = SERVICE_GROUPS[category];
+  const ServiceIcon = serviceIconMap[service.slug] || Settings;
+  const CategoryIcon = categoryIconMap[category] || Settings;
+
+  const features = Array.isArray(service.features) ? service.features : [];
+  const faqs = Array.isArray(service.faqs) ? service.faqs : [];
+  const testimonials = Array.isArray(service.testimonials) ? service.testimonials : [];
+  const pricingPlans = Array.isArray(service.pricingPlans) ? service.pricingPlans : [];
+  const contacts = Array.isArray(service.contacts) ? service.contacts : [];
+  const coverageAreas = Array.isArray(service.coverageAreas) ? service.coverageAreas : [];
+  const certifications = Array.isArray(service.certifications) ? service.certifications : [];
+  const warranties = Array.isArray(service.warranties) ? service.warranties : [];
+  const gallery = Array.isArray(service.gallery) ? service.gallery : [];
+
+  // Déterminer quels onglets afficher selon les données disponibles
+  const tabs = [
+    { id: 'overview', label: 'Aperçu', show: true },
+    { id: 'pricing', label: 'Tarifs', show: pricingPlans.length > 0 || service.pricing },
+    { id: 'testimonials', label: 'Témoignages', show: testimonials.length > 0 },
+    { id: 'faq', label: 'FAQ', show: faqs.length > 0 },
+    { id: 'contact', label: 'Contact', show: true }
+  ].filter(tab => tab.show);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main>
         {/* Hero Section */}
-        <section className="bg-primary text-primary-foreground py-20">
+        <section
+          className="py-20 text-white"
+          style={{ background: `linear-gradient(135deg, ${group.color} 0%, ${group.color}dd 100%)` }}
+        >
           <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <div className="flex items-center space-x-2 mb-4">
-                  <Badge variant="secondary" className="capitalize">{service.category}</Badge>
-                  {service.isPromoted && (
-                    <Badge variant="outline" className="border-primary-foreground text-primary-foreground">
-                      <Star className="w-3 h-3 mr-1" />
-                      Recommandé
-                    </Badge>
-                  )}
-                </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                  {service.name}
-                </h1>
-                <p className="text-xl text-primary-foreground/80 mb-8">
-                  {service.fullDescription}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  {service.showQuoteForm && (
-                    <Button variant="secondary" size="lg">
-                      <FileText className="w-5 h-5 mr-2" />
-                      {service.ctaText || 'Demander un devis'}
-                    </Button>
-                  )}
-                  {service.showBookingForm && (
-                    <Button variant="outline" size="lg" className="border-primary-foreground text-primary hover:bg-primary-foreground hover:text-primary">
-                      <Calendar className="w-5 h-5 mr-2" />
-                      Prendre RDV
-                    </Button>
-                  )}
-                </div>
+            <div className="max-w-5xl mx-auto">
+              {/* Breadcrumb */}
+              <div className="flex items-center space-x-2 mb-6 text-white/80">
+                <Link href="/services" className="hover:text-white transition-colors">
+                  Services
+                </Link>
+                <span>/</span>
+                <Link href={`/services#${category}`} className="hover:text-white transition-colors">
+                  {group.name}
+                </Link>
+                <span>/</span>
+                <span className="text-white">{service.name}</span>
               </div>
-              
-              {/* Statistiques du service */}
-              <div className="relative">
-                <div className="bg-primary-foreground/10 rounded-2xl p-8">
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div className="bg-primary-foreground/20 rounded-lg p-4">
-                      <Users className="w-8 h-8 mx-auto mb-2" />
-                      <div className="text-2xl font-bold">{service.testimonials.length}+</div>
-                      <div className="text-sm text-primary-foreground/80">Clients satisfaits</div>
-                    </div>
-                    <div className="bg-primary-foreground/20 rounded-lg p-4">
-                      <MapPin className="w-8 h-8 mx-auto mb-2" />
-                      <div className="text-2xl font-bold">{service.coverageAreas.length}</div>
-                      <div className="text-sm text-primary-foreground/80">Villes couvertes</div>
-                    </div>
-                    <div className="bg-primary-foreground/20 rounded-lg p-4">
-                      <Award className="w-8 h-8 mx-auto mb-2" />
-                      <div className="text-2xl font-bold">{service.certifications.length}</div>
-                      <div className="text-sm text-primary-foreground/80">Certifications</div>
-                    </div>
-                    <div className="bg-primary-foreground/20 rounded-lg p-4">
-                      <Clock className="w-8 h-8 mx-auto mb-2" />
-                      <div className="text-2xl font-bold">{service.availability.emergencyAvailable ? '24/7' : '8-17h'}</div>
-                      <div className="text-sm text-primary-foreground/80">Disponibilité</div>
-                    </div>
+
+              <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                  <div className="flex items-center space-x-3 mb-4">
+                    <Badge
+                      variant="secondary"
+                      className="text-sm"
+                      style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                    >
+                      <CategoryIcon className="w-4 h-4 mr-2" />
+                      {group.name}
+                    </Badge>
+                    {service.popular && (
+                      <Badge
+                        variant="outline"
+                        className="border-white/50 text-white"
+                      >
+                        <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" />
+                        Populaire
+                      </Badge>
+                    )}
                   </div>
+
+                  <div className="flex items-center space-x-4 mb-6">
+                    <div
+                      className="p-4 rounded-xl"
+                      style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+                    >
+                      <ServiceIcon className="w-12 h-12" />
+                    </div>
+                    <h1 className="text-4xl md:text-5xl font-bold">
+                      {service.name}
+                    </h1>
+                  </div>
+
+                  <p className="text-xl text-white/90 mb-6">
+                    {service.shortDescription}
+                  </p>
+
+                  <p className="text-white/80 mb-8 leading-relaxed">
+                    {service.fullDescription}
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      onClick={() => setActiveTab('contact')}
+                    >
+                      <FileText className="w-5 h-5 mr-2" />
+                      Demander un devis
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="border-white text-white hover:bg-white hover:text-gray-900"
+                      asChild
+                    >
+                      <Link href="/contact">
+                        <Phone className="w-5 h-5 mr-2" />
+                        Nous contacter
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Statistiques */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8">
+                  <div className="grid grid-cols-2 gap-4">
+                    {coverageAreas.length > 0 && (
+                      <div className="bg-white/20 rounded-xl p-4 text-center">
+                        <MapPin className="w-8 h-8 mx-auto mb-2" />
+                        <div className="text-2xl font-bold">{coverageAreas.length}</div>
+                        <div className="text-sm text-white/80">Zones couvertes</div>
+                      </div>
+                    )}
+                    {certifications.length > 0 && (
+                      <div className="bg-white/20 rounded-xl p-4 text-center">
+                        <Award className="w-8 h-8 mx-auto mb-2" />
+                        <div className="text-2xl font-bold">{certifications.length}</div>
+                        <div className="text-sm text-white/80">Certifications</div>
+                      </div>
+                    )}
+                    {service.availability && (
+                      <div className="bg-white/20 rounded-xl p-4 text-center">
+                        <Clock className="w-8 h-8 mx-auto mb-2" />
+                        <div className="text-2xl font-bold">
+                          {service.availability.emergencyAvailable ? '24/7' : service.availability.workingHours}
+                        </div>
+                        <div className="text-sm text-white/80">Disponibilité</div>
+                      </div>
+                    )}
+                    {testimonials.length > 0 && (
+                      <div className="bg-white/20 rounded-xl p-4 text-center">
+                        <Users className="w-8 h-8 mx-auto mb-2" />
+                        <div className="text-2xl font-bold">{testimonials.length}+</div>
+                        <div className="text-sm text-white/80">Clients satisfaits</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Certifications */}
+                  {certifications.length > 0 && (
+                    <div className="mt-6 pt-6 border-t border-white/20">
+                      <div className="text-sm text-white/80 mb-3">Certifications & garanties</div>
+                      <div className="flex flex-wrap gap-2">
+                        {certifications.map((cert: string, index: number) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="border-white/50 text-white text-xs"
+                          >
+                            {cert}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -362,22 +357,19 @@ export default function DynamicServicePage() {
         <section className="bg-white border-b sticky top-16 z-40">
           <div className="container mx-auto px-4">
             <div className="flex space-x-8 overflow-x-auto">
-              {[
-                { id: 'overview', label: 'Aperçu' },
-                { id: 'pricing', label: 'Tarifs' },
-                { id: 'gallery', label: 'Galerie' },
-                { id: 'testimonials', label: 'Témoignages' },
-                { id: 'faq', label: 'FAQ' },
-                { id: 'contact', label: 'Contact' }
-              ].map((tab) => (
+              {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                     activeTab === tab.id
-                      ? 'border-primary text-primary'
+                      ? 'text-gray-900'
                       : 'border-transparent text-muted-foreground hover:text-foreground'
                   }`}
+                  style={{
+                    borderBottomColor: activeTab === tab.id ? group.color : 'transparent',
+                    color: activeTab === tab.id ? group.color : undefined
+                  }}
                 >
                   {tab.label}
                 </button>
@@ -391,55 +383,111 @@ export default function DynamicServicePage() {
           <div className="container mx-auto px-4">
             {/* Onglet Aperçu */}
             {activeTab === 'overview' && (
-              <div className="space-y-12">
+              <div className="space-y-16">
                 {/* Caractéristiques */}
-                <div>
-                  <h2 className="text-3xl font-bold mb-8">Caractéristiques du Service</h2>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {service.features.map((feature) => (
-                      <Card key={feature.id} className={`${!feature.included ? 'opacity-60' : ''}`}>
-                        <CardContent className="p-6 text-center">
-                          <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                            <CheckCircle className="w-6 h-6" />
-                          </div>
-                          <h3 className="font-semibold mb-2">{feature.title}</h3>
-                          <p className="text-sm text-muted-foreground">{feature.description}</p>
-                          {!feature.included && (
-                            <Badge variant="outline" className="mt-2">Option</Badge>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
+                {features.length > 0 && (
+                  <div>
+                    <h2 className="text-3xl font-bold mb-8">Ce que comprend ce service</h2>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {features.map((feature: string | { title: string; description?: string; included?: boolean }, index: number) => {
+                        const featureData = typeof feature === 'string'
+                          ? { title: feature, description: '', included: true }
+                          : feature;
+                        return (
+                          <Card
+                            key={index}
+                            className="border-t-4"
+                            style={{ borderTopColor: group.color }}
+                          >
+                            <CardContent className="p-6">
+                              <div className="flex items-start space-x-4">
+                                <div
+                                  className="p-2 rounded-lg flex-shrink-0"
+                                  style={{ backgroundColor: `${group.color}20` }}
+                                >
+                                  <CheckCircle
+                                    className="w-6 h-6"
+                                    style={{ color: group.color }}
+                                  />
+                                </div>
+                                <div>
+                                  <h3 className="font-semibold mb-1">{featureData.title}</h3>
+                                  {featureData.description && (
+                                    <p className="text-sm text-muted-foreground">
+                                      {featureData.description}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Avantages */}
-                <div>
-                  <h2 className="text-3xl font-bold mb-8">Avantages</h2>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {service.benefits.map((benefit, index) => (
-                      <div key={index} className="flex items-start space-x-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                        <span>{benefit}</span>
+                {/* Comment ça marche */}
+                <div className="bg-muted/30 rounded-2xl p-8 md:p-12">
+                  <h2 className="text-3xl font-bold mb-8 text-center">Comment ça marche ?</h2>
+                  <div className="grid md:grid-cols-4 gap-8">
+                    {[
+                      { step: "01", title: "Contact", description: "Décrivez votre besoin via notre formulaire ou par téléphone" },
+                      { step: "02", title: "Étude", description: "Nos experts analysent votre demande et préparent une proposition" },
+                      { step: "03", title: "Réalisation", description: "Mise en œuvre du service par notre équipe qualifiée" },
+                      { step: "04", title: "Suivi", description: "Accompagnement continu et support après service" }
+                    ].map((item, index) => (
+                      <div key={index} className="text-center relative">
+                        <div
+                          className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-xl font-bold"
+                          style={{ backgroundColor: group.color }}
+                        >
+                          {item.step}
+                        </div>
+                        <h3 className="font-semibold mb-2">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground">{item.description}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Zones de couverture */}
-                <div>
-                  <h2 className="text-3xl font-bold mb-8">Zones d'Intervention</h2>
-                  <div className="grid md:grid-cols-4 gap-4">
-                    {service.coverageAreas.map((area, index) => (
-                      <Card key={index}>
-                        <CardContent className="p-4 text-center">
-                          <MapPin className="w-6 h-6 text-primary mx-auto mb-2" />
-                          <div className="font-medium">{area}</div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                {coverageAreas.length > 0 && (
+                  <div>
+                    <h2 className="text-3xl font-bold mb-8">Zones d'intervention</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                      {coverageAreas.map((area: string, index: number) => (
+                        <Card key={index} className="text-center hover:shadow-md transition-shadow">
+                          <CardContent className="p-4">
+                            <MapPin
+                              className="w-6 h-6 mx-auto mb-2"
+                              style={{ color: group.color }}
+                            />
+                            <div className="font-medium text-sm">{area}</div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Garanties */}
+                {warranties.length > 0 && (
+                  <div>
+                    <h2 className="text-3xl font-bold mb-8">Nos garanties</h2>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {warranties.map((warranty: string, index: number) => (
+                        <div
+                          key={index}
+                          className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg"
+                        >
+                          <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+                          <span className="font-medium">{warranty}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -447,80 +495,107 @@ export default function DynamicServicePage() {
             {activeTab === 'pricing' && (
               <div>
                 <h2 className="text-3xl font-bold mb-8 text-center">Nos Tarifs</h2>
-                <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                  {service.pricing.map((plan) => (
-                    <Card key={plan.id} className={`relative ${plan.isPopular ? 'ring-2 ring-primary' : ''}`}>
-                      {plan.isPopular && (
-                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                          <Badge variant="default" className="bg-primary">
-                            <Star className="w-3 h-3 mr-1" />
-                            Populaire
-                          </Badge>
+
+                {pricingPlans.length > 0 ? (
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    {pricingPlans.map((plan: PricingPlan, index: number) => (
+                      <Card
+                        key={index}
+                        className={`relative ${plan.isPopular ? 'ring-2' : ''}`}
+                        style={{
+                          borderTopColor: group.color,
+                          borderTopWidth: '4px',
+                          ...(plan.isPopular && { '--tw-ring-color': group.color } as React.CSSProperties)
+                        }}
+                      >
+                        {plan.isPopular && (
+                          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                            <Badge
+                              className="text-white"
+                              style={{ backgroundColor: group.color }}
+                            >
+                              <Star className="w-3 h-3 mr-1" />
+                              Recommandé
+                            </Badge>
+                          </div>
+                        )}
+                        <CardHeader className="text-center pt-8">
+                          <CardTitle>{plan.name}</CardTitle>
+                          <CardDescription>{plan.description}</CardDescription>
+                          <div
+                            className="text-3xl font-bold mt-4"
+                            style={{ color: group.color }}
+                          >
+                            {plan.price > 0
+                              ? `${plan.price.toLocaleString('fr-FR')} ${plan.unit}`
+                              : plan.unit
+                            }
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <ul className="space-y-3">
+                            {plan.features.map((feature: string, i: number) => (
+                              <li key={i} className="flex items-start space-x-2">
+                                <CheckCircle
+                                  className="w-5 h-5 flex-shrink-0 mt-0.5"
+                                  style={{ color: group.color }}
+                                />
+                                <span className="text-sm">{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          <Button
+                            className="w-full text-white"
+                            style={{ backgroundColor: group.color }}
+                            onClick={() => setActiveTab('contact')}
+                          >
+                            Choisir ce plan
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : service.pricing ? (
+                  <div className="max-w-md mx-auto text-center">
+                    <Card className="border-t-4" style={{ borderTopColor: group.color }}>
+                      <CardContent className="p-8">
+                        <div
+                          className="text-3xl font-bold mb-4"
+                          style={{ color: group.color }}
+                        >
+                          {service.pricing}
                         </div>
-                      )}
-                      <CardHeader className="text-center">
-                        <CardTitle>{plan.name}</CardTitle>
-                        <CardDescription>{plan.description}</CardDescription>
-                        <div className="text-3xl font-bold text-primary">
-                          {plan.price > 0 ? `${plan.price.toLocaleString()} ${plan.unit}` : plan.unit}
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <ul className="space-y-2">
-                          {plan.features.map((feature, i) => (
-                            <li key={i} className="flex items-center space-x-2">
-                              <CheckCircle className="w-4 h-4 text-green-600" />
-                              <span className="text-sm">{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <Button className="w-full" variant={plan.isPopular ? "default" : "outline"}>
-                          Choisir ce plan
+                        <p className="text-muted-foreground mb-6">
+                          Contactez-nous pour obtenir un devis personnalisé adapté à vos besoins.
+                        </p>
+                        <Button
+                          className="text-white"
+                          style={{ backgroundColor: group.color }}
+                          onClick={() => setActiveTab('contact')}
+                        >
+                          Demander un devis
                         </Button>
                       </CardContent>
                     </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Onglet Galerie */}
-            {activeTab === 'gallery' && (
-              <div>
-                <h2 className="text-3xl font-bold mb-8 text-center">Galerie</h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {service.gallery.map((item) => (
-                    <Card key={item.id} className="overflow-hidden">
-                      <div className="aspect-video bg-muted relative">
-                        {item.type === 'video' && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <PlayCircle className="w-12 h-12 text-primary" />
-                          </div>
-                        )}
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-4">
-                          <h3 className="font-semibold">{item.title}</h3>
-                          {item.description && (
-                            <p className="text-sm text-white/80">{item.description}</p>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                  </div>
+                ) : null}
               </div>
             )}
 
             {/* Onglet Témoignages */}
-            {activeTab === 'testimonials' && (
+            {activeTab === 'testimonials' && testimonials.length > 0 && (
               <div>
-                <h2 className="text-3xl font-bold mb-8 text-center">Témoignages Clients</h2>
+                <h2 className="text-3xl font-bold mb-8 text-center">Ce que disent nos clients</h2>
                 <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                  {service.testimonials.map((testimonial) => (
-                    <Card key={testimonial.id}>
+                  {testimonials.map((testimonial: Testimonial, index: number) => (
+                    <Card key={index} className="border-t-4" style={{ borderTopColor: group.color }}>
                       <CardHeader>
-                        <div className="flex items-center space-x-1 mb-2">
-                          {Array.from({ length: testimonial.rating }).map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <div className="flex items-center space-x-1 mb-3">
+                          {Array.from({ length: testimonial.rating || 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className="w-5 h-5 fill-yellow-400 text-yellow-400"
+                            />
                           ))}
                         </div>
                         <CardTitle className="text-lg">{testimonial.customerName}</CardTitle>
@@ -530,10 +605,17 @@ export default function DynamicServicePage() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-muted-foreground italic">"{testimonial.comment}"</p>
-                        <div className="text-sm text-muted-foreground mt-3">
-                          {new Date(testimonial.date).toLocaleDateString('fr-FR')}
-                        </div>
+                        <p className="text-muted-foreground italic leading-relaxed">
+                          "{testimonial.comment}"
+                        </p>
+                        {testimonial.date && (
+                          <div className="text-sm text-muted-foreground mt-4">
+                            {new Date(testimonial.date).toLocaleDateString('fr-FR', {
+                              year: 'numeric',
+                              month: 'long'
+                            })}
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   ))}
@@ -542,27 +624,28 @@ export default function DynamicServicePage() {
             )}
 
             {/* Onglet FAQ */}
-            {activeTab === 'faq' && (
+            {activeTab === 'faq' && faqs.length > 0 && (
               <div className="max-w-3xl mx-auto">
-                <h2 className="text-3xl font-bold mb-8 text-center">Questions Fréquentes</h2>
+                <h2 className="text-3xl font-bold mb-8 text-center">Questions fréquentes</h2>
                 <div className="space-y-4">
-                  {service.faqs.map((faq) => (
-                    <Card key={faq.id}>
+                  {faqs.map((faq: FAQ, index: number) => (
+                    <Card key={index} className="overflow-hidden">
                       <CardHeader
                         className="cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => toggleFAQ(faq.id)}
+                        onClick={() => toggleFAQ(faq.id || String(index))}
                       >
                         <div className="flex items-center justify-between">
-                          <CardTitle className="text-lg">{faq.question}</CardTitle>
-                          {openFAQ === faq.id ? (
-                            <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                          <CardTitle className="text-lg pr-4">{faq.question}</CardTitle>
+                          {openFAQ === (faq.id || String(index)) ? (
+                            <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                           ) : (
-                            <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                            <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                           )}
                         </div>
                       </CardHeader>
-                      {openFAQ === faq.id && (
-                        <CardContent className="pt-0">
+                      {openFAQ === (faq.id || String(index)) && (
+                        <CardContent className="pt-0 pb-6">
+                          <Separator className="mb-4" />
                           <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
                         </CardContent>
                       )}
@@ -575,51 +658,89 @@ export default function DynamicServicePage() {
             {/* Onglet Contact */}
             {activeTab === 'contact' && (
               <div className="max-w-4xl mx-auto">
-                <h2 className="text-3xl font-bold mb-8 text-center">Nous Contacter</h2>
+                <h2 className="text-3xl font-bold mb-8 text-center">Contactez-nous</h2>
                 <div className="grid md:grid-cols-2 gap-8">
-                  {/* Experts dédiés */}
-                  <div>
-                    <h3 className="text-xl font-bold mb-6">Experts Dédiés</h3>
-                    <div className="space-y-4">
-                      {service.contacts.map((contact, index) => (
-                        <Card key={index}>
-                          <CardContent className="p-6">
-                            <div className="flex items-start space-x-4">
-                              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                                <Users className="w-6 h-6 text-primary" />
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="font-semibold">{contact.name}</h4>
-                                <p className="text-sm text-muted-foreground mb-2">{contact.title}</p>
-                                <div className="space-y-1 text-sm">
-                                  <div className="flex items-center space-x-2">
-                                    <Phone className="w-3 h-3" />
-                                    <span>{contact.phone}</span>
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <Mail className="w-3 h-3" />
-                                    <span>{contact.email}</span>
-                                  </div>
+                  {/* Informations de contact */}
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-bold">Informations</h3>
+
+                    {contacts.length > 0 && (
+                      <div className="space-y-4">
+                        <h4 className="font-semibold text-muted-foreground">Experts dédiés</h4>
+                        {contacts.map((contact: Contact, index: number) => (
+                          <Card key={index}>
+                            <CardContent className="p-4">
+                              <div className="flex items-start space-x-4">
+                                <div
+                                  className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                                  style={{ backgroundColor: `${group.color}20` }}
+                                >
+                                  <Users className="w-6 h-6" style={{ color: group.color }} />
                                 </div>
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                  {contact.specialties.map((specialty, i) => (
-                                    <Badge key={i} variant="outline" className="text-xs">
-                                      {specialty}
-                                    </Badge>
-                                  ))}
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-semibold">{contact.name}</h4>
+                                  <p className="text-sm text-muted-foreground mb-2">{contact.title}</p>
+                                  <div className="space-y-1 text-sm">
+                                    <div className="flex items-center space-x-2">
+                                      <Phone className="w-4 h-4 text-muted-foreground" />
+                                      <span>{contact.phone}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Mail className="w-4 h-4 text-muted-foreground" />
+                                      <span className="truncate">{contact.email}</span>
+                                    </div>
+                                  </div>
+                                  {contact.specialties && contact.specialties.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-3">
+                                      {contact.specialties.map((specialty: string, i: number) => (
+                                        <Badge key={i} variant="outline" className="text-xs">
+                                          {specialty}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Disponibilité */}
+                    {service.availability && (
+                      <div>
+                        <h4 className="font-semibold text-muted-foreground mb-3">Disponibilité</h4>
+                        <Card>
+                          <CardContent className="p-4 space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Calendar className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm">
+                                {service.availability.workingDays?.join(', ')}
+                              </span>
                             </div>
+                            <div className="flex items-center space-x-2">
+                              <Clock className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm">{service.availability.workingHours}</span>
+                            </div>
+                            {service.availability.emergencyAvailable && (
+                              <Badge
+                                className="text-white"
+                                style={{ backgroundColor: group.color }}
+                              >
+                                Urgences 24/7 disponibles
+                              </Badge>
+                            )}
                           </CardContent>
                         </Card>
-                      ))}
-                    </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Formulaire de contact */}
                   <div>
-                    <h3 className="text-xl font-bold mb-6">Demande d'Information</h3>
-                    <Card>
+                    <h3 className="text-xl font-bold mb-6">Demande d'information</h3>
+                    <Card className="border-t-4" style={{ borderTopColor: group.color }}>
                       <CardContent className="p-6">
                         <form className="space-y-4">
                           <div>
@@ -657,10 +778,14 @@ export default function DynamicServicePage() {
                               rows={4}
                               value={bookingForm.message}
                               onChange={(e) => setBookingForm({...bookingForm, message: e.target.value})}
-                              placeholder="Décrivez votre besoin..."
+                              placeholder={`Je souhaite en savoir plus sur ${service.name}...`}
                             />
                           </div>
-                          <Button className="w-full">
+                          <Button
+                            type="submit"
+                            className="w-full text-white"
+                            style={{ backgroundColor: group.color }}
+                          >
                             <Send className="w-4 h-4 mr-2" />
                             Envoyer la demande
                           </Button>
@@ -675,20 +800,36 @@ export default function DynamicServicePage() {
         </section>
 
         {/* CTA Final */}
-        <section className="py-16 bg-primary text-primary-foreground">
+        <section
+          className="py-16 text-white"
+          style={{ backgroundColor: group.color }}
+        >
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold mb-4">Intéressé par ce Service ?</h2>
-            <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-              Contactez-nous dès maintenant pour discuter de vos besoins et obtenir un devis personnalisé
+            <h2 className="text-3xl font-bold mb-4">
+              Prêt à démarrer avec {service.name} ?
+            </h2>
+            <p className="text-white/80 mb-8 max-w-2xl mx-auto">
+              Contactez-nous dès maintenant pour discuter de vos besoins et obtenir un devis personnalisé.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="secondary" size="lg">
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() => setActiveTab('contact')}
+              >
                 <FileText className="w-5 h-5 mr-2" />
                 Demander un devis
               </Button>
-              <Button variant="outline" size="lg" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-                <Phone className="w-5 h-5 mr-2" />
-                Nous appeler
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-white text-white hover:bg-white hover:text-gray-900"
+                asChild
+              >
+                <Link href="/services">
+                  <ArrowRight className="w-5 h-5 mr-2" />
+                  Voir tous les services
+                </Link>
               </Button>
             </div>
           </div>

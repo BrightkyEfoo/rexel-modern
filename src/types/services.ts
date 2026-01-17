@@ -1,3 +1,11 @@
+// Types de catégorie de service
+export type ServiceCategory =
+  | 'solutions-techniques'
+  | 'rh-formation'
+  | 'accompagnement-conseil'
+  | 'energie-renouvelable';
+
+// Interface pour une fonctionnalité de service
 export interface ServiceFeature {
   id: string;
   title: string;
@@ -6,6 +14,7 @@ export interface ServiceFeature {
   included: boolean;
 }
 
+// Interface pour un plan tarifaire
 export interface ServicePricing {
   id: string;
   name: string;
@@ -16,6 +25,7 @@ export interface ServicePricing {
   isPopular?: boolean;
 }
 
+// Interface pour un témoignage
 export interface ServiceTestimonial {
   id: string;
   customerName: string;
@@ -27,6 +37,7 @@ export interface ServiceTestimonial {
   avatar?: string;
 }
 
+// Interface pour un élément de galerie
 export interface ServiceGalleryItem {
   id: string;
   type: 'image' | 'video';
@@ -37,6 +48,7 @@ export interface ServiceGalleryItem {
   alt?: string;
 }
 
+// Interface pour une FAQ
 export interface ServiceFAQ {
   id: string;
   question: string;
@@ -44,6 +56,7 @@ export interface ServiceFAQ {
   category?: string;
 }
 
+// Interface pour un contact
 export interface ServiceContact {
   name: string;
   title: string;
@@ -53,75 +66,95 @@ export interface ServiceContact {
   specialties: string[];
 }
 
+// Interface pour la disponibilité
+export interface ServiceAvailability {
+  workingDays: string[];
+  workingHours: string;
+  emergencyAvailable: boolean;
+  bookingRequired: boolean;
+  leadTime: string;
+}
+
+// Interface principale pour un service
 export interface Service {
-  id: string;
+  id: string | number;
   slug: string;
   name: string;
   shortDescription: string;
   fullDescription: string;
-  category: 'base' | 'premium' | 'custom';
+  category: ServiceCategory;
+  groupName?: string;
+  groupOrder?: number;
   status: 'active' | 'inactive' | 'coming_soon';
-  
-  // Contenu principal
+  type: 'primary' | 'complementary';
+
+  // Visuel
+  icon?: string;
+  color?: string;
   heroImage?: string;
   heroVideo?: string;
-  features: ServiceFeature[];
-  benefits: string[];
-  
+
+  // Contenu
+  features: string[] | ServiceFeature[];
+  benefits?: string[];
+
   // Tarification
-  pricing: ServicePricing[];
-  
+  pricing?: string;
+  pricingPlans?: ServicePricing[];
+
   // Galerie
-  gallery: ServiceGalleryItem[];
-  
+  gallery?: ServiceGalleryItem[];
+
   // Témoignages
-  testimonials: ServiceTestimonial[];
-  
+  testimonials?: ServiceTestimonial[];
+
   // FAQ
-  faqs: ServiceFAQ[];
-  
+  faqs?: ServiceFAQ[];
+
   // Contact
-  contacts: ServiceContact[];
-  
-  // Zones de couverture
-  coverageAreas: string[];
-  
-  // Délais et disponibilité
-  availability: {
-    workingDays: string[];
-    workingHours: string;
-    emergencyAvailable: boolean;
-    bookingRequired: boolean;
-    leadTime: string;
-  };
-  
+  contacts?: ServiceContact[];
+
+  // Couverture
+  coverageAreas?: string[];
+
+  // Disponibilité
+  availability?: ServiceAvailability;
+
   // Certifications et garanties
-  certifications: string[];
-  warranties: string[];
-  
+  certifications?: string[];
+  warranties?: string[];
+
   // SEO
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string[];
-  
-  // Métadonnées
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-  isPromoted: boolean;
-  sortOrder: number;
-  
-  // Relations
-  relatedServices: string[];
-  requiredEquipment?: string[];
-  
-  // Call to action
+
+  // CTA
+  href?: string;
   ctaText?: string;
   ctaLink?: string;
-  showBookingForm: boolean;
-  showQuoteForm: boolean;
+  showBookingForm?: boolean;
+  showQuoteForm?: boolean;
+
+  // Métadonnées
+  popular?: boolean;
+  isPromoted?: boolean;
+  sortOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
+// Interface pour un groupe de services
+export interface ServiceGroup {
+  slug: ServiceCategory;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  services: Service[];
+}
+
+// Interface pour une demande de réservation
 export interface ServiceBooking {
   id: string;
   serviceId: string;
@@ -139,6 +172,7 @@ export interface ServiceBooking {
   updatedAt: string;
 }
 
+// Interface pour une demande de devis
 export interface ServiceQuote {
   id: string;
   serviceId: string;
@@ -158,12 +192,58 @@ export interface ServiceQuote {
   updatedAt: string;
 }
 
-// Services de base prédéfinis
-export const BASE_SERVICES = {
-  DELIVERY: 'livraison',
-  INSTALLATION: 'installation', 
-  TRAINING: 'formation',
-  CONSULTING: 'conseil'
+// Constantes pour les 10 services KesiMarket
+export const KESIMARKET_SERVICES = {
+  // Groupe 1: Solutions Techniques
+  EQUIP_PRET: 'equip-pret',
+  PLANEX: 'planex',
+  FIX_AND_GO: 'fix-and-go',
+  EQUILOC: 'equiloc',
+  // Groupe 2: Ressources Humaines & Formation
+  PROTECHRH: 'protechrh',
+  TALENT_FORM: 'talent-form',
+  // Groupe 3: Accompagnement & Conseil
+  PERFECO: 'perfeco',
+  CONTRACTIS: 'contractis',
+  SURVEYTECH: 'surveytech',
+  // Groupe 4: Énergie Renouvelable
+  SOLARTECH: 'solartech',
 } as const;
 
-export type BaseServiceType = typeof BASE_SERVICES[keyof typeof BASE_SERVICES];
+export type KesiMarketServiceType = typeof KESIMARKET_SERVICES[keyof typeof KESIMARKET_SERVICES];
+
+// Métadonnées des groupes de services
+export const SERVICE_GROUPS: Record<ServiceCategory, { name: string; description: string; icon: string; color: string }> = {
+  'solutions-techniques': {
+    name: 'Solutions Techniques',
+    description: 'Des solutions clé en main pour vos projets électriques',
+    icon: 'settings',
+    color: '#3B82F6'
+  },
+  'rh-formation': {
+    name: 'Ressources Humaines & Formation',
+    description: 'Développez vos compétences et trouvez les bons profils',
+    icon: 'users',
+    color: '#EC4899'
+  },
+  'accompagnement-conseil': {
+    name: 'Accompagnement & Conseil',
+    description: 'Un accompagnement expert pour vos projets',
+    icon: 'handshake',
+    color: '#14B8A6'
+  },
+  'energie-renouvelable': {
+    name: 'Énergie Renouvelable',
+    description: 'Passez à l\'énergie verte avec nos solutions solaires',
+    icon: 'sun',
+    color: '#FBBF24'
+  }
+};
+
+// Liste ordonnée des catégories
+export const SERVICE_CATEGORIES_ORDER: ServiceCategory[] = [
+  'solutions-techniques',
+  'rh-formation',
+  'accompagnement-conseil',
+  'energie-renouvelable'
+];
