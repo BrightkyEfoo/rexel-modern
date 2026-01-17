@@ -266,11 +266,15 @@ export default function ServicesPage() {
                       : [];
 
                     return (
-                      <Card
+                      <Link
                         key={service.id}
-                        className="relative overflow-hidden hover:shadow-xl transition-all duration-300 group border-t-4"
-                        style={{ borderTopColor: group.color }}
+                        href={`/services/${service.slug}`}
+                        className="block"
                       >
+                        <Card
+                          className="relative overflow-hidden hover:shadow-xl transition-all duration-300 group border-t-4 h-full cursor-pointer"
+                          style={{ borderTopColor: group.color }}
+                        >
                         {service.popular && (
                           <div className="absolute top-4 right-4 z-10">
                             <Badge
@@ -336,20 +340,17 @@ export default function ServicesPage() {
                                 </p>
                               </div>
                             )}
-                            <Button
-                              asChild
-                              size="sm"
-                              className="ml-auto"
-                              style={{ backgroundColor: group.color }}
+                            <div
+                              className="ml-auto flex items-center text-sm font-medium group-hover:translate-x-1 transition-transform"
+                              style={{ color: group.color }}
                             >
-                              <Link href={`/services/${service.slug}`}>
-                                Découvrir
-                                <ArrowRight className="w-4 h-4 ml-2" />
-                              </Link>
-                            </Button>
+                              Découvrir
+                              <ArrowRight className="w-4 h-4 ml-2" />
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
+                    </Link>
                     );
                   })}
                 </div>
